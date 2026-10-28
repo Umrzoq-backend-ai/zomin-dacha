@@ -38,7 +38,10 @@
 
       <!-- Center Navigation Links -->
       <nav class="main-nav-links">
-        <a href="#stays" class="nav-link active" id="nav-link-stays" onclick="scrollToSection('stays-section')">Turar joylar</a>
+        <a href="#stays" class="nav-link active" id="nav-link-stays" onclick="scrollToSection('stays-section')">
+          <span id="nav-link-stays-text">Turar joylar</span>
+          <svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" style="display:inline-block; margin-left:4px; vertical-align:middle;"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
         <a href="#discover" class="nav-link" id="nav-link-discover" onclick="scrollToSection('discover-section')">Kashf etish</a>
         <a href="#routes" class="nav-link" id="nav-link-routes" onclick="scrollToSection('map-section')">Marshrutlar</a>
         <a href="#partner" class="nav-link" id="nav-link-partner" onclick="openPartnerModal()">Hamkor bo'lish</a>
@@ -180,7 +183,8 @@
           <div class="search-divider"></div>
 
           <!-- Segment 2: Check-In Date -->
-          <div class="search-segment segment-date" onclick="openDateCalendar('checkin', event)">
+          <div class="search-segment segment-date" onclick="closeAllSearchDropdowns()">
+            <input type="date" id="native-checkin-date" class="segment-native-date-input" onchange="handleDateSelect('checkin', this.value)">
             <div class="segment-icon-box">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -201,7 +205,8 @@
           <div class="search-divider"></div>
 
           <!-- Segment 3: Check-Out Date -->
-          <div class="search-segment segment-date" onclick="openDateCalendar('checkout', event)">
+          <div class="search-segment segment-date" onclick="closeAllSearchDropdowns()">
+            <input type="date" id="native-checkout-date" class="segment-native-date-input" onchange="handleDateSelect('checkout', this.value)">
             <div class="segment-icon-box">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -278,10 +283,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Hidden Native Inputs for form binding -->
-    <input type="date" id="native-checkin-date" class="hidden">
-    <input type="date" id="native-checkout-date" class="hidden">
 
     <!-- ================= SECTION 1: SIZGA MOS DAM OLISH MASKANLARI (Image 1) ================= -->
     <section class="content-section" id="stays-section">

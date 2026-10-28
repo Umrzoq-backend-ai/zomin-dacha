@@ -360,7 +360,8 @@ function applyLanguage(lang) {
   document.getElementById('current-lang-code').innerText = lang.toUpperCase();
   const footerLang = document.getElementById('footer-lang-name');
   if (footerLang) footerLang.innerText = lang.toUpperCase();
-  document.getElementById('nav-link-stays').innerText = t.navStays;
+  const navStays = document.getElementById('nav-link-stays-text');
+  if (navStays) navStays.innerText = t.navStays;
   document.getElementById('nav-link-discover').innerText = t.navDiscover;
   document.getElementById('nav-link-routes').innerText = t.navRoutes;
   document.getElementById('nav-link-partner').innerText = t.navPartner;
@@ -378,6 +379,14 @@ function applyLanguage(lang) {
   }
   document.getElementById('lbl-search-checkin').innerText = t.searchCheckIn;
   document.getElementById('lbl-search-checkout').innerText = t.searchCheckOut;
+  if (!searchCheckInDate) {
+    const el = document.getElementById('search-val-checkin');
+    if (el) el.innerText = t.searchSelectDate;
+  }
+  if (!searchCheckOutDate) {
+    const el = document.getElementById('search-val-checkout');
+    if (el) el.innerText = t.searchSelectDate;
+  }
   document.getElementById('lbl-search-guests').innerText = t.searchGuests;
   document.getElementById('search-val-guests').innerText = t.searchGuestsFormat(guestsAdults + guestsChildren);
   document.getElementById('lbl-search-btn').innerText = t.searchBtn;
@@ -474,46 +483,62 @@ function applyLanguage(lang) {
 // ===================================================================
 // FLOATING SEARCH BAR CONTROLS
 // ===================================================================
+function closeAllSearchDropdowns() {
+  const locDropdown = document.getElementById('dropdown-locations');
+  if (locDropdown) locDropdown.classList.add('hidden');
+
+  const guestsDropdown = document.getElementById('dropdown-guests');
+  if (guestsDropdown) guestsDropdown.classList.add('hidden');
+
+  const langMenu = document.getElementById('lang-dropdown-menu');
+  if (langMenu) langMenu.classList.add('hidden');
+
+  const profileMenu = document.getElementById('profile-dropdown-menu');
+  if (profileMenu) profileMenu.classList.add('hidden');
+}
+
 function toggleLocationDropdown(e) {
   e.stopPropagation();
   const dropdown = document.getElementById('dropdown-locations');
-  dropdown.classList.toggle('hidden');
+  const isCurrentlyOpen = dropdown && !dropdown.classList.contains('hidden');
+  closeAllSearchDropdowns();
+  if (dropdown && !isCurrentlyOpen) {
+    dropdown.classList.remove('hidden');
+  }
 }
 
 function selectSearchLocation(districtCode, displayName) {
   searchSelectedDistrict = districtCode;
   document.getElementById('search-val-district').innerText = displayName;
-  document.getElementById('dropdown-locations').classList.add('hidden');
+  const dropdown = document.getElementById('dropdown-locations');
+  if (dropdown) dropdown.classList.add('hidden');
   renderProperties();
 }
 
-function openDateCalendar(type, e) {
-  e.stopPropagation();
-  const nativeInput = type === 'checkin' ? document.getElementById('native-checkin-date') : document.getElementById('native-checkout-date');
-  
-  if (nativeInput) {
-    nativeInput.showPicker ? nativeInput.showPicker() : nativeInput.focus();
-    nativeInput.onchange = () => {
-      const val = nativeInput.value;
-      if (val) {
-        const parts = val.split('-');
-        const dateFormatted = `${parts[2]}/${parts[1]}`;
-        if (type === 'checkin') {
-          searchCheckInDate = val;
-          document.getElementById('search-val-checkin').innerText = dateFormatted;
-        } else {
-          searchCheckOutDate = val;
-          document.getElementById('search-val-checkout').innerText = dateFormatted;
-        }
-      }
-    };
+function handleDateSelect(type, val) {
+  if (!val) return;
+  const parts = val.split('-');
+  const dateFormatted = `${parts[2]}/${parts[1]}`;
+  if (type === 'checkin') {
+    searchCheckInDate = val;
+    const el = document.getElementById('search-val-checkin');
+    if (el) el.innerText = dateFormatted;
+  } else {
+    searchCheckOutDate = val;
+    const el = document.getElementById('search-val-checkout');
+    if (el) el.innerText = dateFormatted;
   }
+  closeAllSearchDropdowns();
 }
 
 function toggleGuestsDropdown(e) {
   e.stopPropagation();
   const dropdown = document.getElementById('dropdown-guests');
-  dropdown.classList.toggle('hidden');
+  const isCurrentlyOpen = dropdown && !dropdown.classList.contains('hidden');
+  closeAllSearchDropdowns();
+  if (dropdown && !isCurrentlyOpen) {
+    dropdown.classList.remove('hidden');
+  }
 }
 
 function adjustGuests(type, delta) {
@@ -545,13 +570,13 @@ function initDefaultDates() {
   const checkinVal = fmt(tomorrow);
   const checkoutVal = fmt(dayAfter);
 
-  searchCheckInDate = checkinVal;
-  searchCheckOutDate = checkoutVal;
+  searchCheckInDate = '';
+  searchCheckOutDate = '';
 
   const nIn = document.getElementById('native-checkin-date');
   const nOut = document.getElementById('native-checkout-date');
-  if (nIn) nIn.value = checkinVal;
-  if (nOut) nOut.value = checkoutVal;
+  if (nIn) { nIn.value = ''; nIn.min = fmt(new Date()); }
+  if (nOut) { nOut.value = ''; nOut.min = checkinVal; }
 
   const mStart = document.getElementById('modal-start-date');
   const mEnd = document.getElementById('modal-end-date');
