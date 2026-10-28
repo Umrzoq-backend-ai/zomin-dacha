@@ -240,6 +240,20 @@ def init_db(db_path: Optional[str] = None) -> None:
         """)
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_ivr_booking ON ivr_call_logs(booking_id);")
 
+        # 12. Audit Logs (TZ 9.2: Operation Audit Trail)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS audit_logs (
+            id TEXT PRIMARY KEY,
+            user_id TEXT,
+            action TEXT NOT NULL,
+            target_type TEXT NOT NULL,
+            target_id TEXT,
+            details TEXT,
+            created_at TEXT NOT NULL
+        );
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_audit_time ON audit_logs(created_at);")
+
         # Database Engine Exclusion Constraints (Triggers emulating PostgreSQL GiST exclusion)
         cursor.execute("""
         CREATE TRIGGER IF NOT EXISTS trg_prevent_double_booking_insert

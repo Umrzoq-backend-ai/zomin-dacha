@@ -190,3 +190,30 @@ class ReviewResponse(BaseModel):
     comment: Optional[str]
     owner_reply: Optional[str]
     created_at: str
+
+# Admin Panel Schemas (TZ 9)
+class AdminDashboardStats(BaseModel):
+    total_gmv: float
+    total_platform_fee: float
+    total_bookings: int
+    confirmed_bookings: int
+    pending_bookings: int
+    total_properties: int
+    verified_properties: int
+    total_users: int
+    ivr_calls_count: int
+
+class AdminPropertyVerifyRequest(BaseModel):
+    admin_id: str
+    status: str # 'VERIFIED', 'REJECTED'
+    notes: Optional[str] = None
+
+class AdminForceCancelRequest(BaseModel):
+    admin_id: str
+    reason: str
+
+class AdminUserStatusRequest(BaseModel):
+    admin_id: str
+    is_active: bool
+    role: Optional[str] = None
+

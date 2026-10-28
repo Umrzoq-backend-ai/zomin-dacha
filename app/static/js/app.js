@@ -21,7 +21,8 @@ const DEMO_PROFILES = {
   guest: { phone: '+998935551122', name: 'Jasur Mamadaliyev', role: 'GUEST', label: '🏕️ Jasur M. (Sayyoh)' },
   owner1: { phone: '+998901112233', name: 'Alisher Zokirov', role: 'OWNER', label: '🏡 Alisher Z. (Duoba Dacha Egasi)' },
   owner2: { phone: '+998904445566', name: 'Muzaffar Raimov', role: 'OWNER', label: '🏡 Muzaffar R. (Suffa & O\'riklisoy Egasi)' },
-  caretaker: { phone: '+998917778899', name: 'Rustam Tog\'a', role: 'CARETAKER', label: '🔑 Rustam Tog\'a (Duoba Bog\'boni)' }
+  caretaker: { phone: '+998917778899', name: 'Rustam Tog\'a', role: 'CARETAKER', label: '🔑 Rustam Tog\'a (Duoba Bog\'boni)' },
+  admin: { phone: '+998900000001', name: 'Sanjar Karimov', role: 'ADMIN', label: '🛡️ Sanjar K. (Platforma Admini)' }
 };
 
 let currentUser = null;
@@ -91,7 +92,7 @@ function updateHeaderUserInfo() {
   if (nameEl) nameEl.innerText = currentUser.full_name;
   if (roleEl) roleEl.innerText = currentUser.role;
   if (avatarEl) {
-    avatarEl.innerText = currentUser.role === 'OWNER' ? '🏡' : (currentUser.role === 'CARETAKER' ? '🔑' : '👤');
+    avatarEl.innerText = currentUser.role === 'ADMIN' ? '🛡️' : (currentUser.role === 'OWNER' ? '🏡' : (currentUser.role === 'CARETAKER' ? '🔑' : '👤'));
   }
 }
 
@@ -157,7 +158,8 @@ function switchPortal(portal) {
     portal === 'guest' ? 'tab-guest-dachas' : 
     (portal === 'owner' ? 'tab-owner-portal' : 
     (portal === 'caretaker' ? 'tab-caretaker-portal' : 
-    (portal === 'trips' ? 'tab-my-trips' : 'tab-map-guide')))
+    (portal === 'trips' ? 'tab-my-trips' : 
+    (portal === 'admin' ? 'tab-admin-portal' : 'tab-map-guide'))))
   );
   if (activeDesktopTab) activeDesktopTab.classList.add('active');
 
@@ -166,7 +168,8 @@ function switchPortal(portal) {
   const mobItem = document.getElementById(
     portal === 'guest' ? 'mob-nav-guest' : 
     (portal === 'owner' ? 'mob-nav-owner' : 
-    (portal === 'trips' ? 'mob-nav-trips' : 'mob-nav-tapchan'))
+    (portal === 'trips' ? 'mob-nav-trips' : 
+    (portal === 'admin' ? 'mob-nav-admin' : 'mob-nav-tapchan')))
   );
   if (mobItem) mobItem.classList.add('active');
 
@@ -193,6 +196,12 @@ function switchPortal(portal) {
     }
   } else if (portal === 'trips') {
     loadMyTrips();
+  } else if (portal === 'admin') {
+    if (currentUser && currentUser.role !== 'ADMIN') {
+      switchUserProfile('admin', true);
+    } else {
+      loadAdminStats();
+    }
   }
 }
 
@@ -1112,4 +1121,381 @@ async function refreshBadges() {
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) modal.classList.add('hidden');
+}
+
+// ================= ADMIN OPERATIONS (TZ 9) =================
+let currentAdminTab = 'dash';
+
+async function loadAdminStats() {
+  try {
+    const res = await fetch('/api/v1/admin/dashboard-stats');
+    const s = await res.json();
+
+    document.getElementById('adm-stat-gmv').innerText = `${Number(s.total_gmv).toLocaleString()} so'm`;
+    document.getElementById('adm-stat-fee').innerText = `${Number(s.total_platform_fee).toLocaleString()} so'm`;
+    document.getElementById('adm-stat-props').innerText = `${s.verified_properties} / ${s.total_properties} ta`;
+    document.getElementById('adm-stat-bookings').innerText = `${s.total_bookings} ta (${s.confirmed_bookings} tasdiqlangan)`;
+    const ivrEl = document.getElementById('adm-ivr-stat');
+    if (ivrEl) ivrEl.innerText = `${s.ivr_calls_count} ta qo'ng'iroq yuborildi`;
+
+    // Load active subtab data
+    if (currentAdminTab === 'moderation') loadAdminProperties();
+    else if (currentAdminTab === 'bookings') loadAdminBookings();
+    else if (currentAdminTab === 'payments') loadAdminPayments();
+    else if (currentAdminTab === 'users') loadAdminUsers();
+    else if (currentAdminTab === 'audit') loadAdminAuditLogs();
+
+  } catch (err) {
+    showToast('Admin statistikasini olishda xatolik: ' + err.message, 'error');
+  }
+}
+
+function switchAdminTab(tab) {
+  currentAdminTab = tab;
+  document.querySelectorAll('.admin-subnav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`adm-tab-${tab}`)?.classList.add('active');
+
+  document.querySelectorAll('.admin-subview').forEach(v => v.classList.add('hidden'));
+  document.getElementById(`adm-view-${tab}`)?.classList.remove('hidden');
+
+  if (tab === 'moderation') loadAdminProperties();
+  else if (tab === 'bookings') loadAdminBookings();
+  else if (tab === 'payments') loadAdminPayments();
+  else if (tab === 'users') loadAdminUsers();
+  else if (tab === 'audit') loadAdminAuditLogs();
+}
+
+async function loadAdminProperties() {
+  const container = document.getElementById('adm-props-table-wrap');
+  container.innerHTML = '<div style="padding:20px; color:#64748b;">Obyektlar yuklanmoqda...</div>';
+
+  const filterStatus = document.getElementById('adm-mod-filter')?.value || '';
+  try {
+    const url = filterStatus ? `/api/v1/admin/properties?status=${filterStatus}` : '/api/v1/admin/properties';
+    const res = await fetch(url);
+    const props = await res.json();
+
+    if (!props || props.length === 0) {
+      container.innerHTML = '<p style="padding:16px; color:#64748b;">Hech qanday dacha topilmadi.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Dacha / Maskan</th>
+            <th>Hudud</th>
+            <th>Turi</th>
+            <th>Birliklar</th>
+            <th>Holati</th>
+            <th>Nashr</th>
+            <th>Amallar</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${props.map(p => `
+            <tr>
+              <td>
+                <b>${p.title}</b><br>
+                <small style="color:#64748b;">${p.address_text}</small>
+              </td>
+              <td><span class="tag-badge">${p.micro_district}</span></td>
+              <td>${p.property_type}</td>
+              <td><b>${p.units_count} ta</b></td>
+              <td>
+                <span class="badge-status ${p.verification_status.toLowerCase()}">${p.verification_status}</span>
+              </td>
+              <td>${p.is_published ? '✅ Ha' : '❌ Yo\'q'}</td>
+              <td>
+                <div style="display:flex; gap:6px;">
+                  ${p.verification_status !== 'VERIFIED' ? `
+                    <button class="btn-action-sm" style="background:#16a34a; color:white;" onclick="adminVerifyProperty('${p.id}', 'VERIFIED')">
+                      ✓ Tasdiqlash
+                    </button>
+                  ` : `
+                    <button class="btn-action-sm" style="background:#ea580c; color:white;" onclick="adminVerifyProperty('${p.id}', 'REJECTED')">
+                      Rad etish
+                    </button>
+                  `}
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:red; padding:16px;">Xatolik: ${err.message}</div>`;
+  }
+}
+
+async function adminVerifyProperty(propertyId, status) {
+  try {
+    const res = await fetch(`/api/v1/admin/properties/${propertyId}/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: currentUser?.id || 'admin_user',
+        status: status,
+        notes: `Admin tomonidan ${status} deb belgilandi.`
+      })
+    });
+    const result = await res.json();
+    if (res.ok) {
+      showToast(result.message, 'success');
+      loadAdminProperties();
+      loadAdminStats();
+    } else {
+      showToast(result.detail || 'Xatolik', 'error');
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function loadAdminBookings() {
+  const container = document.getElementById('adm-bookings-table-wrap');
+  container.innerHTML = '<div style="padding:20px; color:#64748b;">Bronlar monitoringi yuklanmoqda...</div>';
+
+  const filterStatus = document.getElementById('adm-book-filter')?.value || '';
+  try {
+    const url = filterStatus ? `/api/v1/admin/bookings?status=${filterStatus}` : '/api/v1/admin/bookings';
+    const res = await fetch(url);
+    const bookings = await res.json();
+
+    if (!bookings || bookings.length === 0) {
+      container.innerHTML = '<p style="padding:16px; color:#64748b;">Bronlar topilmadi.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Bron Ref</th>
+            <th>Obyekt & Birlik</th>
+            <th>Mehmon & Telefon</th>
+            <th>Sanalar</th>
+            <th>Jami Summa</th>
+            <th>Xizmat Haqi (10%)</th>
+            <th>Status</th>
+            <th>Amal</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${bookings.map(b => `
+            <tr>
+              <td><b>${b.booking_reference}</b></td>
+              <td>${b.property_title} — ${b.unit_name}</td>
+              <td>
+                ${b.guest_name}<br>
+                <small style="color:#0284c7;">${b.guest_phone}</small>
+              </td>
+              <td><small>${b.checkin_time.slice(0, 10)} / ${b.checkout_time.slice(0, 10)}</small></td>
+              <td><b>${Number(b.total_amount).toLocaleString()} so'm</b></td>
+              <td><span style="color:#059669; font-weight:700;">${Number(b.platform_fee_amount).toLocaleString()} so'm</span></td>
+              <td><span class="badge-status ${b.booking_status.toLowerCase()}">${b.booking_status}</span></td>
+              <td>
+                ${b.booking_status !== 'CANCELLED' ? `
+                  <button class="btn-action-sm" style="background:#dc2626; color:white;" onclick="adminForceCancel('${b.id}', '${b.booking_reference}')">
+                    🚫 Bekor Qilish
+                  </button>
+                ` : '<span style="color:#64748b; font-size:11px;">Bekor qilingan</span>'}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:red; padding:16px;">Xatolik: ${err.message}</div>`;
+  }
+}
+
+async function adminForceCancel(bookingId, ref) {
+  const reason = prompt(`${ref} raqamli bronni majburiy bekor qilish sababini kiriting:`, 'Sayyoh iltimosiga binoan');
+  if (!reason) return;
+
+  try {
+    const res = await fetch(`/api/v1/admin/bookings/${bookingId}/force-cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: currentUser?.id || 'admin_user',
+        reason: reason
+      })
+    });
+    const result = await res.json();
+    if (res.ok) {
+      showToast(result.message, 'success');
+      loadAdminBookings();
+      loadAdminStats();
+    } else {
+      showToast(result.detail || 'Bekor qilishda xatolik', 'error');
+    }
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function loadAdminPayments() {
+  const container = document.getElementById('adm-payments-table-wrap');
+  container.innerHTML = '<div style="padding:20px; color:#64748b;">To\'lovlar tarixi yuklanmoqda...</div>';
+
+  try {
+    const res = await fetch('/api/v1/admin/payments');
+    const payments = await res.json();
+
+    if (!payments || payments.length === 0) {
+      container.innerHTML = '<p style="padding:16px; color:#64748b;">Hozircha to\'lovlar qayd etilmagan.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Provayder</th>
+            <th>Bron Ref</th>
+            <th>Mehmon</th>
+            <th>Summa (UZS)</th>
+            <th>Tiyinda</th>
+            <th>Holati</th>
+            <th>OFD Elektron Chek</th>
+            <th>Vaqti</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${payments.map(p => `
+            <tr>
+              <td>
+                <b style="color:${p.provider === 'CLICK' ? '#0284c7' : '#059669'};">${p.provider}</b>
+              </td>
+              <td><b>${p.booking_reference}</b></td>
+              <td>${p.guest_name} (${p.guest_phone})</td>
+              <td><b>${Number(p.amount_uzs).toLocaleString()} so'm</b></td>
+              <td><small>${p.amount_in_tiyin}</small></td>
+              <td><span class="badge-status ${p.status.toLowerCase()}">${p.status}</span></td>
+              <td>
+                ${p.fiscal_receipt_url ? `
+                  <a href="${p.fiscal_receipt_url}" target="_blank" class="btn-action-sm" style="background:#059669; color:white; text-decoration:none; display:inline-block;">
+                    🧾 Soliq Chek
+                  </a>
+                ` : '<span style="color:#94a3b8;">Yo\'q</span>'}
+              </td>
+              <td><small>${p.created_at.slice(0, 16).replace('T', ' ')}</small></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:red; padding:16px;">Xatolik: ${err.message}</div>`;
+  }
+}
+
+async function loadAdminUsers() {
+  const container = document.getElementById('adm-users-table-wrap');
+  container.innerHTML = '<div style="padding:20px; color:#64748b;">Foydalanuvchilar ro\'yxati yuklanmoqda...</div>';
+
+  try {
+    const res = await fetch('/api/v1/admin/users');
+    const users = await res.json();
+
+    container.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>F.I.SH</th>
+            <th>Telefon Raqam</th>
+            <th>Roli</th>
+            <th>Telegram ID</th>
+            <th>Holati</th>
+            <th>Amallar</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${users.map(u => `
+            <tr>
+              <td><b>${u.full_name || 'Noma\'lum'}</b></td>
+              <td><code>${u.phone_number}</code></td>
+              <td><span class="tag-badge">${u.role}</span></td>
+              <td>${u.telegram_id || '—'}</td>
+              <td>${u.is_active ? '✅ Faol' : '🚫 Bloklangan'}</td>
+              <td>
+                <button class="btn-action-sm" style="background:${u.is_active ? '#dc2626' : '#16a34a'}; color:white;" onclick="adminToggleUser('${u.id}', ${u.is_active})">
+                  ${u.is_active ? 'Bloklash' : 'Faollashtirish'}
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:red; padding:16px;">Xatolik: ${err.message}</div>`;
+  }
+}
+
+async function adminToggleUser(userId, currentActive) {
+  const newActive = !currentActive;
+  try {
+    const res = await fetch(`/api/v1/admin/users/${userId}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: currentUser?.id || 'admin_user',
+        is_active: newActive
+      })
+    });
+    if (res.ok) {
+      showToast('Foydalanuvchi holati yangilandi', 'success');
+      loadAdminUsers();
+    }
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function loadAdminAuditLogs() {
+  const container = document.getElementById('adm-audit-table-wrap');
+  container.innerHTML = '<div style="padding:20px; color:#64748b;">Audit jurnali yuklanmoqda...</div>';
+
+  try {
+    const res = await fetch('/api/v1/admin/audit-logs');
+    const logs = await res.json();
+
+    if (!logs || logs.length === 0) {
+      container.innerHTML = '<p style="padding:16px; color:#64748b;">Audit yozuvlari hali mavjud emas.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Amal (Action)</th>
+            <th>Obyekt Turi</th>
+            <th>ID</th>
+            <th>Tafsilotlar</th>
+            <th>Vaqt</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${logs.map(l => `
+            <tr>
+              <td><b>${l.action}</b></td>
+              <td><span class="tag-badge">${l.target_type}</span></td>
+              <td><code>${(l.target_id || '').slice(0, 8)}...</code></td>
+              <td>${l.details || '—'}</td>
+              <td><small>${l.created_at.slice(0, 16).replace('T', ' ')}</small></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:red; padding:16px;">Xatolik: ${err.message}</div>`;
+  }
 }
