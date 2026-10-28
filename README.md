@@ -49,6 +49,15 @@ Loyihaning to'liq texnik spetsifikatsiyasi: [ZOMINSTAY_MUKAMMAL_TZ.md](file:///h
 
 ---
 
+7. **To'liq SuperAdmin Boshqaruv Portali:**
+   - Real vaqtli biznes metrikalari: umumiy bronlar, faol foydalanuvchilar, jami tushum va sof platforma daromadi.
+   - Dacha va kottejlarni tekshirish va moderatsiyadan o'tkazish (VERIFIED / REJECTED).
+   - Bronlarni boshqarish va nizoli holatlarda ma'muriy bekor qilish (Force-Cancel).
+   - Click va Payme to'lovlar tranzaksiyalari reestrini nazorat qilish va Soliq OFD fiskal cheklari rekonssilyatsiyasi.
+   - Foydalanuvchilarni bloklash / faollashtirish va harakatlar audit tarixi (Audit Logs).
+
+---
+
 ## 🚀 Ishga Tushirish va O'rnatish
 
 ```bash
@@ -68,14 +77,14 @@ Brauzer yoki Telegram WebApp orqali oching:
 
 ## 🧪 Avtomatlashtirilgan Testlar
 
-Loyiha barcha asosiy talablar, concurrency, to'lovlar va chekka holatlar bo'yicha 23 ta avtomatlashtirilgan test bilan qoplangan:
+Loyiha barcha asosiy talablar, concurrency, to'lovlar, admin boshqaruvi va chekka holatlar bo'yicha 34 ta avtomatlashtirilgan test bilan to'liq qoplangan:
 
 ```bash
 source .venv/bin/activate
 pytest tests/ -v
 ```
 
-Barcha testlar:
+Barcha test to'plamlari:
 - `test_concurrency_double_booking.py` (AC-01, AC-02, AC-05)
 - `test_race_conditions_and_edge_cases.py` (20-thread stress test, Idempotency replay)
 - `test_quotes.py` (AC-03, ish/dam olish kunlari narxlash, tandir kalkulyatori)
@@ -84,3 +93,5 @@ Barcha testlar:
 - `test_telegram_auth.py` (AC-08 HMAC tekshiruvi va Replay attack himoyasi)
 - `test_filters_and_search.py` (AC-11 Spark yo'li & Generator, AC-13 boshlang'ich narx)
 - `test_offline_voucher.py` (AC-09 oflayn vaucher va GSM havolalari)
+- `test_ivr_call_reminder.py` (AC-10 egaga 10 daqiqadan so'ng avtomatlashtirilgan qo'ng'iroq)
+- `test_admin_portal.py` (Superadmin dashboard, moderatsiya, tranzatsiyalar va audit loglar)
