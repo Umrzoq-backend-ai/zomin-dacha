@@ -1,0 +1,1910 @@
+zomin stay loyihasi :
+
+Quyida ZominStay uchun texnik topshiriqning asosiy loyihasini beraman. Bu dizayner, backendchi, frontendchi va AI coding agentlari bir xil tushunadigan asos bo‘ladi. Rasm — faqat dastlabki vizual yo‘nalish; ekranlar tuzilishini unga bog‘lamaymiz.
+1. Avvalgi tavsiyamga muhim aniqlik
+Oldingi javobimdagi “Zominda platformalar yo‘q, yagona bo‘lasan” degan taassurotni to‘g‘rilayman: Zomin uchun sahifalari bor Bronla va Turar kabi xizmatlar mavjud. Ularning amaldagi bron jarayoni, egalar bazasi va faol foydalanish darajasini hozir to‘liq tekshirganimiz yo‘q. Shuning uchun “raqobat yo‘q” emas, “Zomin bo‘yicha yaxshiroq xizmat yaratish imkoniyati bor” deb qaraymiz.bronla+1
+Shuningdek, oldingi javobimdagi bozor muammolarining bir qismi — ishonchsiz rasmlar, eskirgan narxlar kabi fikrlar — tekshiriladigan gipotezalar edi, isbotlangan statistik natija emas.
+Mahsulot arxitekturasini esa shunday quramizki, aynan shu muammolarni o‘lchash va hal qilish mumkin bo‘lsin.
+2. Mahsulot maqsadi va chegarasi
+2.1. Asosiy vazifa
+Foydalanuvchi Zominga safarini rejalashtirib:
+Mos turar joy topadi.
+Joylashuv va sharoitini tekshiradi.
+Yakuniy narxni biladi.
+Haqiqiy mavjud sanalarga bron so‘rovi yuboradi.
+Tasdiq oladi va zarur to‘lovni amalga oshiradi.
+Yetib borish ma’lumotlarini oladi.
+Muammo bo‘lsa yordamga murojaat qiladi.
+Safardan keyin fikr bildiradi.
+Ega esa:
+Obyektini joylaydi.
+Tekshiruvdan o‘tadi.
+Narx va kalendarni boshqaradi.
+Bronlarni qabul qiladi.
+Tashqi bronlarini ham kiritadi.
+Daromad va hisob-kitoblarini ko‘radi.
+Platforma faqat “telefon raqamini ko‘rsatuvchi sayt” bo‘lib qolmasligi kerak. Uning markaziy qiymati — topishdan safar yakunigacha bo‘lgan jarayonni tartibga solish.
+2.2. Birinchi reliz chegarasi
+Birinchi relizga kiradi
+Keyingi bosqichga qoldiriladi
+Dacha va mehmon uyi katalogi
+Barcha turizm xizmatlari uchun umumiy bron tizimi
+Ro‘yxat + xarita
+Murakkab avtomatik marshrut optimallashtirish
+Sana, mehmon va qulaylik filtrlari
+Dinamik narxlash
+Ega tasdiqlaydigan bron
+Barcha obyektlarda bir zumda bron
+Ega kabineti
+Katta agentliklar uchun alohida CRM
+Moderatsiya va operatsion admin
+Murakkab hamkorlik dasturi
+Bron bildirishnomalari
+Mustaqil qaror chiqaruvchi AI agentlar
+Sayohat joylari bo‘yicha axborot katalogi
+Transfer va gid uchun to‘liq marketplace
+Backend kelajakdagi kengayishga tayyor bo‘ladi, lekin birinchi relizni barcha xizmatlar bilan og‘irlashtirmaymiz.
+3. Rollar va ruxsatlar
+Bitta odam bir vaqtning o‘zida sayyoh ham, dacha egasi ham bo‘lishi mumkin. Shu sababli user.role = owner kabi yagona rol bilan cheklanmaymiz.
+Rol
+Ruxsatlari
+Mehmon
+Katalog, xarita, obyekt va sayohat sahifalarini ko‘radi
+Ro‘yxatdan o‘tgan sayyoh
+Bron, saqlanganlar, murojaatlar va sharhlar
+Obyekt egasi
+O‘z obyektlari, narxlari, kalendari va bronlari
+Obyekt menejeri
+Ega bergan obyektlar va chegaralangan vazifalar
+Moderator
+Obyekt va kontent tekshiruvi
+Qo‘llab-quvvatlash xodimi
+Murojaatlar va ruxsat etilgan bron amallari
+Moliya xodimi
+To‘lov, refund, hisob-kitob va solishtirish
+Platforma administratori
+Operatsion sozlamalar va foydalanuvchilar boshqaruvi
+Superadmin
+Yuqori darajali ruxsatlar va tizim sozlamalari
+Muhim talab: interfeysdagi tugmani yashirish yetmaydi. Backend har bir obyekt va bron bo‘yicha foydalanuvchi ruxsatini alohida tekshiradi. Obyekt identifikatorini almashtirib boshqa egaga tegishli ma’lumotni olish — OWASP ko‘rsatadigan asosiy API xavflaridan biri.devguide.owasp
+4. Navigatsiya va tugmalar joylashuvi
+4.1. Telefon va Telegram Mini App
+Pastki asosiy navigatsiya:
+text
+Qidirish | Saqlanganlar | Safarlarim | Profil
+Bildirishnomalar — yuqorida alohida belgi.
+“Xaritada ko‘rish” — qidiruv natijalari ichida doim ko‘rinadigan tugma. Uni alohida asosiy bo‘lim qilish shart emas: xarita va ro‘yxat bir qidiruvning ikki ko‘rinishi bo‘ladi.
+“Dacha joylashtirish”:
+bosh sahifada ikkilamchi tugma;
+profilda “Ega sifatida ishlash”;
+ega rejimida alohida boshqaruv navigatsiyasi.
+4.2. Kompyuter uchun
+Yuqori navigatsiya:
+text
+Logo | Turar joylar | Zominni kashf etish | Yordam
+                        Dacha joylashtirish | Til | Profil
+Qidiruv natijalari:
+text
+Filtrlar | Obyektlar ro‘yxati | Xarita
+4.3. Ega rejimi
+text
+Umumiy holat | Obyektlarim | Kalendar | Bronlar | Moliya
+Telefon ekranida kam ishlatiladigan bo‘limlar “Yana” ichiga o‘tadi.
+Sayyoh va ega rejimlari aniq ajraladi: foydalanuvchi oddiy dacha qidirayotganida unga biznes boshqaruv tugmalari aralashib ketmaydi.
+5. Sayyoh uchun ekranlar va funksiyalar
+5.1. Bosh sahifa
+Bo‘limlar tartibi:
+Asosiy qidiruv.
+Turar joy turlari.
+Hududlar orqali topish.
+Tanlangan obyektlar.
+Zominni kashf etish.
+Platforma qanday ishlashi.
+Dacha egalari uchun taklif.
+Yordam va qoidalar.
+Asosiy qidiruv maydonlari:
+Hudud yoki xaritada joy.
+Kirish va chiqish sanalari.
+Kattalar soni.
+Bolalar soni, zarur bo‘lsa yoshi.
+Obyekt yoki xona soni — ko‘p birlikli turar joylar qo‘shilganda.
+Tugma: Variantlarni topish.
+Sanasiz qidirishga ruxsat beriladi. Lekin bunday natijada “shu sanaga bo‘sh” degan va’da ko‘rsatilmaydi.
+“200+ dacha”, “24/7 yordam”, “har bir uy tekshirilgan” kabi da’volar haqiqiy ma’lumot va xizmat mavjud bo‘lgandagina chiqadi. Rasmdagi bunday yozuvlarni avtomatik ravishda mahsulot va’dasiga aylantirmaymiz.
+5.2. Qidiruv natijalari
+Filtrlar:
+Guruh
+Filtrlar
+Narx
+Tun uchun yoki butun safar uchun budjet
+Turar joy
+Butun dacha, mehmon uyi, kottej, xona
+Sig‘im
+Mehmon, yotoq, yotoqxona, sanuzel
+Qulaylik
+Oshxona, isitish, Wi-Fi, avtoturargoh, mangal
+Hovuz
+Mavjudligi, yopiq/ochiq, isitiladiganligi
+Qoidalar
+Uy hayvoni, tadbir, chekish
+Joylashuv
+Belgilangan hudud, diqqatga sazovor joyga masofa
+Ishonch
+Tekshiruv turi, tasdiqlangan safar sharhlari
+Bron
+Ega tasdig‘i kerak yoki bir zumda bron
+Saralash:
+Tavsiya etilgan.
+Safar umumiy narxi: arzondan qimmatga.
+Baholash bo‘yicha — sharhlar soni bilan birga.
+Tanlangan nuqtaga yaqinligi.
+Natija kartasi:
+Muqova rasmi.
+Nomi va umumiy hududi.
+Mehmon sig‘imi.
+Asosiy qulayliklari.
+Sharh bahosi va soni.
+Tanlangan sanalar uchun umumiy narx.
+Bron usuli.
+Saqlash tugmasi.
+Sana tanlanmagan bo‘lsa: ... so‘mdan / tun va “Aniq narx uchun sanani tanlang”.
+Homiylik asosidagi joylashtirish oddiy tavsiya bilan aralashtirilmaydi; alohida belgilanadi.
+5.3. Xarita
+Funksiyalar:
+Narxli markerlar.
+Yaqin markerlarni guruhlash.
+Marker bosilganda qisqa karta.
+Shu hududdan qidirish.
+Ro‘yxat va xarita o‘rtasida filtrlarni saqlab o‘tish.
+Lokatsiyadan foydalanishga alohida rozilik.
+Joylashuv ruxsati rad etilganda qo‘lda hudud tanlash.
+Maxfiylik qoidasi:
+Ochiq katalogda umumlashtirilgan joylashuv.
+Tasdiqlangan bron egasiga aniq manzil va yo‘l ko‘rsatmasi.
+Mehmonxona kabi ochiq obyektlar uchun aniq manzilni ommaviy ko‘rsatish sozlamasi.
+Taxminiy marker ko‘rsatilsa, foydalanuvchiga bu ochiq aytiladi. Taxminiy koordinatadan hisoblangan masofa ham taxminiy deb belgilanadi.
+5.4. Obyekt sahifasi
+Bo‘limlar:
+Foto va video galereya.
+Nomi, hududi, tekshiruv belgisi.
+Sig‘im va xonalar.
+Tavsif.
+Qulayliklar.
+Mavjudlik kalendari.
+Narx tarkibi.
+Uy qoidalari.
+Bekor qilish shartlari.
+Xarita va borish yo‘li.
+Sharhlar.
+Ega haqida ma’lumot.
+O‘xshash variantlar.
+E’lon ustidan shikoyat.
+Telefonda pastdagi doimiy panel:
+text
+Safar narxi yoki boshlang‘ich narx | Sanani tanlash / Bron so‘rovi
+“Tekshirilgan” belgisi aniq nimani anglatishini ochib beradi:
+Telefon tekshirilgan.
+Ega vakolati tekshirilgan.
+Obyekt joyida ko‘rilgan.
+Rasmlar tekshirilgan.
+Oxirgi tekshiruv sanasi.
+Bitta umumiy belgi bilan hamma narsaga kafolat berilmaydi.
+5.5. Bron yaratish
+Qadamlar:
+text
+Sanalar va mehmonlar
+→ Narx va qoidalar
+→ Aloqa ma’lumotlari
+→ So‘rov yuborish
+→ Ega tasdig‘i
+→ To‘lov
+→ Bron tasdiqlanishi
+Bu — birinchi reliz uchun taklif etilayotgan model.
+Foydalanuvchi tasdiqlashdan oldin quyidagilarni ko‘radi:
+Obyekt va sanalar.
+Tunlar soni.
+Mehmonlar soni.
+To‘liq narx tarkibi.
+Hozir to‘lanadigan summa.
+Keyin to‘lanadigan summa bo‘lsa, miqdori va muddati.
+Bekor qilish shartlari.
+Ega javob berishi uchun belgilangan muddat.
+Platforma va egaga oid majburiyatlar.
+5.6. Safarlarim
+Tablar:
+Kutilmoqda.
+Tasdiqlangan.
+Yakunlangan.
+Bekor qilingan.
+Bron tafsilotida:
+Status va voqealar tarixi.
+To‘lov holati.
+Manzil va aloqa — tegishli bosqichda.
+Bekor qilish.
+Yordamga murojaat.
+Safardan keyin sharh yozish.
+6. Bron tizimining markaziy qoidalari
+Bu loyihaning eng muhim qismi.
+6.1. “Obyekt” va “bron qilinadigan birlik” alohida bo‘ladi
+Masalan:
+Butun dacha: 1 ta bron birligi.
+Mehmon uyi: 5 ta alohida xona.
+Kottej majmuasi: 8 ta alohida kottej.
+Shuning uchun model:
+text
+Property → RentalUnit → Availability / InventoryAllocation
+Bitta obyektga bitta kalendar bog‘lab qo‘yish keyinchalik xonalar yoki majmualar qo‘shilganda muammo tug‘diradi.
+Birinchi relizda butun dacha bilan boshlash mumkin, lekin ma’lumot modeli birliklarni hisobga oladi.
+6.2. Sanalar talqini
+Turar joy bandligi:
+text
+[kirish sanasi, chiqish sanasi)
+Masalan, 10–12-noyabr bron ikki tunni egallaydi. 12-noyabr kuni boshqa mehmon kirishi mumkin; tozalash uchun qo‘shimcha blok kerak bo‘lsa, alohida qoida qo‘llanadi.
+6.3. Bron statuslari
+text
+PENDING_OWNER
+   ├─ OWNER_DECLINED
+   ├─ REQUEST_EXPIRED
+   ├─ GUEST_CANCELLED
+   └─ AWAITING_PAYMENT
+          ├─ PAYMENT_EXPIRED
+          ├─ CANCELLED
+          └─ CONFIRMED
+                 ├─ CANCELLED
+                 ├─ NO_SHOW
+                 └─ CHECKED_IN
+                        └─ COMPLETED
+Har bir o‘tish uchun:
+Kim bajara olishi.
+Old shartlar.
+Bandlikka ta’siri.
+Pulga ta’siri.
+Bildirishnoma.
+Audit yozuvi belgilanadi.
+DRAFT bosqichini foydalanuvchining saqlanmagan formasi sifatida yuritish mumkin; u kalendarni band qilmaydi.
+6.4. Bandlik siyosati
+Taklif etilayotgan boshlang‘ich qoida:
+Yuborilgan bron so‘rovi cheklangan muddatga vaqtinchalik joy ushlab turadi.
+Ega rad etsa yoki muddat tugasa, joy bo‘shaydi.
+Ega tasdiqlasa, to‘lov uchun alohida muddat boshlanadi.
+To‘lov tasdiqlansa, bandlik yakuniy bo‘ladi.
+Tashqi bronlar ham shu umumiy bandlik jadvaliga kiritiladi.
+So‘rov bilan joyni ushlab turish suiiste’mol qilinmasligi uchun telefon tasdig‘i, tezlik cheklovi va bir foydalanuvchining faol so‘rovlari limiti kerak.
+Muddatlar hozir qat’iy biznes fakti emas: boshqaruv sozlamasi bo‘ladi va pilot natijalariga ko‘ra tanlanadi.
+6.5. Ikki marta bronning oldini olish
+Faqat frontenddagi “band” belgisi yoki Redis lock yetarli emas. Yakuniy himoya ma’lumotlar bazasida bo‘ladi.
+PostgreSQL range va exclusion constraint yordamida bir birlikning ustma-ust keluvchi faol bandliklarini taqiqlash mumkin.postgresql
+Barcha manbalar bitta himoyadan o‘tadi:
+text
+Platforma bronlari
++ Ega kiritgan tashqi bron
++ Ta’mirlash / yopiq kun
++ Vaqtinchalik hold
+→ yagona bandlik nazorati
+Muddati tugagan holdni bo‘shatish worker bilan bajariladi; yangi bron tranzaksiyasi ham muddati o‘tgan holdni xavfsiz qayta tekshiradi. Vaqt o‘tishi bazadagi statusni o‘z-o‘zidan o‘zgartiradi deb hisoblamaymiz.
+6.6. Tashqi bronlar
+Ega Telegram yoki telefon orqali bron olsa:
+Kalendarni ochadi.
+Sana va birlikni tanlaydi.
+Tashqi bron qo‘shish.
+Istasa mehmon nomini kiritadi.
+Tizim ustma-ust bandlikni tekshiradi.
+Kunlar yopiladi.
+Platforma tashqarisidagi bron kiritilmagan bo‘lsa, tizim uni bilolmaydi. Shu sababli “haqiqiy mavjudlik” faqat dastur emas, egalar bilan operatsion intizom masalasi ham bo‘ladi.
+7. Narx va to‘lov logikasi
+7.1. Narx hisoblash
+Hisob quyidagilardan tuziladi:
+text
+Har bir tun narxi yig‘indisi
++ Qo‘shimcha mehmon haqi
++ Tozalash haqi
++ Tanlangan qo‘shimcha xizmatlar
++ Mavjud bo‘lsa platforma yig‘imi
+− Chegirmalar
+= Safarning umumiy narxi
+Alohida ko‘rsatiladi:
+Qaytariladigan zarar depoziti.
+Hozir to‘lanadigan qism.
+Yetib borganda to‘lanadigan qism.
+Narx qoidalari ustuvorligi aniq bo‘ladi:
+Muayyan sana uchun qo‘lda berilgan narx.
+Mavsum yoki maxsus davr qoidasi.
+Haftaning kuni qoidasi.
+Asosiy narx.
+Qoidalar bir-biriga to‘qnashsa, tizim tushunarli ustuvorlik bilan ishlaydi; tasodifan ikkita ustama qo‘shmaydi.
+7.2. Narx nusxasi
+Bron vaqtida quyidagilar o‘zgarmas nusxa sifatida saqlanadi:
+Kunma-kun narxlar.
+Yig‘imlar.
+Komissiya.
+Chegirma.
+Bekor qilish siyosati.
+To‘lov shartlari.
+Valyuta.
+Ega keyinchalik narxini almashtirsa, mavjud bronning kelishilgan summasi o‘zgarmaydi.
+7.3. To‘lov va bron statuslari ajratiladi
+To‘lov holatlari:
+text
+CREATED → PENDING → SUCCEEDED
+                  → FAILED
+                  → CANCELLED
+Refund alohida obyekt va holatlarga ega:
+text
+REQUESTED → PROCESSING → SUCCEEDED / FAILED
+Bitta bron uchun bir necha muvaffaqiyatsiz to‘lov urinishi bo‘lishi mumkin. Shu sababli booking.payment_statusning o‘zi yetmaydi.
+Majburiy talablar:
+Har bir to‘lov hodisasini takroriy ishlashdan himoyalash.
+Provayder callbackini tekshirish.
+Summani va valyutani serverdagi bron bilan solishtirish.
+To‘lov muvaffaqiyatini faqat brauzerdagi redirect bilan tasdiqlamaslik.
+To‘lov natijasi noaniq qolsa, provayder bilan solishtirish.
+Muddati tugagan bronga kech to‘lov kelsa, avtomatik qayta band qilmaslik; tekshiruv va qaytarish jarayoniga yuborish.
+Pulni kim qabul qilishi, komissiya qanday ushlanishi, egaga kim o‘tkazishi va fiskal majburiyatlar — ishga tushirishdan oldin to‘lov provayderi va tegishli mutaxassis bilan aniqlanadigan biznes qarorlari. Platformani o‘zimizcha “escrow” deb atamaymiz.
+8. Ega kabineti
+8.1. Obyekt qo‘shish ustasi
+text
+Obyekt turi
+→ Umumiy ma’lumot
+→ Manzil va koordinata
+→ Bron birliklari va sig‘im
+→ Qulayliklar
+→ Rasmlar
+→ Qoidalar
+→ Narxlar
+→ Kalendar
+→ Tekshiruvga yuborish
+Funksiyalar:
+Qoralamani saqlash.
+Qadamlar orasida qaytish.
+Majburiy maydonlarni ko‘rsatish.
+Mobil telefondan rasm yuklash.
+Yetishmayotgan ma’lumotlar ro‘yxati.
+Moderator izohi va qayta yuborish.
+Obyekt holatlari:
+text
+DRAFT → SUBMITTED → IN_REVIEW
+                     ├─ CHANGES_REQUESTED
+                     ├─ REJECTED
+                     └─ PUBLISHED
+                            ├─ PAUSED
+                            ├─ SUSPENDED
+                            └─ ARCHIVED
+Muhim o‘zgarishlar — manzil, egalik ma’lumoti, keskin o‘zgartirilgan tavsif — qayta moderatsiyaga yuboriladi. Narx yoki kalendar o‘zgarishi har safar moderatorni kutmaydi.
+8.2. Kalendar
+Kunlik va oraliq narx.
+Band / bo‘sh / yopiq kunlar.
+Tashqi bron.
+Minimal tunlar.
+Kelish mumkin bo‘lmagan kunlar.
+Tozalash oralig‘i.
+Bir nechta birlikni ko‘rish.
+8.3. Ega bosh sahifasi
+Ko‘rsatkichlar:
+Javob kutayotgan so‘rovlar.
+Bugungi kirish va chiqishlar.
+Yangilanmagan kalendar haqida ogohlantirish.
+Bekor qilingan bronlar.
+Platformadagi hisob-kitob.
+Obyekt bo‘yicha bajarilishi kerak bo‘lgan ishlar.
+9. Admin panel — alohida operatsion mahsulot
+Admin faqat jadvaldagi yozuvlarni o‘zgartirish joyi emas. U platformadagi muammolarni boshqarish markazi bo‘ladi.
+9.1. Modullar
+Modul
+Asosiy amallar
+Operatsion dashboard
+Kechikkan bronlar, to‘lov xatolari, yangi shikoyatlar
+Foydalanuvchilar
+Qidirish, bloklash, sessiyalar, bog‘langan hisoblar
+Egalar va tekshiruv
+Vakolat, hujjat, tekshiruv tarixi
+Obyektlar
+Moderatsiya, dublikatlar, nashrni to‘xtatish
+Bronlar
+Timeline, status, muddatlar, bekor qilish
+Bandlik
+To‘qnashuvlar va tashqi bronlarni ko‘rish
+To‘lovlar
+Urinishlar, callbacklar, solishtirish
+Refund
+Sabab, summa, tasdiqlovchilar, bajarilish holati
+Ega hisob-kitobi
+Komissiya, majburiyat va o‘tkazmalar
+Murojaatlar
+Mas’ul xodim, prioritet, muddat
+Sharh va shikoyatlar
+Tekshiruv, yashirish sababi, apellyatsiya
+Kontent
+Joylar, qo‘llanmalar, bosh sahifa to‘plamlari
+Sozlamalar
+Limitlar, muddatlar, tarif va siyosatlar
+Audit
+Kim, qachon, nimani o‘zgartirgani
+9.2. Nazorat talablar
+Admin bron statusini erkin matn bilan almashtirmaydi; faqat ruxsat etilgan amalni bajaradi.
+Majburiy bekor qilishda sabab yoziladi.
+Moliyaviy o‘zgarishlar oddiy moderatorga ochilmaydi.
+Belgilangan limitdan yuqori refund ikki bosqichli tasdiqqa ega bo‘lishi mumkin.
+Ega to‘lov rekvizitlari o‘zgarsa, qo‘shimcha tekshiruv ishlaydi.
+Tarixiy moliyaviy yozuvlar tahrirlanmaydi; tuzatish qarama-qarshi yozuv orqali qilinadi.
+Maxfiy hujjatni ko‘rish ham auditga tushadi.
+Oddiy admin interfeysidan audit yozuvlarini o‘chirish taqiqlanadi.
+10. Sharh, yordam va ishonch tizimi
+10.1. Sharhlar
+Birinchi reliz qoidasi:
+Faqat yakunlangan platforma bronidan keyin.
+Bitta bron uchun bitta mehmon sharhi.
+Ega javob bera oladi.
+Baho va matn alohida saqlanadi.
+Shikoyat va moderatsiya sababi saqlanadi.
+Salbiy fikr bo‘lgani uchun o‘chirilmaydi.
+Ko‘rsatkichlar:
+Tozalik.
+Tavsifga moslik.
+Qulaylik.
+Aloqa.
+Narxga munosiblik.
+10.2. Yordam
+Murojaat turlari:
+Ega javob bermayapti.
+Obyekt e’londagiga mos emas.
+Kirishga imkon bo‘lmadi.
+To‘lov muammosi.
+Bekor qilish yoki qaytarish.
+Boshqa masala.
+Har bir murojaat:
+text
+OPEN → IN_PROGRESS → WAITING_USER / WAITING_OWNER → RESOLVED → CLOSED
+Bron bilan bog‘liq murojaatda tizim tegishli bronni avtomatik biriktiradi.
+“24/7 yordam” faqat bunga mos navbatchilik bo‘lganda yoziladi.
+11. “Zominni kashf etish” va qo‘shimcha xizmatlar
+Platforma turizmga kengayishi uchun quyidagi bo‘limlar ajratiladi:
+Diqqatga sazovor joylar.
+Sayohat qo‘llanmalari.
+Oilaviy safar.
+Borish yo‘li.
+Ovqatlanish joylari.
+Gidlar.
+Transferlar.
+Dam olish dasturlari.
+Ammo axborot kartasi va bron qilinadigan xizmatni farqlaymiz.
+Masalan:
+Diqqatga sazovor joy: tavsif, koordinata, rasmiy ma’lumot manbasi, yangilangan sana.
+Transfer: yo‘nalish, avtomobil, yo‘lovchi sig‘imi, sana va vaqt.
+Gid: til, yo‘nalish, davomiylik, guruh sig‘imi.
+Ularning hammasiga dacha kalendarini qo‘llamaymiz. Umumiy katalog bo‘lishi mumkin, lekin bandlik va narxlash modellarining farqi saqlanadi.
+Birinchi relizda bular axborot va murojaat shaklida ishlashi mumkin; keyin alohida tranzaksion modullar qo‘shiladi.
+12. Tavsiya etiladigan backend arxitekturasi
+Boshlang‘ich arxitektura taklifi: modulli monolit.
+Bu bitta tartibsiz loyiha degani emas. Bitta deploy qilinadigan backend ichida qat’iy ajratilgan biznes modullar bo‘ladi.
+text
+Web             Telegram Mini App         Keyingi mobil ilova
+  \                    |                         /
+                 Umumiy API
+                       |
+ ┌────────────────────────────────────────────┐
+ │ Identity va Permissions                   │
+ │ Owners va Organizations                   │
+ │ Properties va Rental Units                │
+ │ Search va Geo                             │
+ │ Pricing va Quotes                         │
+ │ Availability va Inventory                 │
+ │ Bookings                                  │
+ │ Payments, Refunds va Ledger               │
+ │ Reviews va Trust                          │
+ │ Support va Moderation                     │
+ │ Content                                   │
+ │ Notifications va Audit                    │
+ └────────────────────────────────────────────┘
+          |             |              |
+   PostgreSQL/      Redis va       Fayl ombori
+    PostGIS          worker         va CDN
+Tavsiya etilayotgan boshlang‘ich stack:
+Qism
+Taklif
+Backend
+Django + Django REST Framework
+Asosiy baza
+PostgreSQL + PostGIS
+Fon vazifalari
+Celery va Redis
+Fayllar
+S3-compatible private/public storage
+Web
+Next.js
+Mini App
+React asosida, umumiy API va UI qismlari bilan
+API shartnomasi
+OpenAPI
+Monitoring
+Xatolar, metrikalar va tuzilgan loglar
+Bu tanlov taklif, majburiy standart emas. Muhim narsa — jamoaning uni ishonchli ishlab chiqib, xizmat ko‘rsata olishi.
+Django admin ichki yordamchi vosita bo‘lishi mumkin. Lekin moderatsiya navbati, refund va bron boshqaruvi uchun yuqoridagi operatsion ekranlar alohida quriladi.
+Arxitektura qoidalari
+Bron yaratish logikasi web, bot va admin uchun bir xil servisdan o‘tadi.
+To‘lovga oid kod bron kodiga tarqoq yozilmaydi.
+Bildirishnoma tranzaksiya muvaffaqiyatli yakunlangandan keyin yuboriladi.
+Muhim hodisalar uchun transactional outbox qo‘llash rejalashtiriladi.
+Queue vazifalari qayta bajarilganda noto‘g‘ri takroriy amal qilmasligi kerak.
+Redisdagi ma’lumot yo‘qolsa, bron va pul haqidagi haqiqat yo‘qolmaydi.
+Qidiruv nusxasi yoki kesh yakuniy bandlik manbasi hisoblanmaydi.
+13. Asosiy ma’lumotlar modeli
+Guruh
+Entitilar
+Hisob
+User, AuthIdentity, Session
+Ruxsat
+Role, Permission, Membership
+Ega
+Organization, OwnerProfile, Verification
+Obyekt
+Property, PropertyRevision, Address
+Birlik
+RentalUnit, Capacity, Amenity
+Media
+MediaAsset, MediaReview
+Narx
+RatePlan, DateRate, PricingRule, Quote
+Bandlik
+InventoryAllocation, CalendarBlock
+Bron
+Booking, BookingGuest, BookingSnapshot, BookingEvent
+Pul
+PaymentAttempt, ProviderEvent, Refund
+Hisob-kitob
+LedgerEntry, Commission, OwnerSettlement
+Ishonch
+Review, ReviewReply, Report
+Yordam
+SupportTicket, TicketMessage
+Kontent
+Place, GuideArticle, Collection
+Xabarlar
+Notification, DeliveryAttempt
+Nazorat
+AuditEvent, OutboxEvent
+Muhim talablar:
+Pul hisoblari float bilan yuritilmaydi.
+Vaqt belgilari UTCda, foydalanuvchi ko‘rinishi tegishli vaqt zonasida.
+Turar joy tunlari mahalliy sanalar bilan hisoblanadi.
+Obyekt arxivlansa ham oldingi bron nusxasi saqlanadi.
+Telefon va Telegram identifikatori alohida autentifikatsiya identifikatorlari.
+Hisoblarni birlashtirish ikki tomondagi egalikni tekshirgandan keyin amalga oshiriladi.
+14. API shartnomasiQuyida ZominStay uchun texnik topshiriqning asosiy loyihasini beraman. Bu dizayner, backendchi, frontendchi va AI coding agentlari bir xil tushunadigan asos bo‘ladi. Rasm — faqat dastlabki vizual yo‘nalish; ekranlar tuzilishini unga bog‘lamaymiz.
+
+1. Avvalgi tavsiyamga muhim aniqlik
+Oldingi javobimdagi “Zominda platformalar yo‘q, yagona bo‘lasan” degan taassurotni to‘g‘rilayman: Zomin uchun sahifalari bor Bronla va Turar kabi xizmatlar mavjud. Ularning amaldagi bron jarayoni, egalar bazasi va faol foydalanish darajasini hozir to‘liq tekshirganimiz yo‘q. Shuning uchun “raqobat yo‘q” emas, “Zomin bo‘yicha yaxshiroq xizmat yaratish imkoniyati bor” deb qaraymiz.
+
+Shuningdek, oldingi javobimdagi bozor muammolarining bir qismi — ishonchsiz rasmlar, eskirgan narxlar kabi fikrlar — tekshiriladigan gipotezalar edi, isbotlangan statistik natija emas.
+
+Mahsulot arxitekturasini esa shunday quramizki, aynan shu muammolarni o‘lchash va hal qilish mumkin bo‘lsin.
+
+2. Mahsulot maqsadi va chegarasi
+2.1. Asosiy vazifa
+Foydalanuvchi Zominga safarini rejalashtirib:
+
+Mos turar joy topadi.
+
+Joylashuv va sharoitini tekshiradi.
+
+Yakuniy narxni biladi.
+
+Haqiqiy mavjud sanalarga bron so‘rovi yuboradi.
+
+Tasdiq oladi va zarur to‘lovni amalga oshiradi.
+
+Yetib borish ma’lumotlarini oladi.
+
+Muammo bo‘lsa yordamga murojaat qiladi.
+
+Safardan keyin fikr bildiradi.
+
+Ega esa:
+
+Obyektini joylaydi.
+
+Tekshiruvdan o‘tadi.
+
+Narx va kalendarni boshqaradi.
+
+Bronlarni qabul qiladi.
+
+Tashqi bronlarini ham kiritadi.
+
+Daromad va hisob-kitoblarini ko‘radi.
+
+Platforma faqat “telefon raqamini ko‘rsatuvchi sayt” bo‘lib qolmasligi kerak. Uning markaziy qiymati — topishdan safar yakunigacha bo‘lgan jarayonni tartibga solish.
+
+2.2. Birinchi reliz chegarasi
+Birinchi relizga kiradi	Keyingi bosqichga qoldiriladi
+Dacha va mehmon uyi katalogi	Barcha turizm xizmatlari uchun umumiy bron tizimi
+Ro‘yxat + xarita	Murakkab avtomatik marshrut optimallashtirish
+Sana, mehmon va qulaylik filtrlari	Dinamik narxlash
+Ega tasdiqlaydigan bron	Barcha obyektlarda bir zumda bron
+Ega kabineti	Katta agentliklar uchun alohida CRM
+Moderatsiya va operatsion admin	Murakkab hamkorlik dasturi
+Bron bildirishnomalari	Mustaqil qaror chiqaruvchi AI agentlar
+Sayohat joylari bo‘yicha axborot katalogi	Transfer va gid uchun to‘liq marketplace
+Backend kelajakdagi kengayishga tayyor bo‘ladi, lekin birinchi relizni barcha xizmatlar bilan og‘irlashtirmaymiz.
+
+3. Rollar va ruxsatlar
+Bitta odam bir vaqtning o‘zida sayyoh ham, dacha egasi ham bo‘lishi mumkin. Shu sababli user.role = owner kabi yagona rol bilan cheklanmaymiz.
+
+Rol	Ruxsatlari
+Mehmon	Katalog, xarita, obyekt va sayohat sahifalarini ko‘radi
+Ro‘yxatdan o‘tgan sayyoh	Bron, saqlanganlar, murojaatlar va sharhlar
+Obyekt egasi	O‘z obyektlari, narxlari, kalendari va bronlari
+Obyekt menejeri	Ega bergan obyektlar va chegaralangan vazifalar
+Moderator	Obyekt va kontent tekshiruvi
+Qo‘llab-quvvatlash xodimi	Murojaatlar va ruxsat etilgan bron amallari
+Moliya xodimi	To‘lov, refund, hisob-kitob va solishtirish
+Platforma administratori	Operatsion sozlamalar va foydalanuvchilar boshqaruvi
+Superadmin	Yuqori darajali ruxsatlar va tizim sozlamalari
+Muhim talab: interfeysdagi tugmani yashirish yetmaydi. Backend har bir obyekt va bron bo‘yicha foydalanuvchi ruxsatini alohida tekshiradi. Obyekt identifikatorini almashtirib boshqa egaga tegishli ma’lumotni olish — OWASP ko‘rsatadigan asosiy API xavflaridan biri.
+
+4. Navigatsiya va tugmalar joylashuvi
+4.1. Telefon va Telegram Mini App
+Pastki asosiy navigatsiya:
+
+text
+Qidirish | Saqlanganlar | Safarlarim | Profil
+Bildirishnomalar — yuqorida alohida belgi.
+
+“Xaritada ko‘rish” — qidiruv natijalari ichida doim ko‘rinadigan tugma. Uni alohida asosiy bo‘lim qilish shart emas: xarita va ro‘yxat bir qidiruvning ikki ko‘rinishi bo‘ladi.
+
+“Dacha joylashtirish”:
+
+bosh sahifada ikkilamchi tugma;
+
+profilda “Ega sifatida ishlash”;
+
+ega rejimida alohida boshqaruv navigatsiyasi.
+
+4.2. Kompyuter uchun
+Yuqori navigatsiya:
+
+text
+Logo | Turar joylar | Zominni kashf etish | Yordam
+                        Dacha joylashtirish | Til | Profil
+Qidiruv natijalari:
+
+text
+Filtrlar | Obyektlar ro‘yxati | Xarita
+4.3. Ega rejimi
+text
+Umumiy holat | Obyektlarim | Kalendar | Bronlar | Moliya
+Telefon ekranida kam ishlatiladigan bo‘limlar “Yana” ichiga o‘tadi.
+
+Sayyoh va ega rejimlari aniq ajraladi: foydalanuvchi oddiy dacha qidirayotganida unga biznes boshqaruv tugmalari aralashib ketmaydi.
+
+5. Sayyoh uchun ekranlar va funksiyalar
+5.1. Bosh sahifa
+Bo‘limlar tartibi:
+
+Asosiy qidiruv.
+
+Turar joy turlari.
+
+Hududlar orqali topish.
+
+Tanlangan obyektlar.
+
+Zominni kashf etish.
+
+Platforma qanday ishlashi.
+
+Dacha egalari uchun taklif.
+
+Yordam va qoidalar.
+
+Asosiy qidiruv maydonlari:
+
+Hudud yoki xaritada joy.
+
+Kirish va chiqish sanalari.
+
+Kattalar soni.
+
+Bolalar soni, zarur bo‘lsa yoshi.
+
+Obyekt yoki xona soni — ko‘p birlikli turar joylar qo‘shilganda.
+
+Tugma: Variantlarni topish.
+
+Sanasiz qidirishga ruxsat beriladi. Lekin bunday natijada “shu sanaga bo‘sh” degan va’da ko‘rsatilmaydi.
+
+“200+ dacha”, “24/7 yordam”, “har bir uy tekshirilgan” kabi da’volar haqiqiy ma’lumot va xizmat mavjud bo‘lgandagina chiqadi. Rasmdagi bunday yozuvlarni avtomatik ravishda mahsulot va’dasiga aylantirmaymiz.
+
+5.2. Qidiruv natijalari
+Filtrlar:
+
+Guruh	Filtrlar
+Narx	Tun uchun yoki butun safar uchun budjet
+Turar joy	Butun dacha, mehmon uyi, kottej, xona
+Sig‘im	Mehmon, yotoq, yotoqxona, sanuzel
+Qulaylik	Oshxona, isitish, Wi-Fi, avtoturargoh, mangal
+Hovuz	Mavjudligi, yopiq/ochiq, isitiladiganligi
+Qoidalar	Uy hayvoni, tadbir, chekish
+Joylashuv	Belgilangan hudud, diqqatga sazovor joyga masofa
+Ishonch	Tekshiruv turi, tasdiqlangan safar sharhlari
+Bron	Ega tasdig‘i kerak yoki bir zumda bron
+Saralash:
+
+Tavsiya etilgan.
+
+Safar umumiy narxi: arzondan qimmatga.
+
+Baholash bo‘yicha — sharhlar soni bilan birga.
+
+Tanlangan nuqtaga yaqinligi.
+
+Natija kartasi:
+
+Muqova rasmi.
+
+Nomi va umumiy hududi.
+
+Mehmon sig‘imi.
+
+Asosiy qulayliklari.
+
+Sharh bahosi va soni.
+
+Tanlangan sanalar uchun umumiy narx.
+
+Bron usuli.
+
+Saqlash tugmasi.
+
+Sana tanlanmagan bo‘lsa: ... so‘mdan / tun va “Aniq narx uchun sanani tanlang”.
+
+Homiylik asosidagi joylashtirish oddiy tavsiya bilan aralashtirilmaydi; alohida belgilanadi.
+
+5.3. Xarita
+Funksiyalar:
+
+Narxli markerlar.
+
+Yaqin markerlarni guruhlash.
+
+Marker bosilganda qisqa karta.
+
+Shu hududdan qidirish.
+
+Ro‘yxat va xarita o‘rtasida filtrlarni saqlab o‘tish.
+
+Lokatsiyadan foydalanishga alohida rozilik.
+
+Joylashuv ruxsati rad etilganda qo‘lda hudud tanlash.
+
+Maxfiylik qoidasi:
+
+Ochiq katalogda umumlashtirilgan joylashuv.
+
+Tasdiqlangan bron egasiga aniq manzil va yo‘l ko‘rsatmasi.
+
+Mehmonxona kabi ochiq obyektlar uchun aniq manzilni ommaviy ko‘rsatish sozlamasi.
+
+Taxminiy marker ko‘rsatilsa, foydalanuvchiga bu ochiq aytiladi. Taxminiy koordinatadan hisoblangan masofa ham taxminiy deb belgilanadi.
+
+5.4. Obyekt sahifasi
+Bo‘limlar:
+
+Foto va video galereya.
+
+Nomi, hududi, tekshiruv belgisi.
+
+Sig‘im va xonalar.
+
+Tavsif.
+
+Qulayliklar.
+
+Mavjudlik kalendari.
+
+Narx tarkibi.
+
+Uy qoidalari.
+
+Bekor qilish shartlari.
+
+Xarita va borish yo‘li.
+
+Sharhlar.
+
+Ega haqida ma’lumot.
+
+O‘xshash variantlar.
+
+E’lon ustidan shikoyat.
+
+Telefonda pastdagi doimiy panel:
+
+text
+Safar narxi yoki boshlang‘ich narx | Sanani tanlash / Bron so‘rovi
+“Tekshirilgan” belgisi aniq nimani anglatishini ochib beradi:
+
+Telefon tekshirilgan.
+
+Ega vakolati tekshirilgan.
+
+Obyekt joyida ko‘rilgan.
+
+Rasmlar tekshirilgan.
+
+Oxirgi tekshiruv sanasi.
+
+Bitta umumiy belgi bilan hamma narsaga kafolat berilmaydi.
+
+5.5. Bron yaratish
+Qadamlar:
+
+text
+Sanalar va mehmonlar
+→ Narx va qoidalar
+→ Aloqa ma’lumotlari
+→ So‘rov yuborish
+→ Ega tasdig‘i
+→ To‘lov
+→ Bron tasdiqlanishi
+Bu — birinchi reliz uchun taklif etilayotgan model.
+
+Foydalanuvchi tasdiqlashdan oldin quyidagilarni ko‘radi:
+
+Obyekt va sanalar.
+
+Tunlar soni.
+
+Mehmonlar soni.
+
+To‘liq narx tarkibi.
+
+Hozir to‘lanadigan summa.
+
+Keyin to‘lanadigan summa bo‘lsa, miqdori va muddati.
+
+Bekor qilish shartlari.
+
+Ega javob berishi uchun belgilangan muddat.
+
+Platforma va egaga oid majburiyatlar.
+
+5.6. Safarlarim
+Tablar:
+
+Kutilmoqda.
+
+Tasdiqlangan.
+
+Yakunlangan.
+
+Bekor qilingan.
+
+Bron tafsilotida:
+
+Status va voqealar tarixi.
+
+To‘lov holati.
+
+Manzil va aloqa — tegishli bosqichda.
+
+Bekor qilish.
+
+Yordamga murojaat.
+
+Safardan keyin sharh yozish.
+
+6. Bron tizimining markaziy qoidalari
+Bu loyihaning eng muhim qismi.
+
+6.1. “Obyekt” va “bron qilinadigan birlik” alohida bo‘ladi
+Masalan:
+
+Butun dacha: 1 ta bron birligi.
+
+Mehmon uyi: 5 ta alohida xona.
+
+Kottej majmuasi: 8 ta alohida kottej.
+
+Shuning uchun model:
+
+text
+Property → RentalUnit → Availability / InventoryAllocation
+Bitta obyektga bitta kalendar bog‘lab qo‘yish keyinchalik xonalar yoki majmualar qo‘shilganda muammo tug‘diradi.
+
+Birinchi relizda butun dacha bilan boshlash mumkin, lekin ma’lumot modeli birliklarni hisobga oladi.
+
+6.2. Sanalar talqini
+Turar joy bandligi:
+
+text
+[kirish sanasi, chiqish sanasi)
+Masalan, 10–12-noyabr bron ikki tunni egallaydi. 12-noyabr kuni boshqa mehmon kirishi mumkin; tozalash uchun qo‘shimcha blok kerak bo‘lsa, alohida qoida qo‘llanadi.
+
+6.3. Bron statuslari
+text
+PENDING_OWNER
+   ├─ OWNER_DECLINED
+   ├─ REQUEST_EXPIRED
+   ├─ GUEST_CANCELLED
+   └─ AWAITING_PAYMENT
+          ├─ PAYMENT_EXPIRED
+          ├─ CANCELLED
+          └─ CONFIRMED
+                 ├─ CANCELLED
+                 ├─ NO_SHOW
+                 └─ CHECKED_IN
+                        └─ COMPLETED
+Har bir o‘tish uchun:
+
+Kim bajara olishi.
+
+Old shartlar.
+
+Bandlikka ta’siri.
+
+Pulga ta’siri.
+
+Bildirishnoma.
+
+Audit yozuvi belgilanadi.
+
+DRAFT bosqichini foydalanuvchining saqlanmagan formasi sifatida yuritish mumkin; u kalendarni band qilmaydi.
+
+6.4. Bandlik siyosati
+Taklif etilayotgan boshlang‘ich qoida:
+
+Yuborilgan bron so‘rovi cheklangan muddatga vaqtinchalik joy ushlab turadi.
+
+Ega rad etsa yoki muddat tugasa, joy bo‘shaydi.
+
+Ega tasdiqlasa, to‘lov uchun alohida muddat boshlanadi.
+
+To‘lov tasdiqlansa, bandlik yakuniy bo‘ladi.
+
+Tashqi bronlar ham shu umumiy bandlik jadvaliga kiritiladi.
+
+So‘rov bilan joyni ushlab turish suiiste’mol qilinmasligi uchun telefon tasdig‘i, tezlik cheklovi va bir foydalanuvchining faol so‘rovlari limiti kerak.
+
+Muddatlar hozir qat’iy biznes fakti emas: boshqaruv sozlamasi bo‘ladi va pilot natijalariga ko‘ra tanlanadi.
+
+6.5. Ikki marta bronning oldini olish
+Faqat frontenddagi “band” belgisi yoki Redis lock yetarli emas. Yakuniy himoya ma’lumotlar bazasida bo‘ladi.
+
+PostgreSQL range va exclusion constraint yordamida bir birlikning ustma-ust keluvchi faol bandliklarini taqiqlash mumkin.
+
+Barcha manbalar bitta himoyadan o‘tadi:
+
+text
+Platforma bronlari
++ Ega kiritgan tashqi bron
++ Ta’mirlash / yopiq kun
++ Vaqtinchalik hold
+→ yagona bandlik nazorati
+Muddati tugagan holdni bo‘shatish worker bilan bajariladi; yangi bron tranzaksiyasi ham muddati o‘tgan holdni xavfsiz qayta tekshiradi. Vaqt o‘tishi bazadagi statusni o‘z-o‘zidan o‘zgartiradi deb hisoblamaymiz.
+
+6.6. Tashqi bronlar
+Ega Telegram yoki telefon orqali bron olsa:
+
+Kalendarni ochadi.
+
+Sana va birlikni tanlaydi.
+
+Tashqi bron qo‘shish.
+
+Istasa mehmon nomini kiritadi.
+
+Tizim ustma-ust bandlikni tekshiradi.
+
+Kunlar yopiladi.
+
+Platforma tashqarisidagi bron kiritilmagan bo‘lsa, tizim uni bilolmaydi. Shu sababli “haqiqiy mavjudlik” faqat dastur emas, egalar bilan operatsion intizom masalasi ham bo‘ladi.
+
+7. Narx va to‘lov logikasi
+7.1. Narx hisoblash
+Hisob quyidagilardan tuziladi:
+
+text
+Har bir tun narxi yig‘indisi
++ Qo‘shimcha mehmon haqi
++ Tozalash haqi
++ Tanlangan qo‘shimcha xizmatlar
++ Mavjud bo‘lsa platforma yig‘imi
+− Chegirmalar
+= Safarning umumiy narxi
+Alohida ko‘rsatiladi:
+
+Qaytariladigan zarar depoziti.
+
+Hozir to‘lanadigan qism.
+
+Yetib borganda to‘lanadigan qism.
+
+Narx qoidalari ustuvorligi aniq bo‘ladi:
+
+Muayyan sana uchun qo‘lda berilgan narx.
+
+Mavsum yoki maxsus davr qoidasi.
+
+Haftaning kuni qoidasi.
+
+Asosiy narx.
+
+Qoidalar bir-biriga to‘qnashsa, tizim tushunarli ustuvorlik bilan ishlaydi; tasodifan ikkita ustama qo‘shmaydi.
+
+7.2. Narx nusxasi
+Bron vaqtida quyidagilar o‘zgarmas nusxa sifatida saqlanadi:
+
+Kunma-kun narxlar.
+
+Yig‘imlar.
+
+Komissiya.
+
+Chegirma.
+
+Bekor qilish siyosati.
+
+To‘lov shartlari.
+
+Valyuta.
+
+Ega keyinchalik narxini almashtirsa, mavjud bronning kelishilgan summasi o‘zgarmaydi.
+
+7.3. To‘lov va bron statuslari ajratiladi
+To‘lov holatlari:
+
+text
+CREATED → PENDING → SUCCEEDED
+                  → FAILED
+                  → CANCELLED
+Refund alohida obyekt va holatlarga ega:
+
+text
+REQUESTED → PROCESSING → SUCCEEDED / FAILED
+Bitta bron uchun bir necha muvaffaqiyatsiz to‘lov urinishi bo‘lishi mumkin. Shu sababli booking.payment_statusning o‘zi yetmaydi.
+
+Majburiy talablar:
+
+Har bir to‘lov hodisasini takroriy ishlashdan himoyalash.
+
+Provayder callbackini tekshirish.
+
+Summani va valyutani serverdagi bron bilan solishtirish.
+
+To‘lov muvaffaqiyatini faqat brauzerdagi redirect bilan tasdiqlamaslik.
+
+To‘lov natijasi noaniq qolsa, provayder bilan solishtirish.
+
+Muddati tugagan bronga kech to‘lov kelsa, avtomatik qayta band qilmaslik; tekshiruv va qaytarish jarayoniga yuborish.
+
+Pulni kim qabul qilishi, komissiya qanday ushlanishi, egaga kim o‘tkazishi va fiskal majburiyatlar — ishga tushirishdan oldin to‘lov provayderi va tegishli mutaxassis bilan aniqlanadigan biznes qarorlari. Platformani o‘zimizcha “escrow” deb atamaymiz.
+
+8. Ega kabineti
+8.1. Obyekt qo‘shish ustasi
+text
+Obyekt turi
+→ Umumiy ma’lumot
+→ Manzil va koordinata
+→ Bron birliklari va sig‘im
+→ Qulayliklar
+→ Rasmlar
+→ Qoidalar
+→ Narxlar
+→ Kalendar
+→ Tekshiruvga yuborish
+Funksiyalar:
+
+Qoralamani saqlash.
+
+Qadamlar orasida qaytish.
+
+Majburiy maydonlarni ko‘rsatish.
+
+Mobil telefondan rasm yuklash.
+
+Yetishmayotgan ma’lumotlar ro‘yxati.
+
+Moderator izohi va qayta yuborish.
+
+Obyekt holatlari:
+
+text
+DRAFT → SUBMITTED → IN_REVIEW
+                     ├─ CHANGES_REQUESTED
+                     ├─ REJECTED
+                     └─ PUBLISHED
+                            ├─ PAUSED
+                            ├─ SUSPENDED
+                            └─ ARCHIVED
+Muhim o‘zgarishlar — manzil, egalik ma’lumoti, keskin o‘zgartirilgan tavsif — qayta moderatsiyaga yuboriladi. Narx yoki kalendar o‘zgarishi har safar moderatorni kutmaydi.
+
+8.2. Kalendar
+Kunlik va oraliq narx.
+
+Band / bo‘sh / yopiq kunlar.
+
+Tashqi bron.
+
+Minimal tunlar.
+
+Kelish mumkin bo‘lmagan kunlar.
+
+Tozalash oralig‘i.
+
+Bir nechta birlikni ko‘rish.
+
+8.3. Ega bosh sahifasi
+Ko‘rsatkichlar:
+
+Javob kutayotgan so‘rovlar.
+
+Bugungi kirish va chiqishlar.
+
+Yangilanmagan kalendar haqida ogohlantirish.
+
+Bekor qilingan bronlar.
+
+Platformadagi hisob-kitob.
+
+Obyekt bo‘yicha bajarilishi kerak bo‘lgan ishlar.
+
+9. Admin panel — alohida operatsion mahsulot
+Admin faqat jadvaldagi yozuvlarni o‘zgartirish joyi emas. U platformadagi muammolarni boshqarish markazi bo‘ladi.
+
+9.1. Modullar
+Modul	Asosiy amallar
+Operatsion dashboard	Kechikkan bronlar, to‘lov xatolari, yangi shikoyatlar
+Foydalanuvchilar	Qidirish, bloklash, sessiyalar, bog‘langan hisoblar
+Egalar va tekshiruv	Vakolat, hujjat, tekshiruv tarixi
+Obyektlar	Moderatsiya, dublikatlar, nashrni to‘xtatish
+Bronlar	Timeline, status, muddatlar, bekor qilish
+Bandlik	To‘qnashuvlar va tashqi bronlarni ko‘rish
+To‘lovlar	Urinishlar, callbacklar, solishtirish
+Refund	Sabab, summa, tasdiqlovchilar, bajarilish holati
+Ega hisob-kitobi	Komissiya, majburiyat va o‘tkazmalar
+Murojaatlar	Mas’ul xodim, prioritet, muddat
+Sharh va shikoyatlar	Tekshiruv, yashirish sababi, apellyatsiya
+Kontent	Joylar, qo‘llanmalar, bosh sahifa to‘plamlari
+Sozlamalar	Limitlar, muddatlar, tarif va siyosatlar
+Audit	Kim, qachon, nimani o‘zgartirgani
+9.2. Nazorat talablar
+Admin bron statusini erkin matn bilan almashtirmaydi; faqat ruxsat etilgan amalni bajaradi.
+
+Majburiy bekor qilishda sabab yoziladi.
+
+Moliyaviy o‘zgarishlar oddiy moderatorga ochilmaydi.
+
+Belgilangan limitdan yuqori refund ikki bosqichli tasdiqqa ega bo‘lishi mumkin.
+
+Ega to‘lov rekvizitlari o‘zgarsa, qo‘shimcha tekshiruv ishlaydi.
+
+Tarixiy moliyaviy yozuvlar tahrirlanmaydi; tuzatish qarama-qarshi yozuv orqali qilinadi.
+
+Maxfiy hujjatni ko‘rish ham auditga tushadi.
+
+Oddiy admin interfeysidan audit yozuvlarini o‘chirish taqiqlanadi.
+
+10. Sharh, yordam va ishonch tizimi
+10.1. Sharhlar
+Birinchi reliz qoidasi:
+
+Faqat yakunlangan platforma bronidan keyin.
+
+Bitta bron uchun bitta mehmon sharhi.
+
+Ega javob bera oladi.
+
+Baho va matn alohida saqlanadi.
+
+Shikoyat va moderatsiya sababi saqlanadi.
+
+Salbiy fikr bo‘lgani uchun o‘chirilmaydi.
+
+Ko‘rsatkichlar:
+
+Tozalik.
+
+Tavsifga moslik.
+
+Qulaylik.
+
+Aloqa.
+
+Narxga munosiblik.
+
+10.2. Yordam
+Murojaat turlari:
+
+Ega javob bermayapti.
+
+Obyekt e’londagiga mos emas.
+
+Kirishga imkon bo‘lmadi.
+
+To‘lov muammosi.
+
+Bekor qilish yoki qaytarish.
+
+Boshqa masala.
+
+Har bir murojaat:
+
+text
+OPEN → IN_PROGRESS → WAITING_USER / WAITING_OWNER → RESOLVED → CLOSED
+Bron bilan bog‘liq murojaatda tizim tegishli bronni avtomatik biriktiradi.
+
+“24/7 yordam” faqat bunga mos navbatchilik bo‘lganda yoziladi.
+
+11. “Zominni kashf etish” va qo‘shimcha xizmatlar
+Platforma turizmga kengayishi uchun quyidagi bo‘limlar ajratiladi:
+
+Diqqatga sazovor joylar.
+
+Sayohat qo‘llanmalari.
+
+Oilaviy safar.
+
+Borish yo‘li.
+
+Ovqatlanish joylari.
+
+Gidlar.
+
+Transferlar.
+
+Dam olish dasturlari.
+
+Ammo axborot kartasi va bron qilinadigan xizmatni farqlaymiz.
+
+Masalan:
+
+Diqqatga sazovor joy: tavsif, koordinata, rasmiy ma’lumot manbasi, yangilangan sana.
+
+Transfer: yo‘nalish, avtomobil, yo‘lovchi sig‘imi, sana va vaqt.
+
+Gid: til, yo‘nalish, davomiylik, guruh sig‘imi.
+
+Ularning hammasiga dacha kalendarini qo‘llamaymiz. Umumiy katalog bo‘lishi mumkin, lekin bandlik va narxlash modellarining farqi saqlanadi.
+
+Birinchi relizda bular axborot va murojaat shaklida ishlashi mumkin; keyin alohida tranzaksion modullar qo‘shiladi.
+
+12. Tavsiya etiladigan backend arxitekturasi
+Boshlang‘ich arxitektura taklifi: modulli monolit.
+
+Bu bitta tartibsiz loyiha degani emas. Bitta deploy qilinadigan backend ichida qat’iy ajratilgan biznes modullar bo‘ladi.
+
+text
+Web             Telegram Mini App         Keyingi mobil ilova
+  \                    |                         /
+                 Umumiy API
+                       |
+ ┌────────────────────────────────────────────┐
+ │ Identity va Permissions                   │
+ │ Owners va Organizations                   │
+ │ Properties va Rental Units                │
+ │ Search va Geo                             │
+ │ Pricing va Quotes                         │
+ │ Availability va Inventory                 │
+ │ Bookings                                  │
+ │ Payments, Refunds va Ledger               │
+ │ Reviews va Trust                          │
+ │ Support va Moderation                     │
+ │ Content                                   │
+ │ Notifications va Audit                    │
+ └────────────────────────────────────────────┘
+          |             |              |
+   PostgreSQL/      Redis va       Fayl ombori
+    PostGIS          worker         va CDN
+Tavsiya etilayotgan boshlang‘ich stack:
+
+Qism	Taklif
+Backend	Django + Django REST Framework
+Asosiy baza	PostgreSQL + PostGIS
+Fon vazifalari	Celery va Redis
+Fayllar	S3-compatible private/public storage
+Web	Next.js
+Mini App	React asosida, umumiy API va UI qismlari bilan
+API shartnomasi	OpenAPI
+Monitoring	Xatolar, metrikalar va tuzilgan loglar
+Bu tanlov taklif, majburiy standart emas. Muhim narsa — jamoaning uni ishonchli ishlab chiqib, xizmat ko‘rsata olishi.
+
+Django admin ichki yordamchi vosita bo‘lishi mumkin. Lekin moderatsiya navbati, refund va bron boshqaruvi uchun yuqoridagi operatsion ekranlar alohida quriladi.
+
+Arxitektura qoidalari
+Bron yaratish logikasi web, bot va admin uchun bir xil servisdan o‘tadi.
+
+To‘lovga oid kod bron kodiga tarqoq yozilmaydi.
+
+Bildirishnoma tranzaksiya muvaffaqiyatli yakunlangandan keyin yuboriladi.
+
+Muhim hodisalar uchun transactional outbox qo‘llash rejalashtiriladi.
+
+Queue vazifalari qayta bajarilganda noto‘g‘ri takroriy amal qilmasligi kerak.
+
+Redisdagi ma’lumot yo‘qolsa, bron va pul haqidagi haqiqat yo‘qolmaydi.
+
+Qidiruv nusxasi yoki kesh yakuniy bandlik manbasi hisoblanmaydi.
+
+13. Asosiy ma’lumotlar modeli
+Guruh	Entitilar
+Hisob	User, AuthIdentity, Session
+Ruxsat	Role, Permission, Membership
+Ega	Organization, OwnerProfile, Verification
+Obyekt	Property, PropertyRevision, Address
+Birlik	RentalUnit, Capacity, Amenity
+Media	MediaAsset, MediaReview
+Narx	RatePlan, DateRate, PricingRule, Quote
+Bandlik	InventoryAllocation, CalendarBlock
+Bron	Booking, BookingGuest, BookingSnapshot, BookingEvent
+Pul	PaymentAttempt, ProviderEvent, Refund
+Hisob-kitob	LedgerEntry, Commission, OwnerSettlement
+Ishonch	Review, ReviewReply, Report
+Yordam	SupportTicket, TicketMessage
+Kontent	Place, GuideArticle, Collection
+Xabarlar	Notification, DeliveryAttempt
+Nazorat	AuditEvent, OutboxEvent
+Muhim talablar:
+
+Pul hisoblari float bilan yuritilmaydi.
+
+Vaqt belgilari UTCda, foydalanuvchi ko‘rinishi tegishli vaqt zonasida.
+
+Turar joy tunlari mahalliy sanalar bilan hisoblanadi.
+
+Obyekt arxivlansa ham oldingi bron nusxasi saqlanadi.
+
+Telefon va Telegram identifikatori alohida autentifikatsiya identifikatorlari.
+
+Hisoblarni birlashtirish ikki tomondagi egalikni tekshirgandan keyin amalga oshiriladi.
+
+14. API shartnomasi
+Boshlang‘ich yo‘nalishlar:
+
+text
+/api/v1/auth/...
+/api/v1/me/...
+/api/v1/properties/...
+/api/v1/search/...
+/api/v1/quotes/...
+/api/v1/bookings/...
+/api/v1/payments/...
+/api/v1/reviews/...
+/api/v1/support/...
+
+/api/v1/owner/properties/...
+/api/v1/owner/calendar/...
+/api/v1/owner/bookings/...
+/api/v1/owner/settlements/...
+
+/api/v1/admin/...
+/api/v1/webhooks/...
+Misol jarayon:
+
+text
+POST /quotes
+→ server narxni hisoblaydi va amal qilish muddatini beradi
+
+POST /bookings
+→ quote va bandlik qayta tekshiriladi
+→ bron so‘rovi yaratiladi
+
+POST /owner/bookings/{id}/accept
+→ ruxsat va status tekshiriladi
+→ to‘lov bosqichiga o‘tadi
+
+POST /bookings/{id}/payment-attempts
+→ to‘lov urinishi yaratiladi
+Talablar:
+
+Frontend yuborgan narxga ishonilmaydi.
+
+Bron va to‘lov yaratishda idempotency kaliti.
+
+Bir xil formatdagi xato javoblari.
+
+Pagination.
+
+Xato kuzatuvi uchun request ID.
+
+API versiyalash.
+
+Har endpoint uchun ruxsat, validatsiya va xato holatlari hujjatlashtiriladi.
+
+15. Telegram Mini App logikasi
+Mini App alohida bron backendiga ega bo‘lmaydi. U web bilan bir xil servislarni ishlatadi.
+
+Kirish:
+
+text
+Telegram initData
+→ Backend tekshiruvi
+→ Telegram hisobini topish yoki yaratish
+→ Platforma sessiyasi
+Telegram rasmiy hujjatiga ko‘ra initData serverda tekshirilishi kerak; tekshirilmagan ma’lumotga tayanib foydalanuvchini autentifikatsiya qilish mumkin emas.
+
+Qo‘shimcha talablar:
+
+Imzo va auth_date tekshiruvi.
+
+Bot tokeni frontendga chiqmaydi.
+
+Telegram foydalanuvchi nomi telefon o‘rnida qabul qilinmaydi.
+
+Telefon kerak bo‘lsa, alohida olinadi va tekshiriladi.
+
+Deep link obyekt yoki bronga olib boradi.
+
+Bot orqali bron voqealari haqida xabar yuboriladi.
+
+Bot bloklangan bo‘lsa, muvaffaqiyatsiz yuborish qayd etiladi.
+
+Muhim xabarlar faqat Telegramga bog‘lanib qolmaydi.
+
+16. AI agentlarining ikki xil vazifasi
+Sening “AI agentlarim bilan qilaman” deganingni ikkiga ajratish kerak.
+
+16.1. Loyihani ishlab chiqadigan agentlar
+Vazifa taqsimoti:
+
+Agent	Natija
+Product agent	User story, ekran va biznes qoidalar
+Architecture agent	Modul chegarasi, ERD, API shartnomasi
+Backend agent	Servislar, migratsiyalar, API
+Frontend agent	Ekranlar va holatlar
+QA agent	Testlar va chekka holatlar
+Security reviewer	Ruxsat va ma’lumot xavfsizligi tekshiruvi
+Agentlar umumiy yozma shartnomalar asosida ishlaydi:
+
+Terminlar lug‘ati.
+
+Ma’lumot modeli.
+
+Status o‘tish jadvallari.
+
+OpenAPI.
+
+Arxitektura qarorlari.
+
+Test mezonlari.
+
+Bir agent o‘zicha CONFIRMED, boshqasi APPROVED deb bir xil holatni ikkita nom bilan yaratmasligi kerak.
+
+16.2. Mahsulot ichidagi AI
+Keyinchalik:
+
+Tabiiy tilda qidiruv.
+
+Obyekt tavsifi uchun qoralama.
+
+Murojaatlarni guruhlash.
+
+Savollarga tasdiqlangan ma’lumot bilan javob.
+
+Shubhali e’lonlarni tekshiruvga belgilash.
+
+Chegaralar:
+
+AI narx va bo‘sh sanani o‘ylab topmaydi.
+
+Bronni bekor qilish va pul qaytarish mustaqil bajarilmaydi.
+
+Ruxsatlar oddiy foydalanuvchiniki kabi tekshiriladi.
+
+AI javobidan oldin narx va bandlik tegishli servisdan olinadi.
+
+Muhim yozish amallari aniq foydalanuvchi tasdig‘ini talab qiladi.
+
+AI asosiy bron tizimining o‘rnini bosmaydi.
+
+17. Xavfsizlik va ekspluatatsiya talablari
+Minimal talablar:
+
+Admin va moliya rollari uchun MFA.
+
+OTP urinishlari limiti.
+
+Sessiyani bekor qilish.
+
+Har obyektga tegishli ruxsat tekshiruvi.
+
+Hujjatlar uchun yopiq fayl saqlash.
+
+Vaqti cheklangan fayl havolalari.
+
+Yuklanadigan fayl turi va hajmi nazorati.
+
+Maxfiy ma’lumotlarni logga yozmaslik.
+
+API va admin uchun tezlik cheklovlari.
+
+Backup va undan tiklash testi.
+
+Test va production muhitlarini ajratish.
+
+Maxfiy kalitlarni repozitoriyga yozmaslik.
+
+Texnik monitoringdan tashqari biznes monitoringi ham kerak:
+
+To‘lov muvaffaqiyatli, lekin bron tasdiqlanmagan.
+
+Hold muddati o‘tgan, lekin joy bo‘shamagan.
+
+Ega javob berish muddatini o‘tkazgan.
+
+Refund uzoq vaqt yakunlanmagan.
+
+Bildirishnomalar ketmayapti.
+
+Bir obyekt bo‘yicha takroriy shikoyatlar.
+
+18. Ekranlarning majburiy holatlari
+TZda faqat “sahifa bor” deb yozish yetmaydi. Har ekran quyidagilarga ega bo‘ladi:
+
+Holat	Misol
+Yuklanmoqda	Qidiruv natijalari kelmoqda
+Bo‘sh	Mos variant topilmadi
+Xato	Server javob bermadi
+Ruxsat yo‘q	Begona bron ochildi
+Muddati tugagan	To‘lov uchun vaqt tugadi
+Ma’lumot eskirgan	Narx yoki bandlik o‘zgardi
+Qisman muvaffaqiyat	Bron yaratildi, xabar yuborilmadi
+Internet yo‘q	Ko‘rilgan ma’lumot eskirgan bo‘lishi mumkin
+Bron, to‘lov va bandlik kabi amallar offline holatda muvaffaqiyatli bajarilgandek ko‘rsatilmaydi.
+
+19. Qabul qilish mezonlari
+Quyidagilar test bilan tasdiqlanmaguncha asosiy modul tayyor hisoblanmaydi.
+
+ID	Ssenariy	Kutiladigan natija
+AC-01	Ikki kishi bir birlikni bir sanaga bron qiladi	Ko‘pi bilan bittasi faol bandlik oladi
+AC-02	Ega tashqi bronni mavjud bron ustiga qo‘shadi	Amal rad etiladi, tushunarli sabab chiqadi
+AC-03	Ega narxni o‘zgartiradi	Oldingi bron narxi o‘zgarmaydi
+AC-04	Bir xil to‘lov callbacki qayta keladi	Pul va bron amali takrorlanmaydi
+AC-05	Bron yaratish javobi yo‘qolib, mijoz qayta bosadi	Bitta bron yaratiladi
+AC-06	Hold muddati tugaydi	Joy xavfsiz bo‘shaydi
+AC-07	To‘lov hold tugagandan keyin keladi	Boshqa bron bilan to‘qnashadigan tasdiq yaratilmaydi
+AC-08	Ega begona obyekt ID sini yuboradi	Kirish taqiqlanadi
+AC-09	Obyekt arxivlanadi	Oldingi bron tafsilotlari saqlanadi
+AC-10	Bot xabar yubora olmaydi	Bron bekor bo‘lmaydi; yetkazish xatosi qayd etiladi
+AC-11	Frontend summani almashtiradi	Server o‘z hisobidan foydalanadi
+AC-12	Foydalanuvchi sanasiz qidiradi	Bo‘shlikka yolg‘on kafolat ko‘rsatilmaydi
+AC-13	Soxta Telegram initData yuboriladi	Sessiya berilmaydi
+AC-14	Refund so‘rovi ikki marta yuboriladi	Ortiqcha qaytarish sodir bo‘lmaydi
+AC-15	Backupdan tiklash bajariladi	Bron va moliyaviy yozuvlar muvofiqligi tekshiriladi
+20. Ishlab chiqish tartibi
+Bosqich A — mahsulot shartnomasi
+Natijalar:
+
+Terminlar lug‘ati.
+
+Rollar va ruxsatlar matritsasi.
+
+Sayyoh, ega va admin user flowlari.
+
+Ekranlar ro‘yxati.
+
+Status o‘tish jadvallari.
+
+Birinchi reliz chegarasi.
+
+Yechilmagan biznes qarorlari reyestri.
+
+Bosqich B — texnik shartnoma
+Natijalar:
+
+ERD.
+
+Modul chegaralari.
+
+API OpenAPI hujjati.
+
+Bron va to‘lov sequence diagramlari.
+
+Xavfsizlik modeli.
+
+Test strategiyasi.
+
+Deploy va tiklash rejasi.
+
+Bosqich C — ishlaydigan vertikal kesim
+Birinchi to‘liq ishlaydigan zanjir:
+
+text
+Ega obyekt qo‘shadi
+→ Admin tasdiqlaydi
+→ Sayyoh qidiruvdan topadi
+→ Bron so‘rovi yuboradi
+→ Ega tasdiqlaydi
+→ Sandbox to‘lovi
+→ Bron tasdiqlanadi
+→ Admin butun tarixni ko‘radi
+Shu zanjir ishlamasdan turib o‘nlab qo‘shimcha bo‘limlarni qurmaymiz.
+
+Bosqich D — pilot
+Cheklangan egalar va haqiqiy foydalanuvchilar bilan:
+
+Ega javob tezligi.
+
+Kalendar aniqligi.
+
+Qidiruvdan so‘rovga o‘tish.
+
+So‘rovdan tasdiqlangan bronga o‘tish.
+
+To‘lov xatolari.
+
+Bekor qilish sabablari.
+
+Supportga tushadigan ish hajmi o‘lchanadi.
+
+21. Hozircha ochiq qoladigan biznes qarorlari
+Quyidagilarni taxmin qilib kodga qotirib qo‘ymaslik kerak:
+
+Qaror	Boshlang‘ich taklif
+Bron usuli	Ega tasdig‘idan keyin to‘lov
+Platforma daromadi	Model tasdiqlanguncha konfiguratsiya qilinadigan komissiya
+To‘lov miqdori	Oldindan to‘lov yoki to‘liq to‘lov — provayder va operatsiyaga qarab
+Javob muddati	Sozlanadigan, pilotda sinovdan o‘tadigan
+Bekor qilish	Versiyalanadigan cheklangan siyosatlar
+Ega bilan aloqa	Bron holatiga qarab ochiladigan
+Tekshiruv	Telefon, vakolat, obyekt va media bo‘yicha alohida darajalar
+Bir zumda bron	Faqat kalendar intizomi tekshirilgan obyektlarga keyinroq
+Tillari	Avval o‘zbekcha; tarjimaga tayyor kontent modeli
+Xizmatlar	Avval turar joy, keyin transfer va gid
+Bu qarorlar tasdiqlanmaguncha hujjatni “yakuniy, kodlashga to‘liq tayyor TZ” deb atash noto‘g‘ri bo‘ladi. Ammo yuqoridagi tuzilma uning mahsulot va arxitektura asosini beradi.
+Boshlang‘ich yo‘nalishlar:
+text
+/api/v1/auth/...
+/api/v1/me/...
+/api/v1/properties/...
+/api/v1/search/...
+/api/v1/quotes/...
+/api/v1/bookings/...
+/api/v1/payments/...
+/api/v1/reviews/...
+/api/v1/support/...
+
+/api/v1/owner/properties/...
+/api/v1/owner/calendar/...
+/api/v1/owner/bookings/...
+/api/v1/owner/settlements/...
+
+/api/v1/admin/...
+/api/v1/webhooks/...
+Misol jarayon:
+text
+POST /quotes
+→ server narxni hisoblaydi va amal qilish muddatini beradi
+
+POST /bookings
+→ quote va bandlik qayta tekshiriladi
+→ bron so‘rovi yaratiladi
+
+POST /owner/bookings/{id}/accept
+→ ruxsat va status tekshiriladi
+→ to‘lov bosqichiga o‘tadi
+
+POST /bookings/{id}/payment-attempts
+→ to‘lov urinishi yaratiladi
+Talablar:
+Frontend yuborgan narxga ishonilmaydi.
+Bron va to‘lov yaratishda idempotency kaliti.
+Bir xil formatdagi xato javoblari.
+Pagination.
+Xato kuzatuvi uchun request ID.
+API versiyalash.
+Har endpoint uchun ruxsat, validatsiya va xato holatlari hujjatlashtiriladi.
+15. Telegram Mini App logikasi
+Mini App alohida bron backendiga ega bo‘lmaydi. U web bilan bir xil servislarni ishlatadi.
+Kirish:
+text
+Telegram initData
+→ Backend tekshiruvi
+→ Telegram hisobini topish yoki yaratish
+→ Platforma sessiyasi
+Telegram rasmiy hujjatiga ko‘ra initData serverda tekshirilishi kerak; tekshirilmagan ma’lumotga tayanib foydalanuvchini autentifikatsiya qilish mumkin emas.core.telegram
+Qo‘shimcha talablar:
+Imzo va auth_date tekshiruvi.
+Bot tokeni frontendga chiqmaydi.
+Telegram foydalanuvchi nomi telefon o‘rnida qabul qilinmaydi.
+Telefon kerak bo‘lsa, alohida olinadi va tekshiriladi.
+Deep link obyekt yoki bronga olib boradi.
+Bot orqali bron voqealari haqida xabar yuboriladi.
+Bot bloklangan bo‘lsa, muvaffaqiyatsiz yuborish qayd etiladi.
+Muhim xabarlar faqat Telegramga bog‘lanib qolmaydi.
+16. AI agentlarining ikki xil vazifasi
+Sening “AI agentlarim bilan qilaman” deganingni ikkiga ajratish kerak.
+16.1. Loyihani ishlab chiqadigan agentlar
+Vazifa taqsimoti:
+Agent
+Natija
+Product agent
+User story, ekran va biznes qoidalar
+Architecture agent
+Modul chegarasi, ERD, API shartnomasi
+Backend agent
+Servislar, migratsiyalar, API
+Frontend agent
+Ekranlar va holatlar
+QA agent
+Testlar va chekka holatlar
+Security reviewer
+Ruxsat va ma’lumot xavfsizligi tekshiruvi
+Agentlar umumiy yozma shartnomalar asosida ishlaydi:
+Terminlar lug‘ati.
+Ma’lumot modeli.
+Status o‘tish jadvallari.
+OpenAPI.
+Arxitektura qarorlari.
+Test mezonlari.
+Bir agent o‘zicha CONFIRMED, boshqasi APPROVED deb bir xil holatni ikkita nom bilan yaratmasligi kerak.
+16.2. Mahsulot ichidagi AI
+Keyinchalik:
+Tabiiy tilda qidiruv.
+Obyekt tavsifi uchun qoralama.
+Murojaatlarni guruhlash.
+Savollarga tasdiqlangan ma’lumot bilan javob.
+Shubhali e’lonlarni tekshiruvga belgilash.
+Chegaralar:
+AI narx va bo‘sh sanani o‘ylab topmaydi.
+Bronni bekor qilish va pul qaytarish mustaqil bajarilmaydi.
+Ruxsatlar oddiy foydalanuvchiniki kabi tekshiriladi.
+AI javobidan oldin narx va bandlik tegishli servisdan olinadi.
+Muhim yozish amallari aniq foydalanuvchi tasdig‘ini talab qiladi.
+AI asosiy bron tizimining o‘rnini bosmaydi.
+17. Xavfsizlik va ekspluatatsiya talablari
+Minimal talablar:
+Admin va moliya rollari uchun MFA.
+OTP urinishlari limiti.
+Sessiyani bekor qilish.
+Har obyektga tegishli ruxsat tekshiruvi.
+Hujjatlar uchun yopiq fayl saqlash.
+Vaqti cheklangan fayl havolalari.
+Yuklanadigan fayl turi va hajmi nazorati.
+Maxfiy ma’lumotlarni logga yozmaslik.
+API va admin uchun tezlik cheklovlari.
+Backup va undan tiklash testi.
+Test va production muhitlarini ajratish.
+Maxfiy kalitlarni repozitoriyga yozmaslik.
+Texnik monitoringdan tashqari biznes monitoringi ham kerak:
+To‘lov muvaffaqiyatli, lekin bron tasdiqlanmagan.
+Hold muddati o‘tgan, lekin joy bo‘shamagan.
+Ega javob berish muddatini o‘tkazgan.
+Refund uzoq vaqt yakunlanmagan.
+Bildirishnomalar ketmayapti.
+Bir obyekt bo‘yicha takroriy shikoyatlar.
+18. Ekranlarning majburiy holatlari
+TZda faqat “sahifa bor” deb yozish yetmaydi. Har ekran quyidagilarga ega bo‘ladi:
+Holat
+Misol
+Yuklanmoqda
+Qidiruv natijalari kelmoqda
+Bo‘sh
+Mos variant topilmadi
+Xato
+Server javob bermadi
+Ruxsat yo‘q
+Begona bron ochildi
+Muddati tugagan
+To‘lov uchun vaqt tugadi
+Ma’lumot eskirgan
+Narx yoki bandlik o‘zgardi
+Qisman muvaffaqiyat
+Bron yaratildi, xabar yuborilmadi
+Internet yo‘q
+Ko‘rilgan ma’lumot eskirgan bo‘lishi mumkin
+Bron, to‘lov va bandlik kabi amallar offline holatda muvaffaqiyatli bajarilgandek ko‘rsatilmaydi.
+19. Qabul qilish mezonlari
+Quyidagilar test bilan tasdiqlanmaguncha asosiy modul tayyor hisoblanmaydi.
+ID
+Ssenariy
+Kutiladigan natija
+AC-01
+Ikki kishi bir birlikni bir sanaga bron qiladi
+Ko‘pi bilan bittasi faol bandlik oladi
+AC-02
+Ega tashqi bronni mavjud bron ustiga qo‘shadi
+Amal rad etiladi, tushunarli sabab chiqadi
+AC-03
+Ega narxni o‘zgartiradi
+Oldingi bron narxi o‘zgarmaydi
+AC-04
+Bir xil to‘lov callbacki qayta keladi
+Pul va bron amali takrorlanmaydi
+AC-05
+Bron yaratish javobi yo‘qolib, mijoz qayta bosadi
+Bitta bron yaratiladi
+AC-06
+Hold muddati tugaydi
+Joy xavfsiz bo‘shaydi
+AC-07
+To‘lov hold tugagandan keyin keladi
+Boshqa bron bilan to‘qnashadigan tasdiq yaratilmaydi
+AC-08
+Ega begona obyekt ID sini yuboradi
+Kirish taqiqlanadi
+AC-09
+Obyekt arxivlanadi
+Oldingi bron tafsilotlari saqlanadi
+AC-10
+Bot xabar yubora olmaydi
+Bron bekor bo‘lmaydi; yetkazish xatosi qayd etiladi
+AC-11
+Frontend summani almashtiradi
+Server o‘z hisobidan foydalanadi
+AC-12
+Foydalanuvchi sanasiz qidiradi
+Bo‘shlikka yolg‘on kafolat ko‘rsatilmaydi
+AC-13
+Soxta Telegram initData yuboriladi
+Sessiya berilmaydi
+AC-14
+Refund so‘rovi ikki marta yuboriladi
+Ortiqcha qaytarish sodir bo‘lmaydi
+AC-15
+Backupdan tiklash bajariladi
+Bron va moliyaviy yozuvlar muvofiqligi tekshiriladi
+20. Ishlab chiqish tartibi
+Bosqich A — mahsulot shartnomasi
+Natijalar:
+Terminlar lug‘ati.
+Rollar va ruxsatlar matritsasi.
+Sayyoh, ega va admin user flowlari.
+Ekranlar ro‘yxati.
+Status o‘tish jadvallari.
+Birinchi reliz chegarasi.
+Yechilmagan biznes qarorlari reyestri.
+Bosqich B — texnik shartnoma
+Natijalar:
+ERD.
+Modul chegaralari.
+API OpenAPI hujjati.
+Bron va to‘lov sequence diagramlari.
+Xavfsizlik modeli.
+Test strategiyasi.
+Deploy va tiklash rejasi.
+Bosqich C — ishlaydigan vertikal kesim
+Birinchi to‘liq ishlaydigan zanjir:
+text
+Ega obyekt qo‘shadi
+→ Admin tasdiqlaydi
+→ Sayyoh qidiruvdan topadi
+→ Bron so‘rovi yuboradi
+→ Ega tasdiqlaydi
+→ Sandbox to‘lovi
+→ Bron tasdiqlanadi
+→ Admin butun tarixni ko‘radi
+Shu zanjir ishlamasdan turib o‘nlab qo‘shimcha bo‘limlarni qurmaymiz.
+Bosqich D — pilot
+Cheklangan egalar va haqiqiy foydalanuvchilar bilan:
+Ega javob tezligi.
+Kalendar aniqligi.
+Qidiruvdan so‘rovga o‘tish.
+So‘rovdan tasdiqlangan bronga o‘tish.
+To‘lov xatolari.
+Bekor qilish sabablari.
+Supportga tushadigan ish hajmi o‘lchanadi.
+21. Hozircha ochiq qoladigan biznes qarorlari
+Quyidagilarni taxmin qilib kodga qotirib qo‘ymaslik kerak:
+Qaror
+Boshlang‘ich taklif
+Bron usuli
+Ega tasdig‘idan keyin to‘lov
+Platforma daromadi
+Model tasdiqlanguncha konfiguratsiya qilinadigan komissiya
+To‘lov miqdori
+Oldindan to‘lov yoki to‘liq to‘lov — provayder va operatsiyaga qarab
+Javob muddati
+Sozlanadigan, pilotda sinovdan o‘tadigan
+Bekor qilish
+Versiyalanadigan cheklangan siyosatlar
+Ega bilan aloqa
+Bron holatiga qarab ochiladigan
+Tekshiruv
+Telefon, vakolat, obyekt va media bo‘yicha alohida darajalar
+Bir zumda bron
+Faqat kalendar intizomi tekshirilgan obyektlarga keyinroq
+Tillari
+Avval o‘zbekcha; tarjimaga tayyor kontent modeli
+Xizmatlar
+Avval turar joy, keyin transfer va gid
+Bu qarorlar tasdiqlanmaguncha hujjatni “yakuniy, kodlashga to‘liq tayyor TZ” deb atash noto‘g‘ri bo‘ladi. Ammo yuqoridagi tuzilma uning mahsulot va arxitektura asosini beradi.
