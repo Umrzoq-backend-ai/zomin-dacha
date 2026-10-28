@@ -328,41 +328,57 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
         properties_data = [
             (
                 prop1_id, owner1_id,
-                "Duoba Soy Bo'yi Premium Villa & Basseyn",
-                "duoba-soy-boyi-premium-villa",
-                "Zomin Duoba soyi yoqasida joylashgan zamonaviy 2 qavatli dacha. Isitiladigan qishki va yozgi basseyn, rus hammomi, bilyard va Zomin archazor manzarasi. Spark va Cobalt mashinalari to'g'ridan-to'g'ri darvozagacha asfalt yo'l orqali yetib keladi. Generator va toza buloq suvi mavjud.",
+                "Mountain Chalet Zomin",
+                "mountain-chalet-zomin",
+                "Tog‘ manzarali, yog‘och uy. Oila va do‘stlar uchun ideal. Zomin tog'larining baland archazorlarida, toza havo va tinch tabiat qo'ynida joylashgan zamonaviy yog'och kottej.",
+                "COTTAGE", "ZOMIN", "SUFFA",
+                "Suffa platosi, Dor yo'li yaqinida, Zomin",
+                39.8715, 68.4520, "EXACT",
+                "ASPHALT_SEDAN", 1, "SPRING_WATER", "WOOD_STOVE", "4G_EXCELLENT",
+                "VERIFIED", 1,
+                json.dumps([
+                    "/static/assets/chalet.jpg",
+                    "https://images.unsplash.com/photo-1542718610-a1d656d1884c?auto=format&fit=crop&w=1200&q=80"
+                ]),
+                json.dumps(["Tog' manzarasi", "Kamin", "Balkon/Ayvon", "Wi-Fi", "Oila uchun shinam", "Mangal"]),
+                now_iso, now_iso
+            ),
+            (
+                prop2_id, owner2_id,
+                "Zomin Villa",
+                "zomin-villa",
+                "Shaxsiy hovuz, zamonaviy qulayliklar va betakror manzara. Duoba soyi bo'yida joylashgan hashamatli 2 qavatli villa. Qishki va yozgi isitiladigan basseyn, fin saunasi, keng shiypon.",
                 "VILLA", "ZOMIN", "DUOBA",
                 "Duoba MFY, Soy bo'yi ko'chasi 14-uy, Zomin",
                 39.9612, 68.4231, "EXACT",
                 "ASPHALT_SEDAN", 1, "SPRING_WATER", "GAS_CENTRAL", "4G_EXCELLENT",
                 "VERIFIED", 1,
                 json.dumps([
-                    "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
-                    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
-                    "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1200&q=80"
+                    "/static/assets/villa.jpg",
+                    "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80"
                 ]),
-                json.dumps(["Isitiladigan basseyn", "Sauna/Fin hammomi", "Bilyard xonasi", "Zomin archa tandiri o'chog'i", "Wi-Fi 4G", "Bolalar maydonchasi", "Soy bo'yi tapchani", "Smart TV"]),
+                json.dumps(["Shaxsiy hovuz (Basseyn)", "Sauna", "Bilyard", "Smart TV", "Tandir & Mangal", "Wi-Fi 4G"]),
                 now_iso, now_iso
             ),
             (
-                prop2_id, owner2_id,
-                "Suffa Panoramik Tog' Kotteji (2400m)",
-                "suffa-panoramik-tog-kotteji",
-                "Suffa platosida, Bartholet Shveysariya osma dor yo'li va 305 metrli osma ko'prik yaqinida joylashgan eko-kottej. 2400 metr balandlikdagi archa xushbo'y havosi, qishda qorli tog' manzarasi, kamin va yog'ochli interyer.",
-                "COTTAGE", "ZOMIN", "SUFFA",
-                "Suffa platosi, Dor yo'li yuqori stansiyasi yaqinida, Zomin",
-                39.8715, 68.4520, "EXACT",
-                "HIGH_CLEARANCE", 1, "SPRING_WATER", "WOOD_STOVE", "3G_MEDIUM",
+                prop3_id, owner1_id,
+                "Forest Lodge",
+                "forest-lodge",
+                "Tabiat bag‘rida, sokin va qulay dam olish maskani. Qarag'ayzor va archazorlar o'rtasida joylashgan yog'och eko-lodge. Tinchlik, toza buloq suvi va oilaviy osoyishtalik.",
+                "GUEST_HOUSE", "ZOMIN", "SANATORIY",
+                "Sanatoriy ko'chasi 8-uy, Zomin",
+                39.9450, 68.4110, "APPROXIMATE",
+                "ASPHALT_SEDAN", 1, "SPRING_WATER", "GAS_CENTRAL", "4G_EXCELLENT",
                 "VERIFIED", 1,
                 json.dumps([
-                    "https://images.unsplash.com/photo-1542718610-a1d656d1884c?auto=format&fit=crop&w=1200&q=80",
-                    "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1200&q=80"
+                    "/static/assets/lodge.jpg",
+                    "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80"
                 ]),
-                json.dumps(["Tog' panoramasi", "O'tinli kamin", "Bartholet dor yo'li yaqinida", "Tandir & Mangal", "Yulduzlar kuzatish ayvoni"]),
+                json.dumps(["Qarag'ayzor", "Oshxona barcha jihozlar bilan", "Wi-Fi", "Buloq suvi", "Tinch hordiq"]),
                 now_iso, now_iso
             ),
             (
-                prop3_id, owner2_id,
+                prop4_id, owner2_id,
                 "O'riklisoy Buloq Bo'yi Choyxonasi & Tapchanlari",
                 "oriklisoy-buloq-boyi-tapchanlar",
                 "O'riklisoyning salqin tog' suvlari ustida qurilgan milliy tapchanlar majmuasi. Kunduzgi hordiq, oilaviy dam olish, archa tandiri va muzdek buloq tarvuzi uchun ideal go'sha. Spark va yengil mashinalar bemalol boradi.",
@@ -372,26 +388,10 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
                 "ASPHALT_SEDAN", 0, "SPRING_WATER", "AC", "4G_EXCELLENT",
                 "VERIFIED", 1,
                 json.dumps([
-                    "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80",
-                    "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80"
+                    "/static/assets/hiking.jpg",
+                    "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80"
                 ]),
                 json.dumps(["Suv ustidagi tapchan", "Zomin archa tandiri (buyurtmaga)", "Samovar choy", "Buloq suvi", "Soyda suzish"]),
-                now_iso, now_iso
-            ),
-            (
-                prop4_id, owner1_id,
-                "Zomin Sanatoriy Yonidagi Shifobaxsh Mehmon Uyi",
-                "zomin-sanatoriy-mehmon-uyi",
-                "Zomin xalqaro sanatoriysi darvozasidan 400 metr masofada, archazor va qarag'ayzorlar o'rtasida joylashgan tinch va shinam kottej. Keksalar va oilalar uchun tog' havosi bilan davolanishga eng qulay sharoit.",
-                "GUEST_HOUSE", "ZOMIN", "SANATORIY",
-                "Sanatoriy ko'chasi 8-uy, Zomin",
-                39.9450, 68.4110, "APPROXIMATE",
-                "ASPHALT_SEDAN", 1, "TAP_WATER", "GAS_CENTRAL", "4G_EXCELLENT",
-                "VERIFIED", 1,
-                json.dumps([
-                    "https://images.unsplash.com/photo-1587061949409-02df41d5e562?auto=format&fit=crop&w=1200&q=80"
-                ]),
-                json.dumps(["Sanatoriyga piyoda yo'l", "Oila uchun shinam", "Oshxona barcha anjomlar bilan", "Wi-Fi", "Gaz ta'minoti"]),
                 now_iso, now_iso
             )
         ]
@@ -419,11 +419,11 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
         unit5_id = str(uuid.uuid4()) # Sanatoriy Guest House
         
         rental_units_data = [
-            (unit1_id, prop1_id, "Butun Villa (Basseynli Dacha)", "OVERNIGHT_STAY", 8, 14, 1500000.0, 2200000.0, 1, now_iso),
-            (unit2_id, prop2_id, "Suffa Eko-Chalet", "OVERNIGHT_STAY", 6, 10, 1800000.0, 2600000.0, 1, now_iso),
-            (unit3_id, prop3_id, "Soy Ustidagi 1-Katta Tapchan", "DAY_USE_TAPCHAN", 8, 12, 300000.0, 450000.0, 1, now_iso),
-            (unit4_id, prop3_id, "Sharshara Yonidagi 2-Tapchan", "DAY_USE_TAPCHAN", 6, 10, 250000.0, 350000.0, 1, now_iso),
-            (unit5_id, prop4_id, "Shifobaxsh Oilaviy Kottej", "OVERNIGHT_STAY", 6, 8, 1000000.0, 1400000.0, 1, now_iso),
+            (unit1_id, prop1_id, "Butun Tog' Chaleti", "OVERNIGHT_STAY", 6, 8, 1200000.0, 1600000.0, 1, now_iso),
+            (unit2_id, prop2_id, "Hashamatli Basseynli Villa", "OVERNIGHT_STAY", 8, 14, 2500000.0, 3200000.0, 1, now_iso),
+            (unit3_id, prop3_id, "Shinam Yog'och Lodge", "OVERNIGHT_STAY", 4, 6, 900000.0, 1200000.0, 1, now_iso),
+            (unit4_id, prop4_id, "Soy Ustidagi 1-Katta Tapchan", "DAY_USE_TAPCHAN", 8, 12, 150000.0, 250000.0, 1, now_iso),
+            (unit5_id, prop4_id, "Sharshara Yonidagi 2-Tapchan", "DAY_USE_TAPCHAN", 6, 10, 150000.0, 200000.0, 1, now_iso),
         ]
         
         cursor.executemany("""
@@ -435,13 +435,13 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
         
         # Day Use Slots for Tapchans
         slots_data = [
-            (str(uuid.uuid4()), unit3_id, "FULL_DAY", "10:00:00", "22:00:00", 300000.0, 450000.0),
-            (str(uuid.uuid4()), unit3_id, "LUNCH", "10:00:00", "16:00:00", 180000.0, 250000.0),
-            (str(uuid.uuid4()), unit3_id, "DINNER", "17:00:00", "23:00:00", 200000.0, 280000.0),
+            (str(uuid.uuid4()), unit4_id, "FULL_DAY", "10:00:00", "22:00:00", 300000.0, 450000.0),
+            (str(uuid.uuid4()), unit4_id, "LUNCH", "10:00:00", "16:00:00", 180000.0, 250000.0),
+            (str(uuid.uuid4()), unit4_id, "DINNER", "17:00:00", "23:00:00", 200000.0, 280000.0),
             
-            (str(uuid.uuid4()), unit4_id, "FULL_DAY", "10:00:00", "22:00:00", 250000.0, 350000.0),
-            (str(uuid.uuid4()), unit4_id, "LUNCH", "10:00:00", "16:00:00", 150000.0, 200000.0),
-            (str(uuid.uuid4()), unit4_id, "DINNER", "17:00:00", "23:00:00", 160000.0, 220000.0),
+            (str(uuid.uuid4()), unit5_id, "FULL_DAY", "10:00:00", "22:00:00", 250000.0, 350000.0),
+            (str(uuid.uuid4()), unit5_id, "LUNCH", "10:00:00", "16:00:00", 150000.0, 200000.0),
+            (str(uuid.uuid4()), unit5_id, "DINNER", "17:00:00", "23:00:00", 160000.0, 220000.0),
         ]
         
         cursor.executemany("""
