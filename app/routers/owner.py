@@ -1,4 +1,5 @@
 import uuid
+import sqlite3
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, HTTPException, Query
@@ -6,7 +7,11 @@ from pydantic import BaseModel
 
 from app.database import get_db
 from app.models import BookingDetailResponse
-from app.services.booking_service import owner_transition_booking, lazy_invalidate_expired_holds, check_overlapping_allocation
+from app.services.booking_service import (
+    owner_transition_booking, lazy_invalidate_expired_holds,
+    check_overlapping_allocation, normalize_to_utc_iso
+)
+from app.services.ivr_service import check_and_trigger_ivr_reminders, get_ivr_logs
 
 router = APIRouter(prefix="/owner", tags=["Owner & Caretaker Operations"])
 
@@ -20,6 +25,11 @@ class ManualBlockRequest(BaseModel):
     start_time: str
     end_time: str
     notes: Optional[str] = None
+
+class UpdateUnitPricesRequest(BaseModel):
+    owner_id: str
+    base_price_weekday: float
+    base_price_weekend: float
 
 @router.get("/properties")
 def list_owner_properties(owner_id: str = Query(...)):
@@ -106,14 +116,77 @@ def manual_calendar_block(req: ManualBlockRequest):
             raise HTTPException(status_code=409, detail="Tanlangan sanada allaqachon faol bron mavjud")
 
         alloc_id = str(uuid.uuid4())
-        cursor.execute("""
-            INSERT INTO inventory_allocations (
-                id, rental_unit_id, booking_id, allocation_type, start_time, end_time,
-                status, expires_at, created_at
-            ) VALUES (?, ?, NULL, 'OWNER_MANUAL', ?, ?, 'ACTIVE', NULL, ?)
-        """, (alloc_id, req.rental_unit_id, req.start_time, req.end_time, now_iso))
+        start_utc = normalize_to_utc_iso(req.start_time)
+        end_utc = normalize_to_utc_iso(req.end_time)
+
+        try:
+            cursor.execute("""
+                INSERT INTO inventory_allocations (
+                    id, rental_unit_id, booking_id, allocation_type, start_time, end_time,
+                    status, expires_at, created_at
+                ) VALUES (?, ?, NULL, 'OWNER_MANUAL', ?, ?, 'ACTIVE', NULL, ?)
+            """, (alloc_id, req.rental_unit_id, start_utc, end_utc, now_iso))
+        except sqlite3.IntegrityError:
+            raise HTTPException(status_code=409, detail="Tanlangan sanada allaqachon faol bron mavjud")
 
         return {"status": "SUCCESS", "message": "Kalendar sanasi muvaffaqiyatli yopildi"}
+
+@router.put("/units/{unit_id}/prices")
+def update_unit_prices(unit_id: str, req: UpdateUnitPricesRequest):
+    """
+    Ega o'z birligi narxlarini o'zgartirishi (AC-03 & RBAC 6.2).
+    BOLA himoyasi: faqat dacha egasiga ruxsat beriladi (AC-07).
+    """
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT p.owner_id 
+            FROM rental_units u
+            JOIN properties p ON u.property_id = p.id
+            WHERE u.id = ?
+        """, (unit_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Birlik topilmadi")
+
+        if row["owner_id"] != req.owner_id:
+            raise HTTPException(status_code=403, detail="BOLA cheklovi: Siz ushbu dacha egasi emassiz")
+
+        if req.base_price_weekday <= 0 or req.base_price_weekend <= 0:
+            raise HTTPException(status_code=400, detail="Narxlar musbat son bo'lishi shart")
+
+        cursor.execute("""
+            UPDATE rental_units
+            SET base_price_weekday = ?, base_price_weekend = ?
+            WHERE id = ?
+        """, (req.base_price_weekday, req.base_price_weekend, unit_id))
+
+        return {
+            "status": "SUCCESS",
+            "unit_id": unit_id,
+            "base_price_weekday": req.base_price_weekday,
+            "base_price_weekend": req.base_price_weekend,
+            "message": "Narxlar muvaffaqiyatli yangilandi"
+        }
+
+@router.post("/ivr-check")
+def trigger_ivr_check(delay_minutes: int = Query(10, description="Kutish vaqti (daqiqada)")):
+    """
+    AC-10: 10 daqiqa davomida javobsiz qolgan bronlar uchun IVR ovozli robot qo'ng'irog'ini yuborish.
+    """
+    dispatched = check_and_trigger_ivr_reminders(delay_minutes=delay_minutes)
+    return {
+        "status": "SUCCESS",
+        "dispatched_count": len(dispatched),
+        "dispatched_calls": dispatched
+    }
+
+@router.get("/ivr-logs")
+def view_ivr_logs():
+    """
+    AC-10: IVR qo'ng'iroqlari tarixi va loglari.
+    """
+    return get_ivr_logs()
 
 @router.get("/caretaker/arrivals", response_model=List[BookingDetailResponse])
 def get_caretaker_arrivals(caretaker_id: str = Query(...)):

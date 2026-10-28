@@ -203,3 +203,125 @@ def test_payme_json_rpc_lifecycle(client, test_db_path):
     # Check booking is CANCELLED
     detail_cancelled = client.get(f"/api/v1/bookings/{b['id']}").json()
     assert detail_cancelled["booking_status"] == "CANCELLED"
+
+def test_payme_auth_and_status_checks(client, test_db_path):
+    """
+    Payme auth header verification & CreateTransaction rejection on cancelled booking.
+    """
+    import base64
+    from app.config import settings
+
+    props = client.get("/api/v1/properties").json()
+    unit_id = props[0]["rental_units"][0]["id"]
+
+    q = client.post("/api/v1/quotes/calculate", json={
+        "rental_unit_id": unit_id,
+        "checkin_time": "2026-11-05T14:00:00+05:00",
+        "checkout_time": "2026-11-06T12:00:00+05:00",
+        "guests_count": 2
+    }).json()
+
+    b = client.post("/api/v1/bookings/create", json={
+        "quote_token": q["quote_token"],
+        "guest_name": "Test Payme Auth",
+        "guest_phone": "+998901239999"
+    }).json()
+
+    fee_tiyin = int(b["platform_fee_amount"] * 100)
+
+    # 1. Invalid Basic Auth header -> -32504
+    bad_auth = "Basic " + base64.b64encode(b"Paycom:wrong_password").decode("utf-8")
+    res_bad = client.post("/api/v1/payments/payme/webhook", headers={"Authorization": bad_auth}, json={
+        "method": "CheckPerformTransaction",
+        "params": {
+            "amount": fee_tiyin,
+            "account": { "order_id": b["booking_reference"] }
+        },
+        "id": 201
+    }).json()
+    assert res_bad["error"]["code"] == -32504
+
+    # 2. Valid Basic Auth header -> allow: True
+    good_auth = "Basic " + base64.b64encode(f"Paycom:{settings.PAYME_SECRET_KEY}".encode("utf-8")).decode("utf-8")
+    res_good = client.post("/api/v1/payments/payme/webhook", headers={"Authorization": good_auth}, json={
+        "method": "CheckPerformTransaction",
+        "params": {
+            "amount": fee_tiyin,
+            "account": { "order_id": b["booking_reference"] }
+        },
+        "id": 202
+    }).json()
+    assert res_good["result"]["allow"] is True
+
+    # 3. Reject booking, then try CreateTransaction -> -31008
+    owner_id = props[0]["owner_id"]
+    client.post(f"/api/v1/owner/bookings/{b['id']}/transition?owner_id={owner_id}", json={"action": "REJECT"})
+
+    res_rejected = client.post("/api/v1/payments/payme/webhook", headers={"Authorization": good_auth}, json={
+        "method": "CreateTransaction",
+        "params": {
+            "id": f"payme_tr_{uuid.uuid4().hex[:8]}",
+            "time": 1700000000000,
+            "amount": fee_tiyin,
+            "account": { "order_id": b["booking_reference"] }
+        },
+        "id": 203
+    }).json()
+    assert res_rejected["error"]["code"] == -31008
+
+def test_click_sign_string_verification(client, test_db_path):
+    """
+    Click MD5 signature verification: invalid signature yields error -1.
+    """
+    import hashlib
+    from app.config import settings
+
+    props = client.get("/api/v1/properties").json()
+    unit_id = props[0]["rental_units"][0]["id"]
+
+    q = client.post("/api/v1/quotes/calculate", json={
+        "rental_unit_id": unit_id,
+        "checkin_time": "2026-11-08T14:00:00+05:00",
+        "checkout_time": "2026-11-09T12:00:00+05:00",
+        "guests_count": 2
+    }).json()
+
+    b = client.post("/api/v1/bookings/create", json={
+        "quote_token": q["quote_token"],
+        "guest_name": "Click Sign Test",
+        "guest_phone": "+998901118822"
+    }).json()
+
+    fee = b["platform_fee_amount"]
+    click_trans = f"click_{uuid.uuid4().hex[:8]}"
+
+    # Invalid sign_string
+    bad_res = client.post("/api/v1/payments/click/webhook", json={
+        "click_trans_id": click_trans,
+        "service_id": "19827",
+        "merchant_trans_id": b["booking_reference"],
+        "amount": fee,
+        "action": 0,
+        "sign_time": "2026-11-08 12:00:00",
+        "sign_string": "invalid_md5_hash_12345",
+        "error": 0
+    }).json()
+    assert bad_res["error"] == -1
+    assert "SIGN CHECK FAILED" in bad_res["error_note"]
+
+    # Valid sign_string
+    sign_time = "2026-11-08 12:00:00"
+    raw = f"{click_trans}19827{settings.CLICK_SECRET_KEY}{b['booking_reference']}{fee}0{sign_time}"
+    valid_sign = hashlib.md5(raw.encode("utf-8")).hexdigest()
+
+    good_res = client.post("/api/v1/payments/click/webhook", json={
+        "click_trans_id": click_trans,
+        "service_id": "19827",
+        "merchant_trans_id": b["booking_reference"],
+        "amount": fee,
+        "action": 0,
+        "sign_time": sign_time,
+        "sign_string": valid_sign,
+        "error": 0
+    }).json()
+    assert good_res["error"] == 0

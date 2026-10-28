@@ -9,19 +9,37 @@
 </head>
 <body>
 
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
   <!-- Navigation Header -->
   <header>
     <div class="nav-container">
       <div class="logo-area" onclick="switchPortal('guest')">
         <span class="logo-icon">🌲</span>
-        <span class="logo-text">ZominStay</span>
-        <span class="logo-badge">ZOMIN</span>
+        <div style="display:flex; flex-direction:column;">
+          <span class="logo-text">ZominStay</span>
+          <span class="logo-sub">Zomin Tog' Dam Olish Ekotizimi</span>
+        </div>
       </div>
 
-      <div class="role-switcher">
-        <button id="btn-portal-guest" class="role-btn active" onclick="switchPortal('guest')">🏕️ Sayyoh</button>
-        <button id="btn-portal-owner" class="role-btn" onclick="switchPortal('owner')">🏡 Ega</button>
-        <button id="btn-portal-caretaker" class="role-btn" onclick="switchPortal('caretaker')">🔑 Bog'bon</button>
+      <div class="nav-center">
+        <div class="role-switcher">
+          <button id="btn-portal-guest" class="role-btn active" onclick="switchPortal('guest')">🏕️ Sayyoh</button>
+          <button id="btn-portal-owner" class="role-btn" onclick="switchPortal('owner')">🏡 Dacha Egasi</button>
+          <button id="btn-portal-caretaker" class="role-btn" onclick="switchPortal('caretaker')">🔑 Bog'bon</button>
+        </div>
+      </div>
+
+      <!-- Quick Demo Profile Switcher -->
+      <div class="user-profile-badge">
+        <span style="font-size:12px; color:var(--text-muted);">Faol profil:</span>
+        <select id="user-profile-select" onchange="switchUserProfile(this.value)">
+          <option value="guest">🏕️ Jasur M. (Sayyoh)</option>
+          <option value="owner1">🏡 Alisher Z. (Duoba Dacha Egasi)</option>
+          <option value="owner2">🏡 Muzaffar R. (Suffa & O'riklisoy Egasi)</option>
+          <option value="caretaker">🔑 Rustam Tog'a (Duoba Bog'boni)</option>
+        </select>
       </div>
     </div>
   </header>
@@ -31,7 +49,7 @@
     <!-- Hero Banner -->
     <div class="hero">
       <h1>Zomin Tog'larida Qaynoq Dam Oling</h1>
-      <p>Duoba dachalaridan tortib Suffa platosidagi kottejlar va O'riklisoy tapchanlarigacha. Double-bookingdan 100% himoyalangan kafolatlangan bron.</p>
+      <p>Duoba dachalaridan tortib Suffa platosidagi kottejlar va O'riklisoy choyxona tapchanlarigacha. Double-bookingdan 100% himoyalangan, 10% xizmat haqi bilan kafolatlangan bron.</p>
     </div>
 
     <!-- Search Section -->
@@ -101,7 +119,6 @@
     <!-- Properties Grid -->
     <main class="main-content">
       <div id="properties-grid" class="grid-properties">
-        <!-- Rendered dynamically -->
         <div style="text-align:center; padding:40px; color:#64748b;">Dachalar yuklanmoqda...</div>
       </div>
     </main>
@@ -109,12 +126,35 @@
 
   <!-- OWNER PORTAL -->
   <div id="portal-owner" class="main-content hidden" style="margin-top:24px;">
-    <div style="background:white; padding:20px; border-radius:var(--radius); border:1px solid var(--border); margin-bottom:24px;">
-      <h2 style="color:var(--primary); margin-bottom:4px;">🏡 Dacha Egasi Kabineti</h2>
-      <p style="color:var(--text-muted); font-size:14px;">Yangi kelgan bron so'rovlarini ko'rish, inline tasdiqlash yoki rad etish va kalendarni boshqarish.</p>
+    <div class="portal-header-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h2 style="color:var(--primary); margin-bottom:4px;">🏡 Dacha Egasi Kabineti</h2>
+          <p id="owner-cabinet-subtitle" style="color:var(--text-muted); font-size:14px; margin:0;">
+            Yangi bron so'rovlarini inline tasdiqlash yoki rad etish, narxlarni belgilash va kalendarni boshqarish.
+          </p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="role-btn" style="background:#0284c7; color:white;" onclick="runIvrCheckNow()">
+            📞 IVR 10-daqiqalik tekshiruv
+          </button>
+          <button class="role-btn" style="background:var(--primary); color:white;" onclick="openCalendarBlockModal()">
+            📅 Kalendarni yopish
+          </button>
+        </div>
+      </div>
     </div>
 
-    <h3 style="margin-bottom:12px;">🔔 Kelgan Bron So'rovlari va Bandliklar</h3>
+    <!-- Owner Units & Price Editing -->
+    <div style="background:white; padding:20px; border-radius:var(--radius); border:1px solid var(--border); margin-bottom:24px;">
+      <h3 style="margin-bottom:12px;">🏷️ Mening Dachalarim va Narx Boshqaruvi (AC-03 & RBAC)</h3>
+      <div id="owner-units-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Owner Bookings List -->
+    <h3 style="margin-bottom:12px;">🔔 Kelgan Bron So'rovlari va Buyurtmalar</h3>
     <div id="owner-bookings-list">
       <!-- Dynamic owner bookings -->
     </div>
@@ -124,9 +164,9 @@
   <div id="portal-caretaker" class="main-content hidden" style="margin-top:24px;">
     <div style="background:#f0fdf4; padding:20px; border-radius:var(--radius); border:1px solid #bbf7d0; margin-bottom:24px;">
       <h2 style="color:#166534; margin-bottom:4px;">🔑 Bog'bon (Qarovchi) Portali</h2>
-      <p style="color:#15803d; font-size:14px;">
+      <p style="color:#15803d; font-size:14px; margin:0;">
         Sizga biriktirilgan dacha mehmonlarini kutib olish va kalit topshirish. 
-        <b>Eslatma (AC-14):</b> Moliyaviy summa va narxlar xavfsizlik maqsadida sizga ko'rinmaydi.
+        <br><b>Eslatma (AC-14):</b> Moliyaviy summa va narxlar xavfsizlik maqsadida sizga ko'rinmaydi.
       </p>
     </div>
 
@@ -151,7 +191,25 @@
         <!-- Unit selector -->
         <div class="search-field" style="margin-bottom:12px;">
           <label>Bron Birligi (Unit / Tapchan)</label>
-          <select id="m-unit-select" onchange="calculateLiveQuote()"></select>
+          <select id="m-unit-select" onchange="onUnitSelectionChanged()"></select>
+        </div>
+
+        <!-- Day Use Slot Selector (AC-02: Choyxona Tapchanlari uchun) -->
+        <div id="m-slot-container" class="hidden" style="background:#f0fdfa; border:1px solid #99f6e4; padding:12px; border-radius:10px; margin-bottom:12px;">
+          <label style="font-size:13px; font-weight:bold; color:#0f766e; display:block; margin-bottom:8px;">
+            🕒 Kunduzgi Tapchan Sloti (AC-02):
+          </label>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+            <button type="button" class="slot-pill active" id="slot-full" onclick="selectDaySlot('FULL_DAY', '10:00', '22:00')">
+              Kun bo'yi<br><small>10:00–22:00</small>
+            </button>
+            <button type="button" class="slot-pill" id="slot-lunch" onclick="selectDaySlot('LUNCH', '10:00', '16:00')">
+              Tushlik<br><small>10:00–16:00</small>
+            </button>
+            <button type="button" class="slot-pill" id="slot-dinner" onclick="selectDaySlot('DINNER', '17:00', '23:00')">
+              Kechki ovqat<br><small>17:00–23:00</small>
+            </button>
+          </div>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
@@ -165,12 +223,12 @@
           </div>
         </div>
 
-        <!-- Zomin Tandir Meat pre-order counter -->
+        <!-- Zomin Tandir Meat pre-order counter (AC-12) -->
         <div style="background:#fffbeb; border:1px solid #fef3c7; padding:12px; border-radius:10px; margin-bottom:16px;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <b style="color:#92400e; font-size:14px;">🍗 Zomin Archa Tandiri (Qo'shimcha)</b>
-              <div style="font-size:12px; color:#b45309;">150,000 so'm / kg — Tandir ustasi tomonidan yetkaziladi</div>
+              <b style="color:#92400e; font-size:14px;">🍗 Zomin Archa Tandiri (Qo'shimcha AC-12)</b>
+              <div style="font-size:12px; color:#b45309;">150,000 so'm / kg — Tandir ustasi tomonidan issiq yetkaziladi</div>
             </div>
             <div class="counter-box">
               <button class="btn-counter" onclick="changeTandirKg(-1)">-</button>
@@ -208,7 +266,7 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
           <div class="search-field">
             <label>Ismingiz</label>
-            <input type="text" id="m-guest-name" value="Sardor Aliyev">
+            <input type="text" id="m-guest-name" value="Jasur Mamadaliyev">
           </div>
           <div class="search-field">
             <label>Telefon raqam</label>
@@ -239,7 +297,7 @@
         <div style="font-size:48px; margin-bottom:8px;">⏳</div>
         <h4 id="pay-ref" style="font-size:20px; color:var(--primary); margin-bottom:4px;">ZS-2026-XXXX</h4>
         <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">
-          Joyingiz 15 daqiqaga qulflandi (Hold). Kafolat xizmat haqini to'lab, joyni mustahkamlang.
+          Joyingiz 15 daqiqaga qulflandi (Hold AC-05). 10% kafolat xizmat haqini to'lab, joyni mustahkamlang.
         </p>
 
         <div class="breakdown-box" style="text-align:left;">
@@ -269,10 +327,10 @@
           </p>
           <div style="display:flex; gap:8px; justify-content:center;">
             <a id="btn-ofd-link" href="#" target="_blank" class="role-btn" style="background:white; border:1px solid var(--border); text-decoration:none;">
-              🧾 OFD Chekni ko'rish
+              🧾 Soliq OFD Chek (AC-15)
             </a>
             <button class="btn-search" style="margin-top:0; padding:8px 16px;" onclick="openOfflineVoucher()">
-              📄 Oflayn Vaucher
+              📄 Oflayn Vaucher (AC-09)
             </button>
           </div>
         </div>
@@ -280,15 +338,76 @@
     </div>
   </div>
 
-  <!-- OFFLINE VOUCHER MODAL -->
+  <!-- OFFLINE VOUCHER MODAL (AC-09) -->
   <div id="voucher-modal" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">🌲 Oflayn Safar Vaucheri</h3>
+        <h3 class="modal-title">🌲 Oflayn Safar Vaucheri (AC-09)</h3>
         <button class="modal-close" onclick="closeModal('voucher-modal')">✕</button>
       </div>
       <div class="modal-body" id="voucher-content">
         <!-- Rendered voucher -->
+      </div>
+    </div>
+  </div>
+
+  <!-- OWNER CALENDAR BLOCK MODAL -->
+  <div id="calendar-block-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">📅 Kalendarni Tezkor Yopish (OWNER_MANUAL)</h3>
+        <button class="modal-close" onclick="closeModal('calendar-block-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px; color:#64748b; margin-bottom:12px;">
+          Tanishlaringiz kelganda yoki dacha ta'mirda bo'lganda sanalarni sayyohlarga ko'rinmaydigan qilib yopib qo'yishingiz mumkin.
+        </p>
+        <div class="search-field" style="margin-bottom:12px;">
+          <label>Dacha birligi</label>
+          <select id="block-unit-select"></select>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+          <div class="search-field">
+            <label>Boshlanish</label>
+            <input type="datetime-local" id="block-start">
+          </div>
+          <div class="search-field">
+            <label>Tugash</label>
+            <input type="datetime-local" id="block-end">
+          </div>
+        </div>
+        <div class="search-field" style="margin-bottom:16px;">
+          <label>Sabab / Izoh</label>
+          <input type="text" id="block-notes" placeholder="Masalan: Ta'mir ishlari yoki qarindoshlar">
+        </div>
+        <button class="btn-search" style="width:100%; margin-top:0;" onclick="submitCalendarBlock()">
+          Sanalarni Yopish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OWNER PRICE EDIT MODAL (AC-03 & RBAC) -->
+  <div id="price-edit-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">🏷️ Dacha Narxlarini Yangilash</h3>
+        <button class="modal-close" onclick="closeModal('price-edit-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="price-edit-unit-name" style="font-weight:bold; color:var(--primary); margin-bottom:12px;"></p>
+        <input type="hidden" id="price-edit-unit-id">
+        <div class="search-field" style="margin-bottom:12px;">
+          <label>Hafta ichi narxi (Dushanba–Payshanba) so'mda:</label>
+          <input type="number" id="price-edit-weekday" step="10000">
+        </div>
+        <div class="search-field" style="margin-bottom:16px;">
+          <label>Dam olish kunlari narxi (Juma–Yakshanba) so'mda:</label>
+          <input type="number" id="price-edit-weekend" step="10000">
+        </div>
+        <button class="btn-search" style="width:100%; margin-top:0;" onclick="submitPriceUpdate()">
+          Narxni Saqlash
+        </button>
       </div>
     </div>
   </div>

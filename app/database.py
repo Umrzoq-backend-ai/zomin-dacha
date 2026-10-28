@@ -227,6 +227,55 @@ def init_db(db_path: Optional[str] = None) -> None:
         );
         """)
 
+        # 11. IVR Call Logs (AC-10: 10-minute owner reminder)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ivr_call_logs (
+            id TEXT PRIMARY KEY,
+            booking_id TEXT NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+            owner_phone TEXT NOT NULL,
+            call_status TEXT NOT NULL DEFAULT 'COMPLETED',
+            spoken_message TEXT NOT NULL,
+            dispatched_at TEXT NOT NULL
+        );
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_ivr_booking ON ivr_call_logs(booking_id);")
+
+        # Database Engine Exclusion Constraints (Triggers emulating PostgreSQL GiST exclusion)
+        cursor.execute("""
+        CREATE TRIGGER IF NOT EXISTS trg_prevent_double_booking_insert
+        BEFORE INSERT ON inventory_allocations
+        FOR EACH ROW
+        WHEN NEW.status = 'ACTIVE'
+        BEGIN
+            SELECT RAISE(ABORT, 'Double-booking violation: Active allocation already exists for this unit and time range')
+            WHERE EXISTS (
+                SELECT 1 FROM inventory_allocations
+                WHERE rental_unit_id = NEW.rental_unit_id
+                  AND status = 'ACTIVE'
+                  AND start_time < NEW.end_time
+                  AND end_time > NEW.start_time
+            );
+        END;
+        """)
+
+        cursor.execute("""
+        CREATE TRIGGER IF NOT EXISTS trg_prevent_double_booking_update
+        BEFORE UPDATE ON inventory_allocations
+        FOR EACH ROW
+        WHEN NEW.status = 'ACTIVE'
+        BEGIN
+            SELECT RAISE(ABORT, 'Double-booking violation: Active allocation already exists for this unit and time range')
+            WHERE EXISTS (
+                SELECT 1 FROM inventory_allocations
+                WHERE id != NEW.id
+                  AND rental_unit_id = NEW.rental_unit_id
+                  AND status = 'ACTIVE'
+                  AND start_time < NEW.end_time
+                  AND end_time > NEW.start_time
+            );
+        END;
+        """)
+
 def seed_initial_data(db_path: Optional[str] = None) -> None:
     now_iso = datetime.now(timezone.utc).isoformat()
     

@@ -1,5 +1,6 @@
 import uuid
 import random
+import sqlite3
 from datetime import datetime, timezone, timedelta
 from typing import Optional, Dict, Any, List
 from fastapi import HTTPException
@@ -8,6 +9,28 @@ from app.config import settings
 from app.database import get_db, _db_lock
 from app.models import BookingCreateRequest, BookingResponse, BookingDetailResponse
 from app.security import verify_quote_token
+
+UZ_TZ = timezone(timedelta(hours=5))
+
+def normalize_datetime_input(dt_str: str) -> datetime:
+    """
+    Parses ISO8601 string, treating naive times as Uzbekistan local time (UTC+5),
+    returning timezone-aware datetime.
+    """
+    cleaned = dt_str.strip().replace("Z", "+00:00")
+    dt = datetime.fromisoformat(cleaned)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UZ_TZ)
+    return dt
+
+def normalize_to_utc_iso(dt_str: str) -> str:
+    """
+    Normalizes any datetime representation (aware or naive) into canonical UTC ISO format
+    YYYY-MM-DDTHH:MM:SSZ so that lexicographical string comparison in SQLite is identical
+    to chronological comparison.
+    """
+    dt = normalize_datetime_input(dt_str)
+    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 def generate_booking_reference() -> str:
     year = datetime.now(timezone.utc).year
@@ -49,8 +72,12 @@ def lazy_invalidate_expired_holds(conn, rental_unit_id: Optional[str] = None):
 def check_overlapping_allocation(conn, rental_unit_id: str, start_time: str, end_time: str, exclude_booking_id: Optional[str] = None) -> bool:
     """
     Checks if there is an overlapping ACTIVE allocation for this unit.
+    Normalizes both bounds to UTC ISO strings for deterministic comparison.
     Two intervals [s1, e1) and [s2, e2) overlap if s1 < e2 AND s2 < e1.
     """
+    start_utc = normalize_to_utc_iso(start_time)
+    end_utc = normalize_to_utc_iso(end_time)
+    
     cursor = conn.cursor()
     query = """
         SELECT COUNT(*) FROM inventory_allocations
@@ -59,7 +86,7 @@ def check_overlapping_allocation(conn, rental_unit_id: str, start_time: str, end
           AND start_time < ?
           AND end_time > ?
     """
-    params = [rental_unit_id, end_time, start_time]
+    params = [rental_unit_id, end_utc, start_utc]
     if exclude_booking_id:
         query += " AND (booking_id != ? OR booking_id IS NULL)"
         params.append(exclude_booking_id)
@@ -141,17 +168,25 @@ def create_booking(request: BookingCreateRequest, idempotency_key: Optional[str]
             hold_expires_at, now_iso, now_iso
         ))
 
-        # 6. Create Active Inventory Allocation (Hold)
+        # 6. Create Active Inventory Allocation (Hold with DB engine exclusion constraint)
         allocation_id = str(uuid.uuid4())
-        cursor.execute("""
-            INSERT INTO inventory_allocations (
-                id, rental_unit_id, booking_id, allocation_type, start_time, end_time,
-                status, expires_at, created_at
-            ) VALUES (?, ?, ?, 'PLATFORM_HOLD', ?, ?, 'ACTIVE', ?, ?)
-        """, (
-            allocation_id, unit_id, booking_id, checkin_time, checkout_time,
-            hold_expires_at, now_iso
-        ))
+        start_utc = normalize_to_utc_iso(checkin_time)
+        end_utc = normalize_to_utc_iso(checkout_time)
+        try:
+            cursor.execute("""
+                INSERT INTO inventory_allocations (
+                    id, rental_unit_id, booking_id, allocation_type, start_time, end_time,
+                    status, expires_at, created_at
+                ) VALUES (?, ?, ?, 'PLATFORM_HOLD', ?, ?, 'ACTIVE', ?, ?)
+            """, (
+                allocation_id, unit_id, booking_id, start_utc, end_utc,
+                hold_expires_at, now_iso
+            ))
+        except sqlite3.IntegrityError:
+            raise HTTPException(
+                status_code=409,
+                detail="Ushbu sana va vaqt oralig'i allaqachon boshqa mehmon tomonidan band qilingan yoki to'lov kutilmoqda (Double-booking himoyasi)"
+            )
 
         # 7. Pre-order Tandir meat if requested (AC-12)
         if tandir_preorder_kg > 0:

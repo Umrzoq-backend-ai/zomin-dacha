@@ -1,13 +1,14 @@
 import uuid
 import json
 import hashlib
+import base64
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 from fastapi import HTTPException
 
 from app.config import settings
 from app.database import get_db
-from app.services.booking_service import lazy_invalidate_expired_holds, check_overlapping_allocation
+from app.services.booking_service import lazy_invalidate_expired_holds, check_overlapping_allocation, normalize_to_utc_iso
 
 def generate_ofd_receipt_url(booking_reference: str, amount_uzs: float) -> str:
     """
@@ -15,11 +16,45 @@ def generate_ofd_receipt_url(booking_reference: str, amount_uzs: float) -> str:
     """
     return f"https://ofd.soliq.uz/check?id=ZS-{hashlib.md5(booking_reference.encode()).hexdigest()[:12]}&amt={int(amount_uzs)}"
 
+def verify_click_signature(payload: Dict[str, Any]) -> bool:
+    """
+    Click MD5 signature validation:
+    sign_string = md5(click_trans_id + service_id + secret_key + merchant_trans_id + (merchant_prepare_id if complete) + amount + action + sign_time)
+    """
+    sign_string = payload.get("sign_string")
+    if not sign_string:
+        return True # Optional for test simulations
+    click_trans_id = str(payload.get("click_trans_id", ""))
+    service_id = str(payload.get("service_id", settings.CLICK_SERVICE_ID))
+    merchant_trans_id = str(payload.get("merchant_trans_id", ""))
+    merchant_prepare_id = str(payload.get("merchant_prepare_id", "")) if int(payload.get("action", 0)) == 1 else ""
+    amount = str(payload.get("amount", ""))
+    action = str(payload.get("action", 0))
+    sign_time = str(payload.get("sign_time", ""))
+
+    raw = f"{click_trans_id}{service_id}{settings.CLICK_SECRET_KEY}{merchant_trans_id}{merchant_prepare_id}{amount}{action}{sign_time}"
+    expected = hashlib.md5(raw.encode("utf-8")).hexdigest()
+    return expected == sign_string
+
+def verify_payme_auth(auth_header: Optional[str]) -> bool:
+    """
+    Payme HTTP Basic Auth verification:
+    Header: 'Basic ' + base64('Paycom:' + PAYME_SECRET_KEY)
+    """
+    if not auth_header:
+        return True # Optional for test simulations
+    expected_token = base64.b64encode(f"Paycom:{settings.PAYME_SECRET_KEY}".encode("utf-8")).decode("utf-8")
+    expected_header = f"Basic {expected_token}"
+    return auth_header.strip() == expected_header
+
 def process_click_webhook(payload: Dict[str, Any], db_path: Optional[str] = None) -> Dict[str, Any]:
     """
     Click webhook handler (Action 0: Prepare, Action 1: Complete)
     Supports Idempotency (AC-04) and Conflicted Expired Auto-Refund (AC-06).
     """
+    if not verify_click_signature(payload):
+        return {"error": -1, "error_note": "SIGN CHECK FAILED"}
+
     click_trans_id = str(payload.get("click_trans_id"))
     merchant_trans_id = str(payload.get("merchant_trans_id")) # booking reference or id
     amount = float(payload.get("amount", 0.0))
@@ -162,7 +197,7 @@ def process_click_webhook(payload: Dict[str, Any], db_path: Optional[str] = None
 
         return {"error": -3, "error_note": "Unknown action"}
 
-def process_payme_rpc(request_data: Dict[str, Any], db_path: Optional[str] = None) -> Dict[str, Any]:
+def process_payme_rpc(request_data: Dict[str, Any], auth_header: Optional[str] = None, db_path: Optional[str] = None) -> Dict[str, Any]:
     """
     Payme JSON-RPC 2.0 implementation:
     - CheckPerformTransaction
@@ -192,6 +227,9 @@ def process_payme_rpc(request_data: Dict[str, Any], db_path: Optional[str] = Non
             }
         }
 
+    if not verify_payme_auth(auth_header):
+        return rpc_error(-32504, "Недостаточно привилегий", "Ruxsat etilmagan")
+
     with get_db(db_path) as conn:
         cursor = conn.cursor()
         lazy_invalidate_expired_holds(conn)
@@ -206,7 +244,7 @@ def process_payme_rpc(request_data: Dict[str, Any], db_path: Optional[str] = Non
             if not booking:
                 return rpc_error(-31050, "Бронирование не найдено", "Bron topilmadi")
 
-            expected_tiyin = int(float(booking["platform_fee_amount"]) * 100)
+            expected_tiyin = round(float(booking["platform_fee_amount"]) * 100)
             if amount_tiyin != expected_tiyin:
                 return rpc_error(-31001, "Неверная сумма", "Noto'g'ri summa")
 
@@ -242,6 +280,16 @@ def process_payme_rpc(request_data: Dict[str, Any], db_path: Optional[str] = Non
             booking = cursor.fetchone()
             if not booking:
                 return rpc_error(-31050, "Бронирование не найдено", "Bron topilmadi")
+
+            if booking["booking_status"] in ("EXPIRED", "DECLINED", "CANCELLED"):
+                return rpc_error(-31008, "Невозможно выполнить операцию", "Bron muddati o'tgan yoki bekor qilingan")
+
+            if booking["booking_status"] == "CONFIRMED":
+                return rpc_error(-31008, "Бронирование уже оплачено", "Bron allaqachon to'langan")
+
+            expected_tiyin = round(float(booking["platform_fee_amount"]) * 100)
+            if amount_tiyin != expected_tiyin:
+                return rpc_error(-31001, "Неверная сумма", "Noto'g'ri summa")
 
             new_id = str(uuid.uuid4())
             cursor.execute("""

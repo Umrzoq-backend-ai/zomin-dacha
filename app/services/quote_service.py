@@ -6,16 +6,21 @@ from app.config import settings
 from app.database import get_db
 from app.models import QuoteRequest, QuoteResponse, QuoteBreakdown
 from app.security import create_quote_token
+from app.services.booking_service import normalize_datetime_input, UZ_TZ
 
 def calculate_quote(request: QuoteRequest, db_path: Optional[str] = None) -> QuoteResponse:
     try:
-        checkin_dt = datetime.fromisoformat(request.checkin_time)
-        checkout_dt = datetime.fromisoformat(request.checkout_time)
+        checkin_dt = normalize_datetime_input(request.checkin_time)
+        checkout_dt = normalize_datetime_input(request.checkout_time)
+        if checkout_dt <= checkin_dt:
+            raise HTTPException(status_code=400, detail="Ketish vaqti kirish vaqtidan keyin bo'lishi shart")
+    except HTTPException:
+        raise
     except Exception:
         raise HTTPException(status_code=400, detail="Sanalar ISO8601 formatida bo'lishi shart")
 
-    if checkout_dt <= checkin_dt:
-        raise HTTPException(status_code=400, detail="Ketish vaqti kirish vaqtidan keyin bo'lishi shart")
+    checkin_local = checkin_dt.astimezone(UZ_TZ)
+    checkout_local = checkout_dt.astimezone(UZ_TZ)
 
     with get_db(db_path) as conn:
         cursor = conn.cursor()
@@ -30,14 +35,14 @@ def calculate_quote(request: QuoteRequest, db_path: Optional[str] = None) -> Quo
         units_count = 1
 
         if unit_category == "OVERNIGHT_STAY":
-            # Count nights
-            nights = (checkout_dt.date() - checkin_dt.date()).days
+            # Count nights in Uzbekistan local time
+            nights = (checkout_local.date() - checkin_local.date()).days
             if nights < 1:
                 nights = 1  # Minimum 1 night
             units_count = nights
             
             # Calculate price per night based on weekday (Mon-Thu: 0,1,2,3) vs weekend (Fri-Sun: 4,5,6)
-            current_date = checkin_dt.date()
+            current_date = checkin_local.date()
             for _ in range(nights):
                 weekday = current_date.weekday()
                 if weekday in (4, 5, 6): # Friday, Saturday, Sunday
@@ -49,7 +54,7 @@ def calculate_quote(request: QuoteRequest, db_path: Optional[str] = None) -> Quo
             booking_type = "OVERNIGHT"
 
         else: # DAY_USE_TAPCHAN
-            weekday = checkin_dt.date().weekday()
+            weekday = checkin_local.date().weekday()
             is_weekend = weekday in (4, 5, 6)
             
             if request.day_use_slot_name:

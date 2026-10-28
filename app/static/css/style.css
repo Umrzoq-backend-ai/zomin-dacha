@@ -591,6 +591,119 @@ header {
   display: none !important;
 }
 
+/* Day Use Slot Pills (AC-02) */
+.slot-pill {
+  background: white;
+  border: 1px solid #99f6e4;
+  border-radius: 8px;
+  padding: 8px 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f766e;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.slot-pill small {
+  font-size: 11px;
+  font-weight: normal;
+  display: block;
+  color: #64748b;
+}
+
+.slot-pill.active {
+  background: #0d9488;
+  color: white;
+  border-color: #0f766e;
+}
+
+.slot-pill.active small {
+  color: #ccfbf1;
+}
+
+/* User Profile Badge */
+.user-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-profile-badge select {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text-main);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.portal-header-card {
+  background: white;
+  padding: 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background: #1e293b;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideIn 0.3s ease;
+  min-width: 250px;
+  max-width: 380px;
+}
+
+.toast.success {
+  background: #065f46;
+  border-left: 4px solid #10b981;
+}
+
+.toast.error {
+  background: #7f1d1d;
+  border-left: 4px solid #ef4444;
+}
+
+.toast.info {
+  background: #0c4a6e;
+  border-left: 4px solid #0284c7;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
 @media (max-width: 768px) {
   .search-box {
     grid-template-columns: 1fr;
@@ -600,5 +713,9 @@ header {
   }
   .grid-properties {
     grid-template-columns: 1fr;
+  }
+  .nav-container {
+    flex-direction: column;
+    gap: 8px;
   }
 }

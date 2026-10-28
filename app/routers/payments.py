@@ -36,7 +36,8 @@ async def payme_webhook(request: Request):
         data = await request.json()
     except Exception:
         return {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "Parse error"}}
-    return process_payme_rpc(data)
+    auth_header = request.headers.get("Authorization")
+    return process_payme_rpc(data, auth_header=auth_header)
 
 @router.post("/simulate-success")
 def simulate_instant_payment(req: SimulatePaymentRequest):
