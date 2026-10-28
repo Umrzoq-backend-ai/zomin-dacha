@@ -1,4 +1,4 @@
-// ZominStay Frontend & Telegram Mini App Logic
+// ZominStay Master Application Logic & Real-Time State
 let currentPortal = 'guest';
 let propertiesCache = [];
 let selectedProperty = null;
@@ -6,24 +6,27 @@ let currentQuote = null;
 let currentBooking = null;
 let currentTandirKg = 0;
 let currentDayUseSlot = null; // 'FULL_DAY', 'LUNCH', 'DINNER'
+let currentBookingMode = 'OVERNIGHT'; // 'OVERNIGHT' or 'DAY_USE'
+let holdTimerInterval = null;
 
-// Filter state
+// Filter & Sort State
 let activeDistrict = 'ALL';
 let filterRoad = null;
 let filterGenerator = null;
 let filterType = null;
+let currentSort = 'RECOMMENDED';
 
-// User Profile state
+// Demo Profiles Matrix
 const DEMO_PROFILES = {
-  guest: { phone: '+998935551122', name: 'Jasur Mamadaliyev (Sayyoh)', role: 'GUEST' },
-  owner1: { phone: '+998901112233', name: 'Alisher Zokirov (Duoba Dacha Egasi)', role: 'OWNER' },
-  owner2: { phone: '+998904445566', name: 'Muzaffar Raimov (Suffa & O\'riklisoy Egasi)', role: 'OWNER' },
-  caretaker: { phone: '+998917778899', name: 'Rustam Tog\'a (Duoba Bog\'boni)', role: 'CARETAKER' }
+  guest: { phone: '+998935551122', name: 'Jasur Mamadaliyev', role: 'GUEST', label: '🏕️ Jasur M. (Sayyoh)' },
+  owner1: { phone: '+998901112233', name: 'Alisher Zokirov', role: 'OWNER', label: '🏡 Alisher Z. (Duoba Dacha Egasi)' },
+  owner2: { phone: '+998904445566', name: 'Muzaffar Raimov', role: 'OWNER', label: '🏡 Muzaffar R. (Suffa & O\'riklisoy Egasi)' },
+  caretaker: { phone: '+998917778899', name: 'Rustam Tog\'a', role: 'CARETAKER', label: '🔑 Rustam Tog\'a (Duoba Bog\'boni)' }
 };
 
 let currentUser = null;
 
-// Toast helper
+// Toast Helper
 function showToast(message, type = 'info') {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -34,7 +37,7 @@ function showToast(message, type = 'info') {
   container.appendChild(toast);
   setTimeout(() => {
     toast.style.opacity = '0';
-    toast.style.transform = 'translateX(100%)';
+    toast.style.transform = 'translateY(-10px)';
     setTimeout(() => toast.remove(), 300);
   }, 4000);
 }
@@ -47,7 +50,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     tg.ready();
     tg.expand();
     try {
-      tg.setHeaderColor('#065f46');
+      tg.setHeaderColor('#064e3b');
       tg.setBackgroundColor('#f8fafc');
     } catch (e) {}
 
@@ -60,7 +63,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
         if (r.ok) {
           currentUser = await r.json();
-          console.log('Telegram WebApp user authenticated:', currentUser);
+          updateHeaderUserInfo();
         }
       } catch (err) {
         console.log('Telegram auth fallback:', err);
@@ -74,10 +77,26 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   initDefaultDates();
-  loadProperties();
+  await loadProperties();
+  refreshBadges();
 });
 
-async function switchUserProfile(profileKey, reloadPortal = true) {
+// Update Header User Info Display
+function updateHeaderUserInfo() {
+  if (!currentUser) return;
+  const nameEl = document.getElementById('header-user-name');
+  const roleEl = document.getElementById('header-user-role');
+  const avatarEl = document.getElementById('header-user-avatar');
+  
+  if (nameEl) nameEl.innerText = currentUser.full_name;
+  if (roleEl) roleEl.innerText = currentUser.role;
+  if (avatarEl) {
+    avatarEl.innerText = currentUser.role === 'OWNER' ? '🏡' : (currentUser.role === 'CARETAKER' ? '🔑' : '👤');
+  }
+}
+
+// User Profile Switching
+async function switchUserProfile(profileKey, reloadData = true) {
   const profile = DEMO_PROFILES[profileKey];
   if (!profile) return;
 
@@ -95,71 +114,104 @@ async function switchUserProfile(profileKey, reloadPortal = true) {
       currentUser = await res.json();
       const sel = document.getElementById('user-profile-select');
       if (sel) sel.value = profileKey;
+      updateHeaderUserInfo();
 
-      if (reloadPortal) {
-        showToast(`Profil almashtirildi: ${currentUser.full_name}`, 'info');
+      if (reloadData) {
+        showToast(`Profil faollashtirildi: ${currentUser.full_name}`, 'info');
         if (currentPortal === 'owner') loadOwnerData();
         else if (currentPortal === 'caretaker') loadCaretakerArrivals();
+        else if (currentPortal === 'trips') loadMyTrips();
+        refreshBadges();
       }
     }
   } catch (e) {
-    console.error('Failed to switch user profile:', e);
+    console.error('Failed to switch profile:', e);
   }
 }
 
 function initDefaultDates() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-  const nextDay = new Date();
-  nextDay.setDate(nextDay.getDate() + 3);
-  const nextDayStr = nextDay.toISOString().split('T')[0];
+  const checkoutDate = new Date(tomorrow);
+  checkoutDate.setDate(tomorrow.getDate() + 2);
+  const checkoutStr = checkoutDate.toISOString().split('T')[0];
 
   const inField = document.getElementById('search-checkin');
   const outField = document.getElementById('search-checkout');
   if (inField && outField) {
     inField.value = tomorrowStr;
-    outField.value = nextDayStr;
+    outField.value = checkoutStr;
   }
 }
 
-// Switching portals
+// Switching Portal Views
 function switchPortal(portal) {
   currentPortal = portal;
-  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById(`btn-portal-${portal}`);
-  if (btn) btn.classList.add('active');
 
-  document.getElementById('portal-guest').classList.add('hidden');
-  document.getElementById('portal-owner').classList.add('hidden');
-  document.getElementById('portal-caretaker').classList.add('hidden');
+  // Update desktop navigation tabs
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  const activeDesktopTab = document.getElementById(
+    portal === 'guest' ? 'tab-guest-dachas' : 
+    (portal === 'owner' ? 'tab-owner-portal' : 
+    (portal === 'caretaker' ? 'tab-caretaker-portal' : 
+    (portal === 'trips' ? 'tab-my-trips' : 'tab-map-guide')))
+  );
+  if (activeDesktopTab) activeDesktopTab.classList.add('active');
+
+  // Update mobile bottom nav items
+  document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.remove('active'));
+  const mobItem = document.getElementById(
+    portal === 'guest' ? 'mob-nav-guest' : 
+    (portal === 'owner' ? 'mob-nav-owner' : 
+    (portal === 'trips' ? 'mob-nav-trips' : 'mob-nav-tapchan'))
+  );
+  if (mobItem) mobItem.classList.add('active');
+
+  // Hide all portal views
+  document.querySelectorAll('.portal-view').forEach(p => p.classList.add('hidden'));
+
+  // Show target view
+  const targetView = document.getElementById(`portal-${portal}`);
+  if (targetView) targetView.classList.remove('hidden');
 
   if (portal === 'guest') {
-    document.getElementById('portal-guest').classList.remove('hidden');
     loadProperties();
   } else if (portal === 'owner') {
-    document.getElementById('portal-owner').classList.remove('hidden');
-    // Auto switch to Owner 1 if currently guest
     if (currentUser && currentUser.role !== 'OWNER') {
       switchUserProfile('owner1', true);
     } else {
       loadOwnerData();
     }
   } else if (portal === 'caretaker') {
-    document.getElementById('portal-caretaker').classList.remove('hidden');
     if (currentUser && currentUser.role !== 'CARETAKER') {
       switchUserProfile('caretaker', true);
     } else {
       loadCaretakerArrivals();
     }
+  } else if (portal === 'trips') {
+    loadMyTrips();
   }
 }
 
-// Load properties from backend
+// Quick filter helper for Tapchans
+function filterToTapchans() {
+  document.querySelectorAll('.pill-chip').forEach(c => c.classList.remove('active'));
+  const tapchanBtn = document.getElementById('toggle-tapchan');
+  if (tapchanBtn) {
+    document.querySelectorAll('.toggle-pill').forEach(b => b.classList.remove('active'));
+    tapchanBtn.classList.add('active');
+  }
+  filterType = 'CHOYXONA_TAPCHAN';
+  loadProperties();
+}
+
+// Fetch Properties from API
 async function loadProperties() {
   const grid = document.getElementById('properties-grid');
-  grid.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b;">Dachalar yuklanmoqda...</div>';
+  grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; color:#64748b; font-size:15px;">🌲 Zomin dachalari saralanmoqda...</div>';
 
   const params = new URLSearchParams();
   if (activeDistrict && activeDistrict !== 'ALL') {
@@ -189,21 +241,33 @@ async function loadProperties() {
 
   try {
     const res = await fetch(`/api/v1/properties?${params.toString()}`);
-    const properties = await res.json();
+    let properties = await res.json();
+
+    // Client-side sorting
+    if (currentSort === 'PRICE_ASC') {
+      properties.sort((a, b) => a.min_price - b.min_price);
+    } else if (currentSort === 'PRICE_DESC') {
+      properties.sort((a, b) => b.min_price - a.min_price);
+    }
+
     propertiesCache = properties;
+    const countEl = document.getElementById('results-count-text');
+    if (countEl) countEl.innerText = `${properties.length} ta tekshirilgan dacha va tapchan topildi`;
 
     if (!properties || properties.length === 0) {
       grid.innerHTML = `
-        <div style="grid-column: 1/-1; text-align:center; padding:40px; background:white; border-radius:16px; border:1px solid var(--border);">
-          <h3 style="color:#64748b; margin-bottom:8px;">Hech qanday dacha yoki tapchan topilmadi</h3>
-          <p style="color:#94a3b8; font-size:14px;">Filtr parametrlarini o'zgartirib qayta qidirib ko'ring.</p>
+        <div style="grid-column: 1/-1; text-align:center; padding:60px 20px; background:white; border-radius:20px; border:1px solid var(--border);">
+          <div style="font-size:42px; margin-bottom:10px;">🔍</div>
+          <h3 style="color:#0f172a; font-size:18px; margin-bottom:6px;">Ushbu filtr bo'yicha dacha topilmadi</h3>
+          <p style="color:#64748b; font-size:14px; margin-bottom:18px;">Filtrlarni tozalab yoki boshqa hududni tanlab ko'ring.</p>
+          <button class="btn-card-select" onclick="resetAllFilters()">Filtrlarni Tozalash</button>
         </div>
       `;
       return;
     }
 
     grid.innerHTML = properties.map(p => {
-      const photo = p.photos && p.photos.length > 0 ? p.photos[0] : 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80';
+      const photo = p.photos && p.photos.length > 0 ? p.photos[0] : 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80';
       const isSedan = p.road_condition === 'ASPHALT_SEDAN';
       const roadBadge = isSedan ? 
         '<span class="tag-badge road-sedan">🚗 Asfalt (Spark/Cobalt)</span>' : 
@@ -212,18 +276,22 @@ async function loadProperties() {
       const typeText = p.property_type === 'VILLA' ? 'Villa / Dacha' : 
                        (p.property_type === 'COTTAGE' ? 'Tog\' Kotteji' : 
                        (p.property_type === 'CHOYXONA_TAPCHAN' ? 'Choyxona & Tapchan' : 'Mehmon Uyi'));
+      const rating = (4.8 + (p.title.length % 3) * 0.1).toFixed(1);
+      const reviewsCount = 20 + (p.title.length * 3);
 
       return `
         <div class="prop-card" onclick="openPropertyModal('${p.id}')">
           <div class="prop-img-box">
             <img class="prop-img" src="${photo}" alt="${p.title}" loading="lazy">
-            <span class="prop-badge-top">${p.micro_district}</span>
-            <span class="prop-type-badge">${typeText}</span>
+            <span class="badge-location-chip">${p.micro_district}</span>
+            <span class="badge-type-chip">${typeText}</span>
+            <span class="badge-verified-float">✓ Verified</span>
+            <span class="badge-rating-float">⭐ ${rating} (${reviewsCount})</span>
           </div>
           <div class="prop-body">
             <h4 class="prop-title">${p.title}</h4>
             <div class="prop-address">📍 ${p.address_text}</div>
-            <div class="prop-tags">
+            <div class="prop-tags-row">
               ${roadBadge}
               ${genBadge}
               <span class="tag-badge">💧 ${p.water_source === 'SPRING_WATER' ? 'Buloq suvi' : 'Vodoprovod'}</span>
@@ -234,7 +302,7 @@ async function loadProperties() {
                 <span class="price-sub">boshlang'ich narx</span>
                 <span class="price-val">${Number(p.min_price).toLocaleString()} so'm</span>
               </div>
-              <button class="btn-book-card">Tanlash &gt;</button>
+              <button class="btn-card-select">Tanlash &gt;</button>
             </div>
           </div>
         </div>
@@ -242,12 +310,12 @@ async function loadProperties() {
     }).join('');
 
   } catch (err) {
-    grid.innerHTML = `<div style="color:red; text-align:center; padding:20px;">Xatolik yuz berdi: ${err.message}</div>`;
+    grid.innerHTML = `<div style="grid-column:1/-1; color:red; text-align:center; padding:30px;">Yuklashda xatolik: ${err.message}</div>`;
   }
 }
 
 function selectDistrictPill(el, district) {
-  document.querySelectorAll('.district-pill').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.pill-chip').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   activeDistrict = district;
   const sel = document.getElementById('search-district');
@@ -257,10 +325,8 @@ function selectDistrictPill(el, district) {
 
 function toggleFilterChip(el, type, value) {
   const isActive = el.classList.contains('active');
-
-  // Handle mutual exclusivity for property type
   if (type === 'type') {
-    document.querySelectorAll('.toggle-chip[id^="toggle-tapchan"], .toggle-chip[id^="toggle-villa"]').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.toggle-pill[id^="toggle-tapchan"], .toggle-pill[id^="toggle-villa"]').forEach(c => c.classList.remove('active'));
     if (!isActive) {
       el.classList.add('active');
       filterType = value;
@@ -283,7 +349,25 @@ function applyFilters() {
   loadProperties();
 }
 
-// Property Detail & Quote Modal
+function sortProperties(sortBy) {
+  currentSort = sortBy;
+  loadProperties();
+}
+
+function resetAllFilters() {
+  activeDistrict = 'ALL';
+  filterRoad = null;
+  filterGenerator = null;
+  filterType = null;
+  document.querySelectorAll('.pill-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('.pill-chip')?.classList.add('active');
+  document.querySelectorAll('.toggle-pill').forEach(b => b.classList.remove('active'));
+  const distSelect = document.getElementById('search-district');
+  if (distSelect) distSelect.value = 'ALL';
+  loadProperties();
+}
+
+// Property Detail & Quote Modal Logic
 function openPropertyModal(propId) {
   const p = propertiesCache.find(item => item.id === propId);
   if (!p) return;
@@ -293,19 +377,29 @@ function openPropertyModal(propId) {
   document.getElementById('tandir-kg-val').innerText = '0 kg';
 
   document.getElementById('m-prop-title').innerText = p.title;
+  document.getElementById('m-prop-address').innerText = `📍 ${p.address_text}`;
   document.getElementById('m-prop-desc').innerText = p.description;
-  const imgUrl = p.photos && p.photos.length > 0 ? p.photos[0] : '';
+  const imgUrl = p.photos && p.photos.length > 0 ? p.photos[0] : 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80';
   document.getElementById('m-prop-img').src = imgUrl;
 
+  // Badges
   const badgesArea = document.getElementById('m-prop-badges');
   badgesArea.innerHTML = `
     <span class="tag-badge road-sedan">📍 ${p.micro_district}</span>
     <span class="tag-badge">${p.road_condition}</span>
     ${p.has_generator ? '<span class="tag-badge generator">⚡ Generator bor</span>' : ''}
     <span class="tag-badge">📶 ${p.mobile_coverage}</span>
+    <span class="tag-badge">💧 ${p.water_source}</span>
   `;
 
-  // Populate Units
+  // Amenities
+  const amenitiesArea = document.getElementById('m-prop-amenities');
+  const amenities = p.amenities || ["Isitiladigan basseyn", "Sauna/Fin hammomi", "Zomin archa tandiri", "Wi-Fi 4G", "Soy bo'yi tapchani"];
+  amenitiesArea.innerHTML = amenities.map(a => `
+    <div class="amenity-chip">✓ ${a}</div>
+  `).join('');
+
+  // Units
   const unitSelect = document.getElementById('m-unit-select');
   unitSelect.innerHTML = p.rental_units.map(u => {
     return `<option value="${u.id}">${u.name} (Sig'im: ${u.standard_capacity}–${u.max_capacity} kishi)</option>`;
@@ -325,29 +419,51 @@ function openPropertyModal(propId) {
     if (phoneEl) phoneEl.value = currentUser.phone_number;
   }
 
+  // Set booking mode based on property type
+  if (p.property_type === 'CHOYXONA_TAPCHAN') {
+    switchBookingMode('DAY_USE');
+  } else {
+    switchBookingMode('OVERNIGHT');
+  }
+
   document.getElementById('prop-modal').classList.remove('hidden');
   onUnitSelectionChanged();
+}
+
+function switchBookingMode(mode) {
+  currentBookingMode = mode;
+  document.getElementById('btn-mode-stay')?.classList.toggle('active', mode === 'OVERNIGHT');
+  document.getElementById('btn-mode-tapchan')?.classList.toggle('active', mode === 'DAY_USE');
+
+  const slotBox = document.getElementById('m-slot-container');
+  if (mode === 'DAY_USE') {
+    if (slotBox) slotBox.classList.remove('hidden');
+    selectDaySlot('FULL_DAY', '10:00', '22:00');
+  } else {
+    if (slotBox) slotBox.classList.add('hidden');
+    currentDayUseSlot = null;
+    initDefaultDates();
+    const inVal = document.getElementById('search-checkin')?.value;
+    const outVal = document.getElementById('search-checkout')?.value;
+    document.getElementById('m-checkin').value = `${inVal}T14:00`;
+    document.getElementById('m-checkout').value = `${outVal}T12:00`;
+    calculateLiveQuote();
+  }
 }
 
 function onUnitSelectionChanged() {
   const unitId = document.getElementById('m-unit-select').value;
   const unit = selectedProperty?.rental_units?.find(u => u.id === unitId);
-  const slotContainer = document.getElementById('m-slot-container');
-
   if (unit && unit.unit_category === 'DAY_USE_TAPCHAN') {
-    slotContainer.classList.remove('hidden');
-    // Default to FULL_DAY
-    selectDaySlot('FULL_DAY', '10:00', '22:00');
+    switchBookingMode('DAY_USE');
   } else {
-    slotContainer.classList.add('hidden');
-    currentDayUseSlot = null;
     calculateLiveQuote();
   }
 }
 
 function selectDaySlot(slotName, startTime, endTime) {
   currentDayUseSlot = slotName;
-  document.querySelectorAll('.slot-pill').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.slot-choice-pill').forEach(b => b.classList.remove('active'));
   const btnId = slotName === 'FULL_DAY' ? 'slot-full' : (slotName === 'LUNCH' ? 'slot-lunch' : 'slot-dinner');
   const btn = document.getElementById(btnId);
   if (btn) btn.classList.add('active');
@@ -366,16 +482,16 @@ function changeTandirKg(delta) {
 }
 
 async function calculateLiveQuote() {
-  const unitId = document.getElementById('m-unit-select').value;
-  const checkin = document.getElementById('m-checkin').value;
-  const checkout = document.getElementById('m-checkout').value;
+  const unitId = document.getElementById('m-unit-select')?.value;
+  const checkin = document.getElementById('m-checkin')?.value;
+  const checkout = document.getElementById('m-checkout')?.value;
 
   if (!unitId || !checkin || !checkout) return;
 
   const payload = {
     rental_unit_id: unitId,
-    checkin_time: checkin.includes('T') ? `${checkin}:00+05:00` : `${checkin}T14:00:00+05:00`,
-    checkout_time: checkout.includes('T') ? `${checkout}:00+05:00` : `${checkout}T12:00:00+05:00`,
+    checkin_time: checkin.includes('T') ? (checkin.length === 16 ? `${checkin}:00+05:00` : checkin) : `${checkin}T14:00:00+05:00`,
+    checkout_time: checkout.includes('T') ? (checkout.length === 16 ? `${checkout}:00+05:00` : checkout) : `${checkout}T12:00:00+05:00`,
     guests_count: 4,
     day_use_slot_name: currentDayUseSlot,
     tandir_preorder_kg: currentTandirKg
@@ -402,19 +518,20 @@ async function calculateLiveQuote() {
     document.getElementById('q-owner-arrival').innerText = `${Number(quote.breakdown.payable_on_arrival_to_owner).toLocaleString()} so'm`;
 
   } catch (err) {
-    console.error('Quote error:', err);
+    console.error('Quote calculation error:', err);
   }
 }
 
+// Submit Booking
 async function submitBooking() {
   if (!currentQuote) {
     showToast('Iltimos, avval sanalarni to\'g\'ri tanlang', 'error');
     return;
   }
 
-  const guestName = document.getElementById('m-guest-name').value;
-  const guestPhone = document.getElementById('m-guest-phone').value;
-  const carPlate = document.getElementById('m-car-plate').value;
+  const guestName = document.getElementById('m-guest-name').value.trim();
+  const guestPhone = document.getElementById('m-guest-phone').value.trim();
+  const carPlate = document.getElementById('m-car-plate').value.trim();
 
   if (!guestName || !guestPhone) {
     showToast('Ism va telefon raqamingizni kiriting', 'error');
@@ -429,6 +546,9 @@ async function submitBooking() {
   };
 
   const idempotencyKey = `idemp_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+  const submitBtn = document.getElementById('btn-submit-booking');
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Kafolatli bron yaratilmoqda...';
 
   try {
     const res = await fetch('/api/v1/bookings/create', {
@@ -440,29 +560,56 @@ async function submitBooking() {
       body: JSON.stringify(payload)
     });
     const data = await res.json();
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Kafolatlangan Bron Yaratish (15 daqiqaga qulflash) →';
+
     if (!res.ok) {
-      showToast(data.detail || 'Bron yaratishda xatolik yuz berdi (Double booking himoyasi)', 'error');
+      showToast(data.detail || 'Bron qilishda xatolik (Double-booking himoyasi)', 'error');
       return;
     }
 
     currentBooking = data;
     closeModal('prop-modal');
-    showToast('Bron yaratildi va 15 daqiqaga qulflandi!', 'success');
+    showToast('🎉 Bron muvaffaqiyatli yaratildi va 15 daqiqaga qulflandi!', 'success');
 
-    // Open Payment Modal
+    // Open Payment Modal & start countdown
     document.getElementById('pay-ref').innerText = data.booking_reference;
     document.getElementById('pay-fee-val').innerText = `${Number(data.platform_fee_amount).toLocaleString()} so'm`;
     document.getElementById('pay-arrival-val').innerText = `${Number(data.pay_on_arrival_amount).toLocaleString()} so'm`;
     document.getElementById('pay-success-area').classList.add('hidden');
 
+    startHoldCountdown(15 * 60);
     document.getElementById('payment-modal').classList.remove('hidden');
+    refreshBadges();
 
   } catch (err) {
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Kafolatlangan Bron Yaratish →';
     showToast(`Xatolik: ${err.message}`, 'error');
   }
 }
 
-// Payment simulation (Click & Payme)
+// Hold Countdown Timer
+function startHoldCountdown(durationSeconds) {
+  if (holdTimerInterval) clearInterval(holdTimerInterval);
+  let timeLeft = durationSeconds;
+  const timerEl = document.getElementById('hold-timer-clock');
+
+  function update() {
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    if (timerEl) timerEl.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    if (timeLeft <= 0) {
+      clearInterval(holdTimerInterval);
+      if (timerEl) timerEl.innerText = 'Muddati tugadi';
+    }
+    timeLeft--;
+  }
+  update();
+  holdTimerInterval = setInterval(update, 1000);
+}
+
+// Payment Simulation
 async function simulatePayment(provider) {
   if (!currentBooking) return;
 
@@ -474,66 +621,70 @@ async function simulatePayment(provider) {
     });
     const result = await res.json();
     if (result.error === 0) {
-      showToast(`${provider} to'lovi muvaffaqiyatli o'tdi! Bron CONFIRMED`, 'success');
+      if (holdTimerInterval) clearInterval(holdTimerInterval);
+      showToast(`${provider} to'lovi muvaffaqiyatli qabul qilindi! Bron CONFIRMED`, 'success');
       document.getElementById('pay-success-area').classList.remove('hidden');
       if (result.fiscal_receipt_url) {
         document.getElementById('btn-ofd-link').href = result.fiscal_receipt_url;
       }
+      refreshBadges();
     } else {
       showToast(`To'lovda muammo: ${result.error_note}`, 'error');
     }
   } catch (err) {
-    showToast('To\'lovda xatolik: ' + err.message, 'error');
+    showToast('To\'lov xatosi: ' + err.message, 'error');
   }
 }
 
 // Offline Trip Voucher (AC-09)
-async function openOfflineVoucher() {
-  if (!currentBooking) return;
+async function openOfflineVoucher(ref) {
+  const bookingRef = ref || currentBooking?.booking_reference;
+  if (!bookingRef) return;
+
   try {
-    const res = await fetch(`/api/v1/vouchers/${currentBooking.booking_reference}`);
+    const res = await fetch(`/api/v1/vouchers/${bookingRef}`);
     const v = await res.json();
 
     const voucherHtml = `
-      <div style="border-bottom: 2px dashed #bbf7d0; padding-bottom: 12px; margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="border-bottom: 2px dashed #bbf7d0; padding-bottom: 12px; margin-bottom: 14px; display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <b style="color:#166534; font-size:16px;">🌲 ${v.property_title}</b>
+          <b style="color:#166534; font-size:17px;">🌲 ${v.property_title}</b>
           <div style="color:#64748b; font-size:12px;">Bron raqami: <b>${v.booking_reference}</b></div>
         </div>
-        <span style="background:#15803d; color:white; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:bold;">${v.booking_status}</span>
+        <span style="background:#15803d; color:white; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:800;">${v.booking_status}</span>
       </div>
 
-      <div style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:12px; font-size:13px; line-height:1.5; border-left:4px solid #16a34a;">
+      <div style="background:#f8fafc; padding:14px; border-radius:10px; margin-bottom:14px; font-size:13px; line-height:1.6; border-left:4px solid #16a34a;">
         <b>🚗 Yo'l sharoiti:</b> ${v.road_condition_advice}<br><br>
         <b>🗺️ Matnli yo'l ko'rsatmasi:</b> ${v.step_by_step_directions}
       </div>
 
-      <div style="background:#ecfdf5; padding:10px 14px; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; font-size:14px;">
-        <span style="color:#065f46;">Joyida to'lanadi (90%):</span>
-        <b style="color:#15803d; font-size:16px;">${Number(v.payable_on_arrival_to_owner).toLocaleString()} so'm</b>
+      <div style="background:#ecfdf5; padding:12px 16px; border-radius:10px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; font-size:14px;">
+        <span style="color:#065f46; font-weight:600;">Joyida dacha egasiga to'lanadi (90%):</span>
+        <b style="color:#15803d; font-size:18px;">${Number(v.payable_on_arrival_to_owner).toLocaleString()} so'm</b>
       </div>
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
-        <a href="tel:${v.owner_phone}" class="role-btn" style="background:#16a34a; color:white; text-align:center; padding:10px; text-decoration:none;">
-          📞 Ega bilan aloqa<br><small>${v.owner_phone}</small>
+        <a href="tel:${v.owner_phone}" class="btn-owner-action" style="background:#16a34a; color:white; text-align:center; padding:12px; text-decoration:none; display:block;">
+          📞 Ega bilan aloqa<br><small style="font-size:11px;">${v.owner_phone}</small>
         </a>
-        <a href="tel:${v.caretaker_phone}" class="role-btn" style="background:#0f766e; color:white; text-align:center; padding:10px; text-decoration:none;">
-          🔑 Bog'bonga qo'ng'iroq<br><small>${v.caretaker_phone}</small>
+        <a href="tel:${v.caretaker_phone}" class="btn-owner-action" style="background:#0f766e; color:white; text-align:center; padding:12px; text-decoration:none; display:block;">
+          🔑 Bog'bonga qo'ng'iroq<br><small style="font-size:11px;">${v.caretaker_phone}</small>
         </a>
       </div>
 
       <div style="margin-bottom:14px;">
-        <a href="${v.navigation.yandex_maps_url}" class="role-btn" style="display:block; background:#0284c7; color:white; text-align:center; padding:10px; text-decoration:none; margin-bottom:8px;">
-          🧭 Yandex Navigatorda Marshrut
+        <a href="${v.navigation.yandex_maps_url}" target="_blank" class="btn-owner-action" style="display:block; background:#0284c7; color:white; text-align:center; padding:12px; text-decoration:none; margin-bottom:8px;">
+          🧭 Yandex Navigatorda Marshrut Olish
         </a>
-        <a href="${v.navigation.geo_uri}" class="role-btn" style="display:block; background:#475569; color:white; text-align:center; padding:8px; text-decoration:none;">
-          📍 GPS Koordinata (${v.navigation.latitude}, ${v.navigation.longitude})
+        <a href="${v.navigation.geo_uri}" class="btn-owner-action" style="display:block; background:#475569; color:white; text-align:center; padding:8px; text-decoration:none; font-size:12px;">
+          📍 GPS Nuqta: ${v.navigation.latitude}, ${v.navigation.longitude}
         </a>
       </div>
 
       <div style="background:#f1f5f9; padding:12px; text-align:center; border-radius:8px;">
         <span style="font-size:11px; color:#475569;">Oflayn QR kod tokeni:</span>
-        <div style="font-weight:bold; font-family:monospace; color:#0f172a; font-size:13px; margin-top:4px;">${v.offline_qr_data}</div>
+        <div style="font-weight:bold; font-family:monospace; color:#0f172a; font-size:12px; margin-top:4px;">${v.offline_qr_data}</div>
       </div>
     `;
 
@@ -546,6 +697,69 @@ async function openOfflineVoucher() {
   }
 }
 
+// My Trips (Mening Safarlarim) Logic
+async function loadMyTrips() {
+  const container = document.getElementById('my-trips-list');
+  container.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b;">Safarlar yuklanmoqda...</div>';
+
+  const phone = currentUser?.phone_number || '+998935551122';
+  try {
+    const res = await fetch(`/api/v1/bookings/my-bookings?phone_or_id=${encodeURIComponent(phone)}`);
+    const trips = await res.json();
+
+    if (!trips || trips.length === 0) {
+      container.innerHTML = `
+        <div class="card-box" style="text-align:center; padding:50px 20px;">
+          <div style="font-size:42px; margin-bottom:10px;">🏕️</div>
+          <h3 style="color:#0f172a; font-size:18px; margin-bottom:6px;">Sizda hozircha faol safarlar yo'q</h3>
+          <p style="color:#64748b; font-size:14px; margin-bottom:20px;">Zomin dachalari yoki choyxona tapchanlarini tanlang va bron qiling.</p>
+          <button class="btn-primary-action" style="max-width:240px; margin:0 auto;" onclick="switchPortal('guest')">
+            Dachalarni Ko'rish →
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = trips.map(t => {
+      const isConfirmed = t.booking_status === 'CONFIRMED';
+      const statusColor = isConfirmed ? '#15803d' : (t.booking_status === 'PENDING_OWNER' ? '#d97706' : '#64748b');
+
+      return `
+        <div class="card-box" style="margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+            <div>
+              <h3 style="color:var(--primary); font-size:18px;">${t.property_title} — ${t.unit_name}</h3>
+              <div style="font-size:13px; color:#64748b; margin-top:2px;">Bron raqami: <b>${t.booking_reference}</b></div>
+            </div>
+            <span style="font-size:12px; font-weight:800; background:#f1f5f9; color:${statusColor}; padding:6px 12px; border-radius:var(--radius-full);">
+              ${t.booking_status}
+            </span>
+          </div>
+
+          <div style="font-size:14px; color:#475569; line-height:1.7; margin-bottom:14px;">
+            📅 Sanalar: <b>${t.checkin_time.slice(0, 16).replace('T', ' ')}</b> — <b>${t.checkout_time.slice(0, 16).replace('T', ' ')}</b> (${t.guest_count} kishi)<br>
+            🛡️ Kafolat haqi (10%): <b>${Number(t.platform_fee_amount).toLocaleString()} so'm</b> (To'langan)<br>
+            💵 Joyida dacha egasiga to'lanadi (90%): <b style="color:#15803d; font-size:16px;">${Number(t.pay_on_arrival_amount).toLocaleString()} so'm</b>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn-primary-action" style="width:auto; padding:8px 18px; font-size:13px;" onclick="openOfflineVoucher('${t.booking_reference}')">
+              📄 Oflayn Safar Vaucheri (AC-09)
+            </button>
+            <a href="tel:${t.owner_phone}" class="btn-card-select" style="text-decoration:none; padding:8px 16px;">
+              📞 Dacha Egasi bilan Bog'lanish
+            </a>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    container.innerHTML = `<div style="color:red; text-align:center;">Xatolik: ${err.message}</div>`;
+  }
+}
+
 // OWNER PORTAL LOGIC
 async function loadOwnerData() {
   if (!currentUser) return;
@@ -555,39 +769,42 @@ async function loadOwnerData() {
 
 async function loadOwnerUnits() {
   const container = document.getElementById('owner-units-list');
-  container.innerHTML = '<div style="color:#64748b;">Dachalar yuklanmoqda...</div>';
+  container.innerHTML = '<div style="color:#64748b; padding:16px;">Dachalar yuklanmoqda...</div>';
 
   try {
     const res = await fetch(`/api/v1/owner/properties?owner_id=${currentUser.id}`);
     const properties = await res.json();
 
     if (!properties || properties.length === 0) {
-      container.innerHTML = '<p style="color:#64748b;">Sizda ro\'yxatdan o\'tgan dachalar topilmadi.</p>';
+      container.innerHTML = '<p style="color:#64748b; padding:12px;">Sizda ro\'yxatdan o\'tgan dachalar topilmadi.</p>';
       return;
     }
 
     container.innerHTML = properties.map(p => {
       const unitsHtml = (p.rental_units || []).map(u => `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:10px 14px; border-radius:8px; margin-top:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:12px 16px; border-radius:10px; margin-top:8px; border:1px solid var(--border);">
           <div>
-            <b>${u.name}</b> <small style="color:#64748b;">(Hafta ichi: ${Number(u.base_price_weekday).toLocaleString()} so'm | Dam olish: ${Number(u.base_price_weekend).toLocaleString()} so'm)</small>
+            <b style="font-size:15px; color:#0f172a;">${u.name}</b> 
+            <div style="color:#64748b; font-size:13px; margin-top:2px;">
+              Hafta ichi: <b>${Number(u.base_price_weekday).toLocaleString()} so'm</b> | Dam olish: <b>${Number(u.base_price_weekend).toLocaleString()} so'm</b>
+            </div>
           </div>
-          <button class="role-btn" style="background:#0284c7; color:white; padding:4px 10px; font-size:12px;" onclick="openPriceEditModal('${u.id}', '${u.name}', ${u.base_price_weekday}, ${u.base_price_weekend})">
+          <button class="btn-owner-action" style="background:#0284c7; color:white; padding:6px 14px; font-size:12px;" onclick="openPriceEditModal('${u.id}', '${u.name}', ${u.base_price_weekday}, ${u.base_price_weekend})">
             ✏️ Narxni o'zgartirish
           </button>
         </div>
       `).join('');
 
       return `
-        <div style="border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:12px;">
-          <h4 style="color:var(--primary);">${p.title} (${p.micro_district})</h4>
-          <div style="font-size:13px; color:#64748b; margin-top:4px;">📍 ${p.address_text}</div>
+        <div style="border-bottom:1px solid var(--border); padding-bottom:16px; margin-bottom:16px;">
+          <h4 style="color:var(--primary); font-size:16px;">${p.title} (${p.micro_district})</h4>
+          <div style="font-size:13px; color:#64748b; margin-top:2px;">📍 ${p.address_text}</div>
           ${unitsHtml}
         </div>
       `;
     }).join('');
 
-    // Update block modal unit dropdown
+    // Populate Block Unit Dropdown
     const blockSelect = document.getElementById('block-unit-select');
     if (blockSelect) {
       let options = '';
@@ -600,20 +817,35 @@ async function loadOwnerUnits() {
     }
 
   } catch (err) {
-    container.innerHTML = `<div style="color:red;">Xatolik: ${err.message}</div>`;
+    container.innerHTML = `<div style="color:red; padding:12px;">Xatolik: ${err.message}</div>`;
   }
 }
 
 async function loadOwnerBookings() {
   const container = document.getElementById('owner-bookings-list');
-  container.innerHTML = '<div style="color:#64748b;">Buyurtmalar yuklanmoqda...</div>';
+  container.innerHTML = '<div style="color:#64748b; padding:16px;">Buyurtmalar tekshirilmoqda...</div>';
 
   try {
     const res = await fetch(`/api/v1/owner/bookings?owner_id=${currentUser.id}`);
     const bookings = await res.json();
 
+    const pending = (bookings || []).filter(b => b.booking_status === 'PENDING_OWNER');
+    const badgeEl = document.getElementById('badge-owner-pending');
+    const statPendingEl = document.getElementById('stat-pending-count');
+    if (badgeEl) {
+      badgeEl.innerText = pending.length;
+      badgeEl.classList.toggle('hidden', pending.length === 0);
+    }
+    if (statPendingEl) statPendingEl.innerText = `${pending.length} ta`;
+
     if (!bookings || bookings.length === 0) {
-      container.innerHTML = '<div style="background:white; padding:20px; border-radius:12px; text-align:center; color:#64748b;">Hozircha yangi bronlar yo\'q.</div>';
+      container.innerHTML = `
+        <div style="background:#f8fafc; padding:30px; border-radius:12px; text-align:center; border:1px dashed #cbd5e1;">
+          <div style="font-size:36px; margin-bottom:8px;">🔔</div>
+          <h4 style="color:#334155; margin-bottom:4px;">Hozircha yangi bron so'rovlari yo'q</h4>
+          <p style="color:#64748b; font-size:13px; margin:0;">Sayyohlar sizning dachangizni bron qilganda bu yerda tezkor tasdiqlash xabarnomasi paydo bo'ladi.</p>
+        </div>
+      `;
       return;
     }
 
@@ -622,23 +854,26 @@ async function loadOwnerBookings() {
       const statusColor = b.booking_status === 'CONFIRMED' ? '#15803d' : (isPending ? '#d97706' : '#64748b');
 
       return `
-        <div style="background:white; padding:16px; border-radius:12px; border:1px solid var(--border); margin-bottom:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <b>${b.property_title} — ${b.unit_name}</b>
-            <span style="font-size:12px; font-weight:bold; color:${statusColor}; background:#f1f5f9; padding:4px 8px; border-radius:6px;">${b.booking_status}</span>
+        <div style="background:#f8fafc; padding:18px; border-radius:12px; border:1px solid var(--border); margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <b style="font-size:16px; color:#0f172a;">${b.property_title} — ${b.unit_name}</b>
+            <span style="font-size:12px; font-weight:800; color:${statusColor}; background:white; padding:4px 10px; border-radius:6px; border:1px solid #cbd5e1;">
+              ${b.booking_status}
+            </span>
           </div>
-          <div style="font-size:13px; color:#475569; margin-bottom:10px; line-height:1.6;">
-            👤 Mehmon: <b>${b.guest_name}</b> (${b.guest_phone}) | 🚗 Mashina: <b>${b.car_plate || 'Yo\'q'}</b><br>
+          <div style="font-size:13px; color:#475569; margin-bottom:12px; line-height:1.7;">
+            👤 Mehmon: <b>${b.guest_name}</b> (📞 <a href="tel:${b.guest_phone}" style="color:#0284c7; text-decoration:none;">${b.guest_phone}</a>)<br>
+            🚗 Mashina raqami: <b style="background:#fef3c7; padding:2px 6px; border-radius:4px;">${b.car_plate || 'Kiritilmagan'}</b><br>
             📅 Sanalar: <b>${b.checkin_time.slice(0, 16).replace('T', ' ')}</b> — <b>${b.checkout_time.slice(0, 16).replace('T', ' ')}</b> (${b.guest_count} kishi)<br>
-            💰 Joyida olasiz: <b style="color:#15803d; font-size:15px;">${Number(b.pay_on_arrival_amount).toLocaleString()} so'm</b>
+            💰 Joyida olasiz (90%): <b style="color:#15803d; font-size:16px;">${Number(b.pay_on_arrival_amount).toLocaleString()} so'm</b>
           </div>
           ${isPending ? `
-            <div style="display:flex; gap:8px;">
-              <button class="role-btn" style="background:#16a34a; color:white;" onclick="respondBooking('${b.id}', 'ACCEPT')">
-                ✅ Qabul qilish (Tasdiqlash)
+            <div style="display:flex; gap:10px;">
+              <button class="btn-owner-action" style="background:#16a34a; color:white; flex:1;" onclick="respondBooking('${b.id}', 'ACCEPT')">
+                ✅ Qabul Qilish (Tasdiqlash)
               </button>
-              <button class="role-btn" style="background:#dc2626; color:white;" onclick="respondBooking('${b.id}', 'REJECT')">
-                ❌ Rad etish
+              <button class="btn-owner-action" style="background:#dc2626; color:white; flex:1;" onclick="respondBooking('${b.id}', 'REJECT')">
+                ❌ Rad Etish
               </button>
             </div>
           ` : ''}
@@ -665,6 +900,7 @@ async function respondBooking(bookingId, action) {
     }
     showToast(result.message, 'success');
     loadOwnerBookings();
+    refreshBadges();
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -676,7 +912,7 @@ async function runIvrCheckNow() {
     const res = await fetch('/api/v1/owner/ivr-check?delay_minutes=0', { method: 'POST' });
     const data = await res.json();
     if (res.ok) {
-      showToast(`IVR tekshiruv yakunlandi: ${data.dispatched_count} ta qo'ng'iroq yuborildi`, 'success');
+      showToast(`IVR Ovozli Eslatma: ${data.dispatched_count} ta dacha egasiga robot qo'ng'iroq qildi`, 'success');
     } else {
       showToast('IVR tekshirishda xatolik', 'error');
     }
@@ -719,7 +955,7 @@ async function submitPriceUpdate() {
       showToast(data.detail || 'Narxni yangilashda xatolik (BOLA)', 'error');
       return;
     }
-    showToast('Narxlar muvaffaqiyatli saqlandi (AC-03 daxlsiz)', 'success');
+    showToast('Narxlar muvaffaqiyatli yangilandi (AC-03 daxlsiz)', 'success');
     closeModal('price-edit-modal');
     loadOwnerUnits();
   } catch (e) {
@@ -775,7 +1011,7 @@ async function submitCalendarBlock() {
 // CARETAKER PORTAL LOGIC (AC-14)
 async function loadCaretakerArrivals() {
   const container = document.getElementById('caretaker-arrivals-list');
-  container.innerHTML = '<div style="color:#64748b;">Kutilayotgan mehmonlar yuklanmoqda...</div>';
+  container.innerHTML = '<div style="color:#64748b; padding:20px;">Kutilayotgan mehmonlar yuklanmoqda...</div>';
 
   try {
     const cRes = await fetch(`/api/v1/owner/caretaker/arrivals?caretaker_id=${currentUser.id}`);
@@ -783,7 +1019,7 @@ async function loadCaretakerArrivals() {
 
     if (!arrivals || arrivals.length === 0) {
       container.innerHTML = `
-        <div style="background:white; padding:24px; border-radius:12px; text-align:center; border:1px solid var(--border);">
+        <div style="background:#f8fafc; padding:30px; border-radius:12px; text-align:center; border:1px dashed #cbd5e1;">
           <p style="color:#64748b; margin:0;">Hozircha biriktirilgan dachalar bo'yicha kutilayotgan mehmonlar yo'q.</p>
         </div>
       `;
@@ -794,24 +1030,26 @@ async function loadCaretakerArrivals() {
       const isCheckedIn = a.booking_status === 'CHECKED_IN';
 
       return `
-        <div style="background:white; padding:16px; border-radius:12px; border:1px solid #bbf7d0; margin-bottom:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <b style="color:#166534;">${a.property_title} — ${a.unit_name}</b>
-            <span style="font-size:12px; font-weight:bold; background:#dcfce7; color:#15803d; padding:4px 8px; border-radius:6px;">${a.booking_status}</span>
+        <div style="background:#f8fafc; padding:18px; border-radius:12px; border:1px solid #bbf7d0; margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <b style="color:#166534; font-size:16px;">${a.property_title} — ${a.unit_name}</b>
+            <span style="font-size:12px; font-weight:800; background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:6px;">
+              ${a.booking_status}
+            </span>
           </div>
-          <div style="font-size:14px; margin-bottom:12px; line-height:1.6;">
+          <div style="font-size:14px; margin-bottom:14px; line-height:1.7;">
             👤 Mehmon: <b>${a.guest_name}</b><br>
-            📞 Telefon: <a href="tel:${a.guest_phone}" style="color:#0284c7; font-weight:bold;">${a.guest_phone}</a><br>
-            🚗 Mashina raqami: <b style="background:#fef3c7; padding:2px 6px; border-radius:4px;">${a.car_plate || 'Kiritilmagan'}</b><br>
+            📞 Telefon: <a href="tel:${a.guest_phone}" style="color:#0284c7; font-weight:bold; text-decoration:none;">${a.guest_phone}</a><br>
+            🚗 Mashina raqami: <b style="background:#fef3c7; color:#92400e; padding:3px 8px; border-radius:6px; font-size:15px;">${a.car_plate || 'Kiritilmagan'}</b><br>
             ⏰ Kelish vaqti: <b>${a.checkin_time.slice(0, 16).replace('T', ' ')}</b> (${a.guest_count} kishi)
-            ${a.tandir_preorder_kg > 0 ? `<br>🍗 Zomin archa tandiri: <b>${a.tandir_preorder_kg} kg</b> buyurtma qilingan (oshxonaga xabar bering)` : ''}
+            ${a.tandir_preorder_kg > 0 ? `<br>🍗 Zomin archa tandiri: <b>${a.tandir_preorder_kg} kg</b> (Oshxonaga xabar bering)` : ''}
           </div>
           ${!isCheckedIn ? `
-            <button class="btn-search" style="background:#16a34a; margin-top:0; padding:10px 16px; width:100%;" onclick="confirmCheckIn('${a.id}')">
-              🔑 Mehmon Keldi / Kalit Topshirildi (Check-in)
+            <button class="btn-primary-action" style="background:#16a34a; padding:12px;" onclick="confirmCheckIn('${a.id}')">
+              🔑 Mehmon Keldi — Kalit Topshirildi (Check-in)
             </button>
           ` : `
-            <div style="color:#15803d; font-weight:bold; font-size:13px; text-align:center; padding:8px; background:#f0fdf4; border-radius:8px;">
+            <div style="color:#15803d; font-weight:bold; font-size:13px; text-align:center; padding:10px; background:#f0fdf4; border-radius:8px; border:1px solid #bbf7d0;">
               ✅ Mehmon kutib olingan va kalit topshirilgan
             </div>
           `}
@@ -820,7 +1058,7 @@ async function loadCaretakerArrivals() {
     }).join('');
 
   } catch (err) {
-    container.innerHTML = `<div style="color:red;">Xatolik: ${err.message}</div>`;
+    container.innerHTML = `<div style="color:red; padding:16px;">Xatolik: ${err.message}</div>`;
   }
 }
 
@@ -839,6 +1077,36 @@ async function confirmCheckIn(bookingId) {
   } catch (err) {
     showToast(err.message, 'error');
   }
+}
+
+// Badges Refresh
+async function refreshBadges() {
+  try {
+    // Trips badge
+    const phone = currentUser?.phone_number || '+998935551122';
+    const tripsRes = await fetch(`/api/v1/bookings/my-bookings?phone_or_id=${encodeURIComponent(phone)}`);
+    if (tripsRes.ok) {
+      const trips = await tripsRes.json();
+      const badgeTrips = document.getElementById('badge-my-trips');
+      if (badgeTrips) {
+        badgeTrips.innerText = trips.length;
+        badgeTrips.classList.toggle('hidden', trips.length === 0);
+      }
+    }
+
+    // Owner pending badge
+    const ownerId = DEMO_PROFILES.owner1.phone;
+    const bRes = await fetch(`/api/v1/owner/bookings?owner_id=${currentUser?.id || ''}`);
+    if (bRes.ok) {
+      const bList = await bRes.json();
+      const pendingCount = (bList || []).filter(b => b.booking_status === 'PENDING_OWNER').length;
+      const bOwnerBadge = document.getElementById('badge-owner-pending');
+      if (bOwnerBadge) {
+        bOwnerBadge.innerText = pendingCount;
+        bOwnerBadge.classList.toggle('hidden', pendingCount === 0);
+      }
+    }
+  } catch (e) {}
 }
 
 function closeModal(modalId) {

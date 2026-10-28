@@ -3,38 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ZominStay — Zomin Tog' Turizmi va Dacha Ekotizimi</title>
+  <title>ZominStay — Zomin Tog' Turizmi, Dacha va Dam Olish Ekotizimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
-  <!-- Toast Notifications -->
+  <!-- Toast Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Navigation Header -->
-  <header>
+  <!-- Top Navigation Header -->
+  <header class="site-header">
     <div class="nav-container">
+      <!-- Logo Area -->
       <div class="logo-area" onclick="switchPortal('guest')">
-        <span class="logo-icon">🌲</span>
-        <div style="display:flex; flex-direction:column;">
-          <span class="logo-text">ZominStay</span>
-          <span class="logo-sub">Zomin Tog' Dam Olish Ekotizimi</span>
+        <div class="logo-emblem">🌲</div>
+        <div class="logo-titles">
+          <span class="logo-name">Zomin<span class="logo-highlight">Stay</span></span>
+          <span class="logo-badge-sub">Zomin Tog' Turizmi</span>
         </div>
       </div>
 
-      <div class="nav-center">
-        <div class="role-switcher">
-          <button id="btn-portal-guest" class="role-btn active" onclick="switchPortal('guest')">🏕️ Sayyoh</button>
-          <button id="btn-portal-owner" class="role-btn" onclick="switchPortal('owner')">🏡 Dacha Egasi</button>
-          <button id="btn-portal-caretaker" class="role-btn" onclick="switchPortal('caretaker')">🔑 Bog'bon</button>
-        </div>
-      </div>
+      <!-- Main Navigation Tabs -->
+      <nav class="nav-tabs-desktop">
+        <button id="tab-guest-dachas" class="nav-tab active" onclick="switchPortal('guest')">
+          <span class="tab-icon">🏔️</span> Dachalar & Qidiruv
+        </button>
+        <button id="tab-guest-tapchan" class="nav-tab" onclick="switchPortal('guest'); filterToTapchans();">
+          <span class="tab-icon">🌊</span> Kunduzgi Tapchanlar
+        </button>
+        <button id="tab-map-guide" class="nav-tab" onclick="switchPortal('map')">
+          <span class="tab-icon">🗺️</span> Zomin Xaritasi
+        </button>
+        <button id="tab-my-trips" class="nav-tab" onclick="switchPortal('trips')">
+          <span class="tab-icon">📄</span> Mening Safarlarim
+          <span id="badge-my-trips" class="badge-count hidden">0</span>
+        </button>
+        <button id="tab-owner-portal" class="nav-tab" onclick="switchPortal('owner')">
+          <span class="tab-icon">🏡</span> Ega Kabineti
+          <span id="badge-owner-pending" class="badge-count hidden">1</span>
+        </button>
+        <button id="tab-caretaker-portal" class="nav-tab" onclick="switchPortal('caretaker')">
+          <span class="tab-icon">🔑</span> Bog'bon
+        </button>
+      </nav>
 
-      <!-- Quick Demo Profile Switcher -->
-      <div class="user-profile-badge">
-        <span style="font-size:12px; color:var(--text-muted);">Faol profil:</span>
-        <select id="user-profile-select" onchange="switchUserProfile(this.value)">
+      <!-- User Profile & Quick Demo Switcher -->
+      <div class="user-menu-pill">
+        <div class="user-avatar" id="header-user-avatar">👤</div>
+        <div class="user-info-text">
+          <span class="user-display-name" id="header-user-name">Jasur M. (Sayyoh)</span>
+          <span class="user-role-tag" id="header-user-role">SAYYOH</span>
+        </div>
+        <select id="user-profile-select" class="profile-dropdown" onchange="switchUserProfile(this.value)">
           <option value="guest">🏕️ Jasur M. (Sayyoh)</option>
           <option value="owner1">🏡 Alisher Z. (Duoba Dacha Egasi)</option>
           <option value="owner2">🏡 Muzaffar R. (Suffa & O'riklisoy Egasi)</option>
@@ -44,293 +68,527 @@
     </div>
   </header>
 
-  <!-- GUEST PORTAL -->
-  <div id="portal-guest">
-    <!-- Hero Banner -->
-    <div class="hero">
-      <h1>Zomin Tog'larida Qaynoq Dam Oling</h1>
-      <p>Duoba dachalaridan tortib Suffa platosidagi kottejlar va O'riklisoy choyxona tapchanlarigacha. Double-bookingdan 100% himoyalangan, 10% xizmat haqi bilan kafolatlangan bron.</p>
-    </div>
+  <!-- ================= GUEST PORTAL ================= -->
+  <div id="portal-guest" class="portal-view">
+    <!-- Hero Section -->
+    <section class="hero-banner">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-chip-badge">
+          <span class="pulse-dot"></span> Zomin Tog' Klasteri 2026
+        </div>
+        <h1 class="hero-title">Zomin Tog'larida Qaynoq Hordiq va Kafolatlangan Joylar</h1>
+        <p class="hero-desc">
+          Duoba soyi bo'yidagi basseynli dachalar, Suffa 2400m panoramasi va O'riklisoy tapchanlari. 
+          100% rasmiy tekshirilgan, double-bookingdan himoyalangan, 10% xizmat haqi bilan kafolatli bron.
+        </p>
 
-    <!-- Search Section -->
-    <div class="search-card">
-      <div class="search-box">
-        <div class="search-field">
-          <label>Mikro-hudud</label>
-          <select id="search-district" onchange="applyFilters()">
-            <option value="ALL">Barcha hududlar</option>
+        <!-- Trust Badges Bar -->
+        <div class="trust-badges">
+          <div class="trust-badge-item">
+            <span class="trust-icon">🛡️</span>
+            <span>100% Verified Obyektlar</span>
+          </div>
+          <div class="trust-badge-item">
+            <span class="trust-icon">🔒</span>
+            <span>GiST Double-Booking Himoyasi</span>
+          </div>
+          <div class="trust-badge-item">
+            <span class="trust-icon">⚡</span>
+            <span>10% Avans (Soliq OFD Chek)</span>
+          </div>
+          <div class="trust-badge-item">
+            <span class="trust-icon">🍗</span>
+            <span>Zomin Archa Tandiri</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Floating Interactive Search Widget -->
+    <div class="search-widget-wrapper">
+      <div class="search-card-pill">
+        <div class="search-cell">
+          <div class="search-cell-label">
+            <span class="cell-icon">📍</span> Qayerga borasiz?
+          </div>
+          <select id="search-district" class="search-cell-input" onchange="applyFilters()">
+            <option value="ALL">Barcha hududlar (Zomin)</option>
             <option value="DUOBA">Duoba MFY (Dachalar o'zagi)</option>
-            <option value="ORIKLISOY">O'riklisoy & Pishag'or</option>
-            <option value="SUFFA">Suffa platosi (2400 m)</option>
-            <option value="SANATORIY">Zomin Sanatoriysi</option>
-            <option value="DASHTOBOD">Dashtobod stansiyasi</option>
+            <option value="SUFFA">Suffa platosi (2400 m, Dor yo'li)</option>
+            <option value="ORIKLISOY">O'riklisoy & Pishag'or tapchanlari</option>
+            <option value="SANATORIY">Zomin Sanatoriysi (Archazor)</option>
+            <option value="DASHTOBOD">Dashtobod (Poyezd stansiyasi)</option>
           </select>
         </div>
 
-        <div class="search-field">
-          <label>Kirish sanasi</label>
-          <input type="date" id="search-checkin" onchange="applyFilters()">
+        <div class="search-cell-divider"></div>
+
+        <div class="search-cell">
+          <div class="search-cell-label">
+            <span class="cell-icon">📅</span> Kirish sanasi
+          </div>
+          <input type="date" id="search-checkin" class="search-cell-input" onchange="applyFilters()">
         </div>
 
-        <div class="search-field">
-          <label>Chiqish sanasi</label>
-          <input type="date" id="search-checkout" onchange="applyFilters()">
+        <div class="search-cell-divider"></div>
+
+        <div class="search-cell">
+          <div class="search-cell-label">
+            <span class="cell-icon">📅</span> Chiqish sanasi
+          </div>
+          <input type="date" id="search-checkout" class="search-cell-input" onchange="applyFilters()">
         </div>
 
-        <div class="search-field">
-          <label>Mehmonlar</label>
-          <select id="search-guests" onchange="applyFilters()">
+        <div class="search-cell-divider"></div>
+
+        <div class="search-cell">
+          <div class="search-cell-label">
+            <span class="cell-icon">👥</span> Mehmonlar
+          </div>
+          <select id="search-guests" class="search-cell-input" onchange="applyFilters()">
             <option value="1">1+ kishi</option>
-            <option value="4" selected>4+ kishi</option>
-            <option value="8">8+ kishi</option>
-            <option value="12">12+ kishi</option>
+            <option value="4" selected>4+ kishi (Oila)</option>
+            <option value="8">8+ kishi (Davra)</option>
+            <option value="12">12+ kishi (Katta jamoa)</option>
           </select>
         </div>
 
-        <button class="btn-search" onclick="applyFilters()">Qidirish</button>
+        <button class="btn-search-pill" onclick="applyFilters()">
+          <span class="btn-search-icon">🔍</span>
+          <span class="btn-search-text">Qidirish</span>
+        </button>
       </div>
     </div>
 
-    <!-- Micro-district Pills -->
-    <div class="district-bar">
-      <div class="district-pill active" onclick="selectDistrictPill(this, 'ALL')">🏔️ Barchasi</div>
-      <div class="district-pill" onclick="selectDistrictPill(this, 'DUOBA')">🏡 Duoba (75% dacha)</div>
-      <div class="district-pill" onclick="selectDistrictPill(this, 'ORIKLISOY')">💧 O'riklisoy tapchanlari</div>
-      <div class="district-pill" onclick="selectDistrictPill(this, 'SUFFA')">🚡 Suffa dor yo'li (2400m)</div>
-      <div class="district-pill" onclick="selectDistrictPill(this, 'SANATORIY')">🌲 Shifobaxsh Sanatoriy</div>
+    <!-- Micro-District Category Pills -->
+    <div class="filter-container">
+      <div class="pills-scroll-row">
+        <button class="pill-chip active" onclick="selectDistrictPill(this, 'ALL')">
+          🏔️ Barchasi <span class="pill-count" id="count-all">4</span>
+        </button>
+        <button class="pill-chip" onclick="selectDistrictPill(this, 'DUOBA')">
+          🏡 Duoba Dachalar (75%)
+        </button>
+        <button class="pill-chip" onclick="selectDistrictPill(this, 'SUFFA')">
+          🚡 Suffa Dor Yo'li (2400m)
+        </button>
+        <button class="pill-chip" onclick="selectDistrictPill(this, 'ORIKLISOY')">
+          💧 O'riklisoy Tapchanlari
+        </button>
+        <button class="pill-chip" onclick="selectDistrictPill(this, 'SANATORIY')">
+          🌲 Shifobaxsh Sanatoriy
+        </button>
+      </div>
+
+      <!-- Mountain Specific Toggle Chips -->
+      <div class="feature-toggles-row">
+        <button class="toggle-pill" id="toggle-sedan" onclick="toggleFilterChip(this, 'road', 'ASPHALT_SEDAN')">
+          🚗 Spark / Cobalt chiqa oladi
+        </button>
+        <button class="toggle-pill" id="toggle-gen" onclick="toggleFilterChip(this, 'generator', true)">
+          ⚡ Generator bor (Elektr kafolati)
+        </button>
+        <button class="toggle-pill" id="toggle-tapchan" onclick="toggleFilterChip(this, 'type', 'CHOYXONA_TAPCHAN')">
+          🌊 Kunduzgi tapchanlar
+        </button>
+        <button class="toggle-pill" id="toggle-villa" onclick="toggleFilterChip(this, 'type', 'VILLA')">
+          🏊‍♂️ Isitiladigan basseyn
+        </button>
+      </div>
     </div>
 
-    <!-- Quick Infrastructure Toggles -->
-    <div class="filter-toggles">
-      <div class="toggle-chip" id="toggle-sedan" onclick="toggleFilterChip(this, 'road', 'ASPHALT_SEDAN')">
-        🚗 Spark/Cobalt chiqadigan yo'l
+    <!-- Main Results Section -->
+    <main class="content-container">
+      <div class="section-heading-bar">
+        <div>
+          <h2 class="section-title">Zomindagi Saralangan Dacha va Maskanlar</h2>
+          <p class="section-sub" id="results-count-text">4 ta tekshirilgan obyekt topildi</p>
+        </div>
+        <div class="sort-selector-wrap">
+          <span class="sort-label">Saralash:</span>
+          <select id="sort-selector" class="sort-select" onchange="sortProperties(this.value)">
+            <option value="RECOMMENDED">Tavsiya etilgan</option>
+            <option value="PRICE_ASC">Narx: Arzondan qimmatga</option>
+            <option value="PRICE_DESC">Narx: Qimmatdan arzonga</option>
+          </select>
+        </div>
       </div>
-      <div class="toggle-chip" id="toggle-gen" onclick="toggleFilterChip(this, 'generator', true)">
-        ⚡ Generator bor (Elektr kafolat)
-      </div>
-      <div class="toggle-chip" id="toggle-tapchan" onclick="toggleFilterChip(this, 'type', 'CHOYXONA_TAPCHAN')">
-        🌊 Kunduzgi tapchanlar
-      </div>
-      <div class="toggle-chip" id="toggle-villa" onclick="toggleFilterChip(this, 'type', 'VILLA')">
-        🏊‍♂️ Basseynli dachalar
-      </div>
-    </div>
 
-    <!-- Properties Grid -->
-    <main class="main-content">
-      <div id="properties-grid" class="grid-properties">
-        <div style="text-align:center; padding:40px; color:#64748b;">Dachalar yuklanmoqda...</div>
+      <!-- Properties Grid -->
+      <div id="properties-grid" class="cards-grid">
+        <!-- Rendered by JS -->
       </div>
     </main>
   </div>
 
-  <!-- OWNER PORTAL -->
-  <div id="portal-owner" class="main-content hidden" style="margin-top:24px;">
-    <div class="portal-header-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-        <div>
-          <h2 style="color:var(--primary); margin-bottom:4px;">🏡 Dacha Egasi Kabineti</h2>
-          <p id="owner-cabinet-subtitle" style="color:var(--text-muted); font-size:14px; margin:0;">
-            Yangi bron so'rovlarini inline tasdiqlash yoki rad etish, narxlarni belgilash va kalendarni boshqarish.
-          </p>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <button class="role-btn" style="background:#0284c7; color:white;" onclick="runIvrCheckNow()">
-            📞 IVR 10-daqiqalik tekshiruv
-          </button>
-          <button class="role-btn" style="background:var(--primary); color:white;" onclick="openCalendarBlockModal()">
-            📅 Kalendarni yopish
-          </button>
+  <!-- ================= ZOMIN MAP & GUIDE PORTAL ================= -->
+  <div id="portal-map" class="portal-view hidden">
+    <div class="content-container" style="padding-top:24px;">
+      <div class="card-box" style="margin-bottom:24px;">
+        <h2 style="color:var(--primary); margin-bottom:8px;">🗺️ Zomin Tog' Turizm Xaritasi va Asosiy Maskanlar</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">
+          Toshkentdan Zomingacha masofa taxminan 210 km (mashinada 2.5–3 soat). Yoki Toshkent-Dashtobod "Afrosiyob" tezyurar poyezdida 1 soat 40 daqiqa.
+        </p>
+        
+        <!-- Interactive Mountain Guide Steps -->
+        <div class="map-guide-timeline">
+          <div class="timeline-step">
+            <div class="step-num">1</div>
+            <div class="step-info">
+              <h4>Dashtobod Stansiyasi (Transport Habi)</h4>
+              <p>Afrosiyob poyezdi keladi. Bu yerdan Duoba dacha zonasigacha 25 km tekis asfalt tog' yo'li.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-num">2</div>
+            <div class="step-info">
+              <h4>Zomin Shahar Markazi & Bozor</h4>
+              <p>Mashhur Zomin tandir go'shti, somsa, mevalar va do'konlar shu yerda joylashgan.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-num">3</div>
+            <div class="step-info">
+              <h4>Duoba MFY (Dachalar o'zagi — 1100–1400 m)</h4>
+              <p>Barcha yirik dacha majmualari, basseynli villalar va soy bo'yidagi tapchanlarning 75% i shu yerda.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-num">4</div>
+            <div class="step-info">
+              <h4>O'riklisoy & Pishag'or</h4>
+              <p>Muzdek buloqlar, sharshara, soy bo'yida kunduzgi hordiq uchun tinch sokin tapchanlar maskani.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-num">5</div>
+            <div class="step-info">
+              <h4>Zomin Sanatoriysi (1800 m)</h4>
+              <p>Qarag'ayzorlar va archazorlar bilan o'ralgan shifobaxsh tog' havosi pansionati.</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-num">6</div>
+            <div class="step-info">
+              <h4>Suffa Platosi 2400 m (Bartholet Dor Yo'li & Osma Ko'prik)</h4>
+              <p>Shveysariya texnologiyasi asosidagi 2.1 km dor yo'li va 305 m osma ko'prik. Yozda salqin, qishda qor zonalari.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Owner Units & Price Editing -->
-    <div style="background:white; padding:20px; border-radius:var(--radius); border:1px solid var(--border); margin-bottom:24px;">
-      <h3 style="margin-bottom:12px;">🏷️ Mening Dachalarim va Narx Boshqaruvi (AC-03 & RBAC)</h3>
-      <div id="owner-units-list">
+  <!-- ================= MY TRIPS (MENING SAFARLARIM) PORTAL ================= -->
+  <div id="portal-trips" class="portal-view hidden">
+    <div class="content-container" style="padding-top:24px;">
+      <div class="card-box" style="margin-bottom:24px;">
+        <h2 style="color:var(--primary); margin-bottom:6px;">📄 Mening Safarlarim va Vaucherlarim</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">
+          Siz bron qilgan barcha dacha va tapchanlar. Safarga chiqishdan oldin Oflayn Vaucherni saqlab oling.
+        </p>
+      </div>
+
+      <div id="my-trips-list">
         <!-- Rendered dynamically -->
       </div>
     </div>
+  </div>
 
-    <!-- Owner Bookings List -->
-    <h3 style="margin-bottom:12px;">🔔 Kelgan Bron So'rovlari va Buyurtmalar</h3>
-    <div id="owner-bookings-list">
-      <!-- Dynamic owner bookings -->
+  <!-- ================= OWNER PORTAL ================= -->
+  <div id="portal-owner" class="portal-view hidden">
+    <div class="content-container" style="padding-top:24px;">
+      <!-- Stats Dashboard -->
+      <div class="owner-stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="background:#dcfce7; color:#166534;">🏡</div>
+          <div>
+            <div class="stat-val" id="stat-units-count">2 ta</div>
+            <div class="stat-lbl">Mening Faol Obyektlarim</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="background:#fef3c7; color:#b45309;">🔔</div>
+          <div>
+            <div class="stat-val" id="stat-pending-count">1 ta</div>
+            <div class="stat-lbl">Kutilayotgan So'rovlar</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="background:#e0f2fe; color:#0369a1;">💵</div>
+          <div>
+            <div class="stat-val" id="stat-earnings-count">2,700,000 so'm</div>
+            <div class="stat-lbl">Kutilayotgan Tushum</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="background:#ede9fe; color:#6d28d9;">🔑</div>
+          <div>
+            <div class="stat-val">Rustam Tog'a</div>
+            <div class="stat-lbl">Duoba Qarovchisi (Bog'bon)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons Bar -->
+      <div class="owner-action-bar">
+        <div>
+          <h2 style="color:var(--primary); font-size:22px; margin-bottom:4px;">🏡 Dacha Egasi Boshqaruv Markazi</h2>
+          <p style="color:var(--text-muted); font-size:14px; margin:0;">
+            Kelgan so'rovlarni tasdiqlang, kalendarni yoping yoki hafta ichi / dam olish kunlari narxlarini belgilang.
+          </p>
+        </div>
+        <div class="owner-btns-group">
+          <button class="btn-owner-action btn-ivr" onclick="runIvrCheckNow()">
+            📞 IVR Ovozli Eslatma (AC-10)
+          </button>
+          <button class="btn-owner-action btn-block" onclick="openCalendarBlockModal()">
+            📅 Sanani Yopish
+          </button>
+        </div>
+      </div>
+
+      <!-- Pending Bookings Feed -->
+      <div class="card-box" style="margin-bottom:24px;">
+        <h3 class="card-box-title">🔔 Kelgan Bron So'rovlari (Tasdiqlash & Rad Etish)</h3>
+        <div id="owner-bookings-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Units & Price Management -->
+      <div class="card-box">
+        <h3 class="card-box-title">🏷️ Mening Dachalarim va Narxlarni Boshqarish (AC-03 & RBAC)</h3>
+        <div id="owner-units-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- CARETAKER PORTAL (AC-14) -->
-  <div id="portal-caretaker" class="main-content hidden" style="margin-top:24px;">
-    <div style="background:#f0fdf4; padding:20px; border-radius:var(--radius); border:1px solid #bbf7d0; margin-bottom:24px;">
-      <h2 style="color:#166534; margin-bottom:4px;">🔑 Bog'bon (Qarovchi) Portali</h2>
-      <p style="color:#15803d; font-size:14px; margin:0;">
-        Sizga biriktirilgan dacha mehmonlarini kutib olish va kalit topshirish. 
-        <br><b>Eslatma (AC-14):</b> Moliyaviy summa va narxlar xavfsizlik maqsadida sizga ko'rinmaydi.
-      </p>
-    </div>
+  <!-- ================= CARETAKER PORTAL (AC-14) ================= -->
+  <div id="portal-caretaker" class="portal-view hidden">
+    <div class="content-container" style="padding-top:24px;">
+      <div class="caretaker-banner">
+        <div class="caretaker-banner-icon">🔑</div>
+        <div>
+          <h2 style="color:#166534; font-size:20px; margin-bottom:4px;">Bog'bon (Qarovchi) Portali</h2>
+          <p style="color:#15803d; font-size:14px; margin:0;">
+            Sizga biriktirilgan dacha mehmonlarini kutib oling va darvozadan kalit topshiring.
+            <br><b>Maxfiylik (AC-14):</b> Moliyaviy narxlar va hisob-kitoblar xavfsizlik uchun sizga ko'rsatilmaydi.
+          </p>
+        </div>
+      </div>
 
-    <h3 style="margin-bottom:12px;">🚙 Kutilayotgan Mehmonlar (Arrivals)</h3>
-    <div id="caretaker-arrivals-list">
-      <!-- Dynamic caretaker arrivals -->
+      <div class="card-box">
+        <h3 class="card-box-title">🚙 Kutilayotgan Mehmonlar (Arrivals)</h3>
+        <div id="caretaker-arrivals-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- PROPERTY DETAIL & QUOTE MODAL -->
+  <!-- ================= PROPERTY DETAIL & LIVE QUOTE MODAL ================= -->
   <div id="prop-modal" class="modal-overlay hidden">
-    <div class="modal-card">
+    <div class="modal-card modal-lg">
       <div class="modal-header">
-        <h3 id="m-prop-title" class="modal-title">Dacha Nomi</h3>
-        <button class="modal-close" onclick="closeModal('prop-modal')">✕</button>
+        <div>
+          <h3 id="m-prop-title" class="modal-title">Dacha Nomi</h3>
+          <div id="m-prop-address" class="modal-subtitle">📍 Manzil</div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('prop-modal')">✕</button>
       </div>
-      <div class="modal-body">
-        <img id="m-prop-img" src="" alt="Dacha" style="width:100%; height:220px; object-fit:cover; border-radius:12px; margin-bottom:16px;">
-        <div id="m-prop-badges" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
-        <p id="m-prop-desc" style="font-size:14px; color:#475569; margin-bottom:16px;"></p>
 
-        <!-- Unit selector -->
-        <div class="search-field" style="margin-bottom:12px;">
-          <label>Bron Birligi (Unit / Tapchan)</label>
-          <select id="m-unit-select" onchange="onUnitSelectionChanged()"></select>
-        </div>
+      <div class="modal-body-split">
+        <!-- Left: Gallery & Specs -->
+        <div class="modal-split-left">
+          <div class="modal-gallery">
+            <img id="m-prop-img" src="" alt="Dacha" class="modal-main-img">
+            <div id="m-prop-badges" class="modal-badges-row"></div>
+          </div>
 
-        <!-- Day Use Slot Selector (AC-02: Choyxona Tapchanlari uchun) -->
-        <div id="m-slot-container" class="hidden" style="background:#f0fdfa; border:1px solid #99f6e4; padding:12px; border-radius:10px; margin-bottom:12px;">
-          <label style="font-size:13px; font-weight:bold; color:#0f766e; display:block; margin-bottom:8px;">
-            🕒 Kunduzgi Tapchan Sloti (AC-02):
-          </label>
-          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-            <button type="button" class="slot-pill active" id="slot-full" onclick="selectDaySlot('FULL_DAY', '10:00', '22:00')">
-              Kun bo'yi<br><small>10:00–22:00</small>
-            </button>
-            <button type="button" class="slot-pill" id="slot-lunch" onclick="selectDaySlot('LUNCH', '10:00', '16:00')">
-              Tushlik<br><small>10:00–16:00</small>
-            </button>
-            <button type="button" class="slot-pill" id="slot-dinner" onclick="selectDaySlot('DINNER', '17:00', '23:00')">
-              Kechki ovqat<br><small>17:00–23:00</small>
-            </button>
+          <div class="modal-desc-box">
+            <h4 style="margin-bottom:8px; font-size:16px;">Obyekt Haqida</h4>
+            <p id="m-prop-desc" style="font-size:14px; color:#475569; line-height:1.6;"></p>
+          </div>
+
+          <div class="modal-amenities-box">
+            <h4 style="margin-bottom:10px; font-size:16px;">Qulayliklar va Sharoitlar</h4>
+            <div id="m-prop-amenities" class="amenities-grid"></div>
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div class="search-field">
-            <label>Kirish</label>
-            <input type="datetime-local" id="m-checkin" onchange="calculateLiveQuote()">
-          </div>
-          <div class="search-field">
-            <label>Chiqish</label>
-            <input type="datetime-local" id="m-checkout" onchange="calculateLiveQuote()">
-          </div>
-        </div>
-
-        <!-- Zomin Tandir Meat pre-order counter (AC-12) -->
-        <div style="background:#fffbeb; border:1px solid #fef3c7; padding:12px; border-radius:10px; margin-bottom:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <b style="color:#92400e; font-size:14px;">🍗 Zomin Archa Tandiri (Qo'shimcha AC-12)</b>
-              <div style="font-size:12px; color:#b45309;">150,000 so'm / kg — Tandir ustasi tomonidan issiq yetkaziladi</div>
+        <!-- Right: Real-Time Booking Calculator -->
+        <div class="modal-split-right">
+          <div class="booking-calculator-card">
+            <!-- Mode switch: Overnight vs Day Use -->
+            <div class="unit-type-switch">
+              <button type="button" id="btn-mode-stay" class="mode-tab-btn active" onclick="switchBookingMode('OVERNIGHT')">
+                🌙 Sutkalik Tunash
+              </button>
+              <button type="button" id="btn-mode-tapchan" class="mode-tab-btn" onclick="switchBookingMode('DAY_USE')">
+                ☀️ Kunduzgi Tapchan
+              </button>
             </div>
-            <div class="counter-box">
-              <button class="btn-counter" onclick="changeTandirKg(-1)">-</button>
-              <span id="tandir-kg-val" class="counter-val">0 kg</span>
-              <button class="btn-counter" onclick="changeTandirKg(1)">+</button>
+
+            <!-- Unit selector -->
+            <div class="form-group">
+              <label class="form-label">Tanlangan Birlik / Xona</label>
+              <select id="m-unit-select" class="form-control" onchange="onUnitSelectionChanged()"></select>
             </div>
+
+            <!-- Daytime Slot Picker (AC-02) -->
+            <div id="m-slot-container" class="slot-picker-box hidden">
+              <label class="form-label" style="color:#0f766e;">🕒 Kunduzgi Tapchan Vaqt Sloti (AC-02):</label>
+              <div class="slots-grid-3">
+                <button type="button" class="slot-choice-pill active" id="slot-full" onclick="selectDaySlot('FULL_DAY', '10:00', '22:00')">
+                  <b>Kun bo'yi</b><br><small>10:00–22:00</small>
+                </button>
+                <button type="button" class="slot-choice-pill" id="slot-lunch" onclick="selectDaySlot('LUNCH', '10:00', '16:00')">
+                  <b>Tushlik</b><br><small>10:00–16:00</small>
+                </button>
+                <button type="button" class="slot-choice-pill" id="slot-dinner" onclick="selectDaySlot('DINNER', '17:00', '23:00')">
+                  <b>Kechki</b><br><small>17:00–23:00</small>
+                </button>
+              </div>
+            </div>
+
+            <!-- Date range inputs -->
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Kirish Vaqti</label>
+                <input type="datetime-local" id="m-checkin" class="form-control" onchange="calculateLiveQuote()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Chiqish Vaqti</label>
+                <input type="datetime-local" id="m-checkout" class="form-control" onchange="calculateLiveQuote()">
+              </div>
+            </div>
+
+            <!-- Zomin Tandir Meat Pre-order (AC-12) -->
+            <div class="tandir-preorder-card">
+              <div class="tandir-text">
+                <div class="tandir-title">🍗 Zomin Archa Tandiri (AC-12)</div>
+                <div class="tandir-sub">150,000 so'm / kg — Tandir ustasi tomonidan issiq tortiladi</div>
+              </div>
+              <div class="stepper-wrap">
+                <button type="button" class="stepper-btn" onclick="changeTandirKg(-1)">−</button>
+                <span id="tandir-kg-val" class="stepper-val">0 kg</span>
+                <button type="button" class="stepper-btn" onclick="changeTandirKg(1)">+</button>
+              </div>
+            </div>
+
+            <!-- Live Quote Price Breakdown -->
+            <div class="quote-breakdown-card">
+              <div class="breakdown-line">
+                <span>Turar joy narxi (<span id="q-nights">1</span> birlik):</span>
+                <b id="q-acc-total">0 so'm</b>
+              </div>
+              <div class="breakdown-line" id="row-tandir">
+                <span>Zomin Archa Tandiri:</span>
+                <b id="q-tandir-total">0 so'm</b>
+              </div>
+              <div class="breakdown-divider"></div>
+              <div class="breakdown-line total-line">
+                <span>Jami Hisob:</span>
+                <span id="q-grand-total">0 so'm</span>
+              </div>
+              <div class="breakdown-line highlight-line">
+                <span>🛡️ Kafolatlangan bron haqi (10% Click/Payme):</span>
+                <span id="q-platform-fee">0 so'm</span>
+              </div>
+              <div class="breakdown-note">
+                <span>💵 Joyida dacha egasiga to'lanadi (90%):</span>
+                <b id="q-owner-arrival">0 so'm</b>
+              </div>
+            </div>
+
+            <!-- Guest Input Fields -->
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Ismingiz</label>
+                <input type="text" id="m-guest-name" class="form-control" value="Jasur Mamadaliyev">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Telefon Raqamingiz</label>
+                <input type="text" id="m-guest-phone" class="form-control" value="+998935551122">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Mashina Raqami (Darvozadan kutib olish uchun)</label>
+              <input type="text" id="m-car-plate" class="form-control" placeholder="Masalan: 01 A 777 AA">
+            </div>
+
+            <button id="btn-submit-booking" class="btn-primary-action" onclick="submitBooking()">
+              Kafolatlangan Bron Yaratish (15 daqiqaga qulflash) →
+            </button>
           </div>
         </div>
-
-        <!-- Quote Breakdown Area -->
-        <div class="breakdown-box">
-          <div class="breakdown-row">
-            <span>Turar joy narxi (<span id="q-nights">1</span> birlik):</span>
-            <b id="q-acc-total">0 so'm</b>
-          </div>
-          <div class="breakdown-row" id="row-tandir">
-            <span>Zomin Archa Tandiri:</span>
-            <b id="q-tandir-total">0 so'm</b>
-          </div>
-          <div class="breakdown-row total">
-            <span>Jami Hisob:</span>
-            <span id="q-grand-total">0 so'm</span>
-          </div>
-          <div class="breakdown-row highlight" style="margin-top:10px;">
-            <span>🛡️ Kafolatlangan bron (10% Click/Payme):</span>
-            <span id="q-platform-fee">0 so'm</span>
-          </div>
-          <div class="breakdown-row" style="color:#475569; font-size:13px; margin-top:4px;">
-            <span>Joyida dacha egasiga to'lanadi (90%):</span>
-            <b id="q-owner-arrival">0 so'm</b>
-          </div>
-        </div>
-
-        <!-- Guest Details Form -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
-          <div class="search-field">
-            <label>Ismingiz</label>
-            <input type="text" id="m-guest-name" value="Jasur Mamadaliyev">
-          </div>
-          <div class="search-field">
-            <label>Telefon raqam</label>
-            <input type="text" id="m-guest-phone" value="+998935551122">
-          </div>
-        </div>
-
-        <div class="search-field" style="margin-bottom:16px;">
-          <label>Mashina raqami (Darvozadan kirish uchun)</label>
-          <input type="text" id="m-car-plate" placeholder="Masalan: 01 A 777 AA">
-        </div>
-
-        <button id="btn-submit-booking" class="btn-search" style="width:100%; margin-top:0;" onclick="submitBooking()">
-          Kafolatlangan Bron Yaratish
-        </button>
       </div>
     </div>
   </div>
 
-  <!-- BOOKING SUCCESS & PAYMENT MODAL -->
+  <!-- ================= PAYMENT & CONFIRMATION MODAL ================= -->
   <div id="payment-modal" class="modal-overlay hidden">
-    <div class="modal-card">
+    <div class="modal-card modal-md">
       <div class="modal-header">
-        <h3 class="modal-title">🎉 Bron Yaratildi!</h3>
-        <button class="modal-close" onclick="closeModal('payment-modal')">✕</button>
+        <h3 class="modal-title">🎉 Bron Yaratildi va Qulflandi!</h3>
+        <button class="modal-close-btn" onclick="closeModal('payment-modal')">✕</button>
       </div>
-      <div class="modal-body" style="text-align:center;">
-        <div style="font-size:48px; margin-bottom:8px;">⏳</div>
-        <h4 id="pay-ref" style="font-size:20px; color:var(--primary); margin-bottom:4px;">ZS-2026-XXXX</h4>
-        <p style="color:var(--text-muted); font-size:14px; margin-bottom:16px;">
-          Joyingiz 15 daqiqaga qulflandi (Hold AC-05). 10% kafolat xizmat haqini to'lab, joyni mustahkamlang.
+
+      <div class="modal-body-center">
+        <!-- Hold Countdown Badge -->
+        <div class="hold-timer-badge">
+          <span class="timer-icon">⏳</span>
+          <span>Hold Muddati: <b id="hold-timer-clock">15:00</b></span>
+        </div>
+
+        <h4 id="pay-ref" class="pay-booking-ref">ZS-2026-XXXX</h4>
+        <p style="color:var(--text-muted); font-size:14px; margin-bottom:18px;">
+          Joyingiz 15 daqiqaga ma’lumotlar bazasida qulflandi (Hold AC-05). 
+          10% kafolat xizmat haqini to'lab, bronni to'liq mustahkamlang.
         </p>
 
-        <div class="breakdown-box" style="text-align:left;">
-          <div class="breakdown-row highlight">
-            <span>To'lanadigan summa (10% xizmat haqi):</span>
-            <b id="pay-fee-val" style="font-size:18px;">0 so'm</b>
+        <div class="payment-summary-card">
+          <div class="pay-sum-row highlight">
+            <span>Hozir to'lanadigan summa (10% xizmat haqi):</span>
+            <b id="pay-fee-val" style="font-size:20px; color:#065f46;">0 so'm</b>
           </div>
-          <div class="breakdown-row" style="margin-top:6px;">
-            <span>Qolgan summa (Dacha egasiga joyida):</span>
+          <div class="pay-sum-row">
+            <span>Joyida dacha egasiga to'lanadigan qolgan qism:</span>
             <b id="pay-arrival-val">0 so'm</b>
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
-          <button class="btn-search" style="background:#0284c7; margin-top:0;" onclick="simulatePayment('CLICK')">
-            💳 Click orqali to'lash
+        <!-- Payment Buttons -->
+        <div class="payment-methods-grid">
+          <button class="btn-pay-provider btn-click" onclick="simulatePayment('CLICK')">
+            <span class="pay-brand">Click</span>
+            <span class="pay-sub">Click orqali to'lash</span>
           </button>
-          <button class="btn-search" style="background:#059669; margin-top:0;" onclick="simulatePayment('PAYME')">
-            🟢 Payme orqali to'lash
+          <button class="btn-pay-provider btn-payme" onclick="simulatePayment('PAYME')">
+            <span class="pay-brand">Payme</span>
+            <span class="pay-sub">Payme orqali to'lash</span>
           </button>
         </div>
 
-        <div id="pay-success-area" class="hidden" style="margin-top:20px; background:#ecfdf5; border:1px solid #a7f3d0; padding:16px; border-radius:12px;">
-          <b style="color:#065f46; font-size:16px; display:block; margin-bottom:8px;">✅ To'lov Qabul Qilindi! Bron Tasdiqlandi</b>
-          <p style="font-size:13px; color:#047857; margin-bottom:12px;">
-            Soliq OFD elektron fiskal cheki shakllantirildi va kafolat vaucheri berildi.
+        <!-- Success Details Area -->
+        <div id="pay-success-area" class="pay-success-box hidden">
+          <div class="success-icon">✅</div>
+          <h4 style="color:#065f46; font-size:18px; margin-bottom:6px;">To'lov Muvaffaqiyatli O'tdi!</h4>
+          <p style="font-size:13px; color:#047857; margin-bottom:14px;">
+            Bron holati <b>CONFIRMED</b> ga o'tdi. Soliq OFD cheki shakllantirildi va dacha egasiga xabar yuborildi.
           </p>
-          <div style="display:flex; gap:8px; justify-content:center;">
-            <a id="btn-ofd-link" href="#" target="_blank" class="role-btn" style="background:white; border:1px solid var(--border); text-decoration:none;">
+
+          <div class="success-actions-row">
+            <a id="btn-ofd-link" href="#" target="_blank" class="btn-outline-ofd">
               🧾 Soliq OFD Chek (AC-15)
             </a>
-            <button class="btn-search" style="margin-top:0; padding:8px 16px;" onclick="openOfflineVoucher()">
-              📄 Oflayn Vaucher (AC-09)
+            <button class="btn-primary-action" style="margin:0; padding:10px 20px;" onclick="openOfflineVoucher()">
+              📄 Oflayn Safar Vaucheri (AC-09)
             </button>
           </div>
         </div>
@@ -338,79 +596,99 @@
     </div>
   </div>
 
-  <!-- OFFLINE VOUCHER MODAL (AC-09) -->
+  <!-- ================= OFFLINE VOUCHER MODAL (AC-09) ================= -->
   <div id="voucher-modal" class="modal-overlay hidden">
-    <div class="modal-card">
+    <div class="modal-card modal-md">
       <div class="modal-header">
         <h3 class="modal-title">🌲 Oflayn Safar Vaucheri (AC-09)</h3>
-        <button class="modal-close" onclick="closeModal('voucher-modal')">✕</button>
+        <button class="modal-close-btn" onclick="closeModal('voucher-modal')">✕</button>
       </div>
       <div class="modal-body" id="voucher-content">
-        <!-- Rendered voucher -->
+        <!-- Rendered by JS -->
       </div>
     </div>
   </div>
 
-  <!-- OWNER CALENDAR BLOCK MODAL -->
+  <!-- ================= OWNER CALENDAR BLOCK MODAL ================= -->
   <div id="calendar-block-modal" class="modal-overlay hidden">
-    <div class="modal-card">
+    <div class="modal-card modal-sm">
       <div class="modal-header">
-        <h3 class="modal-title">📅 Kalendarni Tezkor Yopish (OWNER_MANUAL)</h3>
-        <button class="modal-close" onclick="closeModal('calendar-block-modal')">✕</button>
+        <h3 class="modal-title">📅 Kalendarni Yopish (OWNER_MANUAL)</h3>
+        <button class="modal-close-btn" onclick="closeModal('calendar-block-modal')">✕</button>
       </div>
       <div class="modal-body">
-        <p style="font-size:14px; color:#64748b; margin-bottom:12px;">
-          Tanishlaringiz kelganda yoki dacha ta'mirda bo'lganda sanalarni sayyohlarga ko'rinmaydigan qilib yopib qo'yishingiz mumkin.
+        <p style="font-size:14px; color:#64748b; margin-bottom:14px;">
+          Tanishlaringiz kelganda yoki dacha ta'mirda bo'lganda sanalarni katalogda band qilib qo'yishingiz mumkin.
         </p>
-        <div class="search-field" style="margin-bottom:12px;">
-          <label>Dacha birligi</label>
-          <select id="block-unit-select"></select>
+        <div class="form-group">
+          <label class="form-label">Dacha birligi</label>
+          <select id="block-unit-select" class="form-control"></select>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div class="search-field">
-            <label>Boshlanish</label>
-            <input type="datetime-local" id="block-start">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Boshlanish</label>
+            <input type="datetime-local" id="block-start" class="form-control">
           </div>
-          <div class="search-field">
-            <label>Tugash</label>
-            <input type="datetime-local" id="block-end">
+          <div class="form-group">
+            <label class="form-label">Tugash</label>
+            <input type="datetime-local" id="block-end" class="form-control">
           </div>
         </div>
-        <div class="search-field" style="margin-bottom:16px;">
-          <label>Sabab / Izoh</label>
-          <input type="text" id="block-notes" placeholder="Masalan: Ta'mir ishlari yoki qarindoshlar">
+        <div class="form-group" style="margin-bottom:18px;">
+          <label class="form-label">Sabab / Izoh</label>
+          <input type="text" id="block-notes" class="form-control" placeholder="Masalan: Ta'mir yoki qarindoshlar">
         </div>
-        <button class="btn-search" style="width:100%; margin-top:0;" onclick="submitCalendarBlock()">
+        <button class="btn-primary-action" onclick="submitCalendarBlock()">
           Sanalarni Yopish
         </button>
       </div>
     </div>
   </div>
 
-  <!-- OWNER PRICE EDIT MODAL (AC-03 & RBAC) -->
+  <!-- ================= OWNER PRICE EDIT MODAL ================= -->
   <div id="price-edit-modal" class="modal-overlay hidden">
-    <div class="modal-card">
+    <div class="modal-card modal-sm">
       <div class="modal-header">
-        <h3 class="modal-title">🏷️ Dacha Narxlarini Yangilash</h3>
-        <button class="modal-close" onclick="closeModal('price-edit-modal')">✕</button>
+        <h3 class="modal-title">🏷️ Dacha Narxlarini Tahrirlash</h3>
+        <button class="modal-close-btn" onclick="closeModal('price-edit-modal')">✕</button>
       </div>
       <div class="modal-body">
-        <p id="price-edit-unit-name" style="font-weight:bold; color:var(--primary); margin-bottom:12px;"></p>
+        <p id="price-edit-unit-name" style="font-weight:700; color:var(--primary); margin-bottom:14px;"></p>
         <input type="hidden" id="price-edit-unit-id">
-        <div class="search-field" style="margin-bottom:12px;">
-          <label>Hafta ichi narxi (Dushanba–Payshanba) so'mda:</label>
-          <input type="number" id="price-edit-weekday" step="10000">
+        <div class="form-group">
+          <label class="form-label">Hafta ichi narxi (Dushanba–Payshanba) so'mda:</label>
+          <input type="number" id="price-edit-weekday" class="form-control" step="10000">
         </div>
-        <div class="search-field" style="margin-bottom:16px;">
-          <label>Dam olish kunlari narxi (Juma–Yakshanba) so'mda:</label>
-          <input type="number" id="price-edit-weekend" step="10000">
+        <div class="form-group" style="margin-bottom:18px;">
+          <label class="form-label">Dam olish kunlari narxi (Juma–Yakshanba) so'mda:</label>
+          <input type="number" id="price-edit-weekend" class="form-control" step="10000">
         </div>
-        <button class="btn-search" style="width:100%; margin-top:0;" onclick="submitPriceUpdate()">
-          Narxni Saqlash
+        <button class="btn-primary-action" onclick="submitPriceUpdate()">
+          Narxni Saqlash (AC-03)
         </button>
       </div>
     </div>
   </div>
+
+  <!-- ================= MOBILE BOTTOM NAVIGATION ================= -->
+  <nav class="mobile-nav-bar">
+    <button class="mobile-nav-item active" id="mob-nav-guest" onclick="switchPortal('guest')">
+      <span class="mob-nav-icon">🏔️</span>
+      <span class="mob-nav-lbl">Dachalar</span>
+    </button>
+    <button class="mobile-nav-item" id="mob-nav-tapchan" onclick="switchPortal('guest'); filterToTapchans();">
+      <span class="mob-nav-icon">🌊</span>
+      <span class="mob-nav-lbl">Tapchanlar</span>
+    </button>
+    <button class="mobile-nav-item" id="mob-nav-trips" onclick="switchPortal('trips')">
+      <span class="mob-nav-icon">📄</span>
+      <span class="mob-nav-lbl">Safarlarim</span>
+    </button>
+    <button class="mobile-nav-item" id="mob-nav-owner" onclick="switchPortal('owner')">
+      <span class="mob-nav-icon">💼</span>
+      <span class="mob-nav-lbl">Kabinet</span>
+    </button>
+  </nav>
 
   <script src="/static/js/app.js"></script>
 </body>

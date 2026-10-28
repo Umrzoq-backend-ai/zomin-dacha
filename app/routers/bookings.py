@@ -25,6 +25,21 @@ def api_create_booking(
     """
     return create_booking(request, idempotency_key=idempotency_key)
 
+@router.get("/my-bookings", response_model=List[BookingDetailResponse])
+def api_get_my_bookings(phone_or_id: str = Query(..., description="Mehmon telefon raqami yoki ID")):
+    """
+    Sayyohning barcha bronlari va safarlari ro'yxati (Mening safarlarim).
+    """
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id FROM bookings
+            WHERE guest_phone = ? OR guest_id = ?
+            ORDER BY created_at DESC
+        """, (phone_or_id, phone_or_id))
+        rows = cursor.fetchall()
+        return [get_booking_detail(r["id"], current_user_role="GUEST") for r in rows]
+
 @router.get("/{id_or_ref}", response_model=BookingDetailResponse)
 def api_get_booking(
     id_or_ref: str,
