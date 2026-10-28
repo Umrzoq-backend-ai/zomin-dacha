@@ -82,9 +82,16 @@
           
           <!-- User Profile Dropdown Menu (When Logged In) -->
           <div class="profile-dropdown-menu hidden" id="profile-dropdown-menu">
-            <div class="profile-dropdown-header">
-              <div class="dropdown-user-name" id="menu-user-name">Jasur Mamadaliyev</div>
-              <div class="dropdown-user-role" id="menu-user-role">SAYYOH</div>
+            <div class="profile-dropdown-header" style="display:flex; align-items:center; gap:12px; padding:14px 16px;">
+              <img src="/static/assets/avatar.jpg" id="menu-user-avatar" class="dropdown-avatar-img" alt="Avatar">
+              <div style="overflow:hidden;">
+                <div class="dropdown-user-name" id="menu-user-name">Umrzoq Yulchiyev</div>
+                <div class="dropdown-user-email" id="menu-user-email">umrzoq.backend@gmail.com</div>
+                <span class="badge-google-verified">
+                  <svg class="google-icon-svg" style="width:11px; height:11px;" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                  Google ulangan
+                </span>
+              </div>
             </div>
             <div class="profile-dropdown-divider"></div>
             <a href="#profile" class="profile-menu-item" onclick="openProfileModal()">
@@ -183,8 +190,7 @@
           <div class="search-divider"></div>
 
           <!-- Segment 2: Check-In Date -->
-          <div class="search-segment segment-date" onclick="closeAllSearchDropdowns()">
-            <input type="date" id="native-checkin-date" class="segment-native-date-input" onchange="handleDateSelect('checkin', this.value)">
+          <div class="search-segment segment-date" id="segment-checkin" onclick="openCalendarPicker('checkin', event)">
             <div class="segment-icon-box">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -205,8 +211,7 @@
           <div class="search-divider"></div>
 
           <!-- Segment 3: Check-Out Date -->
-          <div class="search-segment segment-date" onclick="closeAllSearchDropdowns()">
-            <input type="date" id="native-checkout-date" class="segment-native-date-input" onchange="handleDateSelect('checkout', this.value)">
+          <div class="search-segment segment-date" id="segment-checkout" onclick="openCalendarPicker('checkout', event)">
             <div class="segment-icon-box">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -221,6 +226,25 @@
                 <span class="segment-val" id="search-val-checkout">Sanani tanlang</span>
                 <svg class="val-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
               </div>
+            </div>
+          </div>
+
+          <!-- In-Page Luxury Calendar Popup (Attached to floating search) -->
+          <div class="search-popup-dropdown calendar-popup hidden" id="dropdown-calendar" onclick="event.stopPropagation()">
+            <div class="cal-header">
+              <button type="button" class="cal-nav-btn" onclick="prevCalendarMonth(event)">❮</button>
+              <div class="cal-month-title" id="cal-month-title">Oktabr 2026</div>
+              <button type="button" class="cal-nav-btn" onclick="nextCalendarMonth(event)">❯</button>
+            </div>
+            <div class="cal-weekdays-row" id="cal-weekdays">
+              <span>Du</span><span>Se</span><span>Ch</span><span>Pa</span><span>Ju</span><span>Sh</span><span>Ya</span>
+            </div>
+            <div class="cal-days-grid" id="cal-days-grid">
+              <!-- Dynamically populated via JS -->
+            </div>
+            <div class="cal-footer">
+              <div class="cal-selected-hint" id="cal-selected-hint">Kirish sanasini tanlang</div>
+              <button type="button" class="btn-cal-clear" onclick="clearSelectedDates(event)">Tozalash</button>
             </div>
           </div>
 
@@ -512,11 +536,16 @@
       </div>
       <div class="modal-body">
         <div class="profile-avatar-row">
-          <div class="profile-avatar-big" id="prof-avatar-letter">J</div>
+          <img src="/static/assets/avatar.jpg" id="prof-avatar-img" class="profile-avatar-big-img" alt="Google Profile">
           <div class="profile-avatar-info">
-            <h4 id="prof-display-name">Jasur Mamadaliyev</h4>
-            <span class="badge-role-pill" id="prof-display-role">SAYYOH / MEHMON</span>
-            <span class="prof-phone-display" id="prof-display-phone">+998 93 555 11 22</span>
+            <h4 id="prof-display-name">Umrzoq Yulchiyev</h4>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span class="badge-role-pill" id="prof-display-role">SAYYOH / MEHMON</span>
+              <span class="badge-google-verified">
+                <svg class="google-icon-svg" style="width:11px; height:11px;" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg> Google tasdiqlangan
+              </span>
+            </div>
+            <div class="dropdown-user-email mt-1" id="prof-display-email">umrzoq.backend@gmail.com</div>
           </div>
         </div>
 
@@ -527,12 +556,12 @@
               <input type="text" id="prof-input-name" class="form-input" required>
             </div>
             <div class="form-group">
-              <label class="input-label" id="lbl-prof-phone">Telefon raqam:</label>
-              <input type="tel" id="prof-input-phone" class="form-input" required>
+              <label class="input-label" id="lbl-prof-email">Google elektron pochta:</label>
+              <input type="email" id="prof-input-email" class="form-input" readonly style="background:#f8fafc; color:#64748b; cursor:not-allowed;">
             </div>
             <div class="form-group">
-              <label class="input-label" id="lbl-prof-email">Elektron pochta (ixtiyoriy):</label>
-              <input type="email" id="prof-input-email" class="form-input" placeholder="misol@pochta.uz">
+              <label class="input-label" id="lbl-prof-phone">Telefon raqam:</label>
+              <input type="tel" id="prof-input-phone" class="form-input" placeholder="+998 90 123 45 67">
             </div>
             <div class="form-group">
               <label class="input-label" id="lbl-prof-car">Avtomobil davlat raqami (Darvoza tekshiruvi uchun):</label>
@@ -565,72 +594,71 @@
     </div>
   </div>
 
-  <!-- ================= 5. AUTH MODAL ================= -->
+  <!-- ================= 5. GOOGLE AUTH MODAL ================= -->
   <div id="auth-modal" class="modal-overlay hidden">
     <div class="modal-card modal-auth">
       <div class="modal-header">
-        <h3 class="modal-title" id="auth-modal-title">Kirish yoki ro‘yxatdan o‘tish</h3>
+        <div>
+          <span class="modal-badge-top" id="lbl-auth-badge">TEZKOR VA XAVFSIZ KIRISH</span>
+          <h3 class="modal-title" id="auth-modal-title">Google orqali kirish</h3>
+        </div>
         <button class="modal-close-btn" onclick="closeAuthModal()">✕</button>
       </div>
       <div class="modal-body">
         
-        <!-- Auth Tabs: Phone login vs Demo profile selector -->
-        <div class="auth-tabs-row">
-          <button class="auth-tab active" id="tab-auth-phone" onclick="switchAuthTab('phone')">Telefon orqali</button>
-          <button class="auth-tab" id="tab-auth-demo" onclick="switchAuthTab('demo')">Tezkor Demo Kirish</button>
-        </div>
+        <div class="google-auth-box">
+          <!-- Big 1-Click Google Button -->
+          <button type="button" class="btn-google-main" onclick="handleGoogleOneClick()">
+            <svg class="google-icon-svg" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span id="lbl-google-btn-text">Google hisobi bilan davom etish</span>
+          </button>
 
-        <!-- Tab 1: Real Phone Number Login -->
-        <div id="auth-pane-phone" class="auth-pane active">
-          <form onsubmit="handlePhoneLogin(event)">
-            <div class="form-group">
-              <label class="input-label" id="lbl-phone-input">Telefon raqamingiz:</label>
-              <div class="phone-input-wrapper">
-                <span class="country-prefix">+998</span>
-                <input type="tel" id="auth-phone-number" class="form-input phone-field" placeholder="90 123 45 67" maxlength="12" required>
-              </div>
-            </div>
-            <div class="form-group" id="group-sms-code" style="display:none;">
-              <label class="input-label" id="lbl-sms-input">SMS / Telegram tasdiqlash kodi:</label>
-              <input type="text" id="auth-sms-code" class="form-input text-center" placeholder="1234" maxlength="6">
-            </div>
-            <button type="submit" class="btn-primary-pill w-100 mt-2" id="btn-phone-submit">
-              Davom etish
-            </button>
-          </form>
-        </div>
+          <div class="google-divider">
+            <span id="lbl-google-divider">yoki tezkor hisobni tanlang</span>
+          </div>
 
-        <!-- Tab 2: Clean Demo Role Switcher -->
-        <div id="auth-pane-demo" class="auth-pane">
-          <div class="demo-profiles-stack">
-            <div class="demo-role-card" onclick="selectUserProfile('guest')">
-              <div class="role-icon">🎒</div>
-              <div class="role-meta">
-                <strong>Jasur Mamadaliyev</strong>
-                <span>Sayyoh (Dacha bron qiluvchi mehmon)</span>
+          <!-- Accounts Stack with Real Photos -->
+          <div class="google-accounts-stack">
+            <!-- Account 1: Umrzoq Yulchiyev -->
+            <div class="google-account-pill" onclick="loginWithGoogleAccount('umrzoq')">
+              <img src="/static/assets/avatar.jpg" alt="Umrzoq" class="google-account-avatar">
+              <div class="google-account-info">
+                <div class="google-account-name">Umrzoq Yulchiyev</div>
+                <div class="google-account-email">umrzoq.backend@gmail.com</div>
               </div>
+              <span class="google-badge-tag">Sayyoh</span>
             </div>
-            <div class="demo-role-card" onclick="selectUserProfile('owner1')">
-              <div class="role-icon">🏡</div>
-              <div class="role-meta">
-                <strong>Alisher Zokirov</strong>
-                <span>Dacha Egasi (Mountain Chalet & Villa)</span>
+
+            <!-- Account 2: Alisher Zokirov -->
+            <div class="google-account-pill" onclick="loginWithGoogleAccount('alisher')">
+              <img src="/static/assets/avatar2.jpg" alt="Alisher" class="google-account-avatar">
+              <div class="google-account-info">
+                <div class="google-account-name">Alisher Zokirov</div>
+                <div class="google-account-email">alisher.zomin@gmail.com</div>
               </div>
+              <span class="google-badge-tag">Dacha Egasi</span>
             </div>
-            <div class="demo-role-card" onclick="selectUserProfile('caretaker')">
-              <div class="role-icon">🔑</div>
-              <div class="role-meta">
-                <strong>Rustam Tog'a</strong>
-                <span>Bog'bon (Darvoza tekshiruvi & Check-in)</span>
+          </div>
+
+          <!-- Custom Google Email Input -->
+          <div class="custom-google-box mt-3" style="border-top: 1px solid var(--color-border); padding-top: 14px;">
+            <form onsubmit="handleCustomGoogleSubmit(event)">
+              <label class="input-label" id="lbl-custom-google-email">Boshqa Google elektron pochtangiz bormi?</label>
+              <div style="display:flex; gap:8px;">
+                <input type="email" id="custom-google-email-input" class="form-input" placeholder="ismingiz@gmail.com" required style="font-size:13px;">
+                <button type="submit" class="btn-primary-pill" style="white-space:nowrap; padding: 8px 18px; font-size: 13px;" id="lbl-btn-google-login">Kirish</button>
               </div>
-            </div>
-            <div class="demo-role-card admin" onclick="selectUserProfile('admin')">
-              <div class="role-icon">🛡️</div>
-              <div class="role-meta">
-                <strong>Sanjar Karimov</strong>
-                <span>SuperAdmin (Platforma boshqaruvchisi)</span>
-              </div>
-            </div>
+            </form>
+          </div>
+
+          <div class="google-trust-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span id="lbl-google-trust">Google OAuth 2.0 bilan himoyalangan</span>
           </div>
         </div>
 

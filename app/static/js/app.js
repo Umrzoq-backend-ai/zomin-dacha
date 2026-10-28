@@ -242,12 +242,34 @@ const I18N = {
   }
 };
 
+// Google Auth User Profiles
+const GOOGLE_PROFILES = {
+  umrzoq: {
+    id: "usr-google-umrzoq",
+    name: "Umrzoq Yulchiyev",
+    email: "umrzoq.backend@gmail.com",
+    avatar: "/static/assets/avatar.jpg",
+    phone: "+998 91 593 30 18",
+    car_plate: "01 A 777 AA",
+    role: "GUEST"
+  },
+  alisher: {
+    id: "usr-google-alisher",
+    name: "Alisher Zokirov",
+    email: "alisher.zomin@gmail.com",
+    avatar: "/static/assets/avatar2.jpg",
+    phone: "+998 90 111 22 33",
+    car_plate: "25 B 888 BB",
+    role: "OWNER"
+  }
+};
+
 // Demo User Profiles
 const DEMO_PROFILES = {
-  guest: { id: "usr-guest-jasur", phone: '+998935551122', name: 'Jasur Mamadaliyev', role: 'GUEST' },
-  owner1: { id: "7a8a7664-168d-4ee1-94ed-f480e0b545a3", phone: '+998901112233', name: 'Alisher Zokirov', role: 'OWNER' },
-  caretaker: { id: "usr-caretaker-rustam", phone: '+998917778899', name: 'Rustam Tog\'a', role: 'CARETAKER' },
-  admin: { id: "usr-admin-sanjar", phone: '+998900000001', name: 'Sanjar Karimov', role: 'ADMIN' }
+  guest: GOOGLE_PROFILES.umrzoq,
+  owner1: GOOGLE_PROFILES.alisher,
+  caretaker: { id: "usr-caretaker-rustam", phone: '+998917778899', name: 'Rustam Tog\'a', role: 'CARETAKER', avatar: '/static/assets/avatar2.jpg' },
+  admin: { id: "usr-admin-sanjar", phone: '+998900000001', name: 'Sanjar Karimov', role: 'ADMIN', avatar: '/static/assets/avatar.jpg' }
 };
 
 let currentUser = null;
@@ -280,7 +302,18 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (savedUser) {
     try {
       currentUser = JSON.parse(savedUser);
+      if (currentUser && (!currentUser.avatar || currentUser.name === 'Jasur Mamadaliyev' || currentUser.name === 'Foydalanuvchi' || !currentUser.email)) {
+        currentUser = Object.assign({}, GOOGLE_PROFILES.umrzoq, currentUser, {
+          name: currentUser.name && currentUser.name !== 'Jasur Mamadaliyev' && currentUser.name !== 'Foydalanuvchi' ? currentUser.name : 'Umrzoq Yulchiyev',
+          email: currentUser.email && currentUser.email.includes('@') && !currentUser.email.includes('jasur') ? currentUser.email : 'umrzoq.backend@gmail.com',
+          avatar: currentUser.avatar || '/static/assets/avatar.jpg'
+        });
+        localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+      }
     } catch (e) {}
+  } else {
+    currentUser = Object.assign({}, GOOGLE_PROFILES.umrzoq);
+    localStorage.setItem('zomin_user', JSON.stringify(currentUser));
   }
 
   // Apply saved language
@@ -305,6 +338,17 @@ window.addEventListener('DOMContentLoaded', async () => {
     const locSegment = document.querySelector('.segment-location');
     if (locDropdown && locSegment && !locSegment.contains(e.target)) {
       locDropdown.classList.add('hidden');
+    }
+
+    // Close calendar dropdown if clicked outside
+    const calDropdown = document.getElementById('dropdown-calendar');
+    const calSegments = document.querySelectorAll('.segment-date');
+    let insideDateSegment = false;
+    calSegments.forEach(seg => {
+      if (seg.contains(e.target)) insideDateSegment = true;
+    });
+    if (calDropdown && !insideDateSegment && !calDropdown.contains(e.target)) {
+      calDropdown.classList.add('hidden');
     }
 
     // Close guests dropdown if clicked outside
@@ -487,6 +531,9 @@ function closeAllSearchDropdowns() {
   const locDropdown = document.getElementById('dropdown-locations');
   if (locDropdown) locDropdown.classList.add('hidden');
 
+  const calDropdown = document.getElementById('dropdown-calendar');
+  if (calDropdown) calDropdown.classList.add('hidden');
+
   const guestsDropdown = document.getElementById('dropdown-guests');
   if (guestsDropdown) guestsDropdown.classList.add('hidden');
 
@@ -495,6 +542,200 @@ function closeAllSearchDropdowns() {
 
   const profileMenu = document.getElementById('profile-dropdown-menu');
   if (profileMenu) profileMenu.classList.add('hidden');
+}
+
+// ===================================================================
+// IN-PAGE CUSTOM LUXURY CALENDAR
+// ===================================================================
+let currentCalYear = new Date().getFullYear();
+let currentCalMonth = new Date().getMonth();
+let calendarSelectingType = 'checkin';
+
+const MONTH_NAMES_UZ = [
+  'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
+  'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'
+];
+const MONTH_NAMES_RU = [
+  'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+  'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+];
+const MONTH_NAMES_EN = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+function openCalendarPicker(type, event) {
+  if (event) event.stopPropagation();
+  calendarSelectingType = type || 'checkin';
+
+  const cal = document.getElementById('dropdown-calendar');
+  if (!cal) return;
+
+  const isAlreadyOpen = !cal.classList.contains('hidden') && cal.dataset.openFor === type;
+
+  closeAllSearchDropdowns();
+
+  if (!isAlreadyOpen) {
+    cal.dataset.openFor = type;
+    cal.classList.remove('hidden');
+
+    // Align calendar under the clicked date segment
+    const targetSeg = type === 'checkin' ? document.getElementById('segment-checkin') : document.getElementById('segment-checkout');
+    if (targetSeg) {
+      const parentCard = targetSeg.closest('.floating-search-card');
+      if (parentCard) {
+        const parentRect = parentCard.getBoundingClientRect();
+        const segRect = targetSeg.getBoundingClientRect();
+        const offsetLeft = segRect.left - parentRect.left;
+        const maxLeft = parentRect.width - 340;
+        cal.style.left = `${Math.max(10, Math.min(offsetLeft - 20, maxLeft))}px`;
+      }
+    }
+
+    renderCalendarGrid();
+  }
+}
+
+function renderCalendarGrid() {
+  const titleEl = document.getElementById('cal-month-title');
+  const gridEl = document.getElementById('cal-days-grid');
+  const hintEl = document.getElementById('cal-selected-hint');
+  if (!gridEl) return;
+
+  const monthNames = currentLang === 'ru' ? MONTH_NAMES_RU : (currentLang === 'en' ? MONTH_NAMES_EN : MONTH_NAMES_UZ);
+  if (titleEl) {
+    titleEl.innerText = `${monthNames[currentCalMonth]} ${currentCalYear}`;
+  }
+
+  if (hintEl) {
+    if (calendarSelectingType === 'checkin') {
+      hintEl.innerText = currentLang === 'uz' ? 'Kelish sanasini tanlang' : (currentLang === 'ru' ? 'Выберите дату заезда' : 'Select check-in date');
+    } else {
+      hintEl.innerText = currentLang === 'uz' ? 'Ketish sanasini tanlang' : (currentLang === 'ru' ? 'Выберите дату выезда' : 'Select check-out date');
+    }
+  }
+
+  gridEl.innerHTML = '';
+
+  const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+  const prevMonthDays = new Date(currentCalYear, currentCalMonth, 0).getDate();
+
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  // Trailing days of previous month
+  for (let i = startOffset - 1; i >= 0; i--) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cal-day-btn disabled other-month';
+    btn.innerText = prevMonthDays - i;
+    btn.disabled = true;
+    gridEl.appendChild(btn);
+  }
+
+  // Active month days
+  for (let day = 1; day <= daysInMonth; day++) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cal-day-btn';
+    btn.innerText = day;
+
+    const dateStr = `${currentCalYear}-${String(currentCalMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    if (dateStr < todayStr) {
+      btn.classList.add('disabled');
+      btn.disabled = true;
+    }
+
+    if (dateStr === todayStr) {
+      btn.classList.add('today');
+    }
+
+    if (dateStr === searchCheckInDate) {
+      btn.classList.add('selected');
+    } else if (dateStr === searchCheckOutDate) {
+      btn.classList.add('selected');
+    } else if (searchCheckInDate && searchCheckOutDate && dateStr > searchCheckInDate && dateStr < searchCheckOutDate) {
+      btn.classList.add('in-range');
+    }
+
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      selectCalendarDate(currentCalYear, currentCalMonth, day);
+    };
+
+    gridEl.appendChild(btn);
+  }
+}
+
+function selectCalendarDate(year, month, day) {
+  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const displayStr = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}`;
+
+  if (calendarSelectingType === 'checkin') {
+    searchCheckInDate = dateStr;
+    const checkinEl = document.getElementById('search-val-checkin');
+    if (checkinEl) checkinEl.innerText = displayStr;
+
+    if (searchCheckOutDate && searchCheckOutDate <= searchCheckInDate) {
+      searchCheckOutDate = '';
+      const checkoutEl = document.getElementById('search-val-checkout');
+      if (checkoutEl) checkoutEl.innerText = currentLang === 'uz' ? 'Sanani tanlang' : (currentLang === 'ru' ? 'Выберите дату' : 'Select date');
+    }
+
+    calendarSelectingType = 'checkout';
+    const cal = document.getElementById('dropdown-calendar');
+    if (cal) cal.dataset.openFor = 'checkout';
+    renderCalendarGrid();
+  } else {
+    if (searchCheckInDate && dateStr <= searchCheckInDate) {
+      showToast(currentLang === 'uz' ? 'Ketish sanasi kelish sanasidan keyin bo‘lishi kerak' : 'Дата выезда должна быть позже даты заезда', 'error');
+      return;
+    }
+    searchCheckOutDate = dateStr;
+    const checkoutEl = document.getElementById('search-val-checkout');
+    if (checkoutEl) checkoutEl.innerText = displayStr;
+
+    const cal = document.getElementById('dropdown-calendar');
+    if (cal) cal.classList.add('hidden');
+    renderProperties();
+    showToast(currentLang === 'uz' ? `Sanalar belgilandi: ${searchCheckInDate} — ${searchCheckOutDate}` : `Даты выбраны: ${searchCheckInDate} — ${searchCheckOutDate}`, 'success');
+  }
+}
+
+function prevCalendarMonth(e) {
+  if (e) e.stopPropagation();
+  currentCalMonth--;
+  if (currentCalMonth < 0) {
+    currentCalMonth = 11;
+    currentCalYear--;
+  }
+  renderCalendarGrid();
+}
+
+function nextCalendarMonth(e) {
+  if (e) e.stopPropagation();
+  currentCalMonth++;
+  if (currentCalMonth > 11) {
+    currentCalMonth = 0;
+    currentCalYear++;
+  }
+  renderCalendarGrid();
+}
+
+function clearSelectedDates(e) {
+  if (e) e.stopPropagation();
+  searchCheckInDate = '';
+  searchCheckOutDate = '';
+  const checkinEl = document.getElementById('search-val-checkin');
+  const checkoutEl = document.getElementById('search-val-checkout');
+  const t = I18N[currentLang] || I18N.uz;
+  if (checkinEl) checkinEl.innerText = t.searchSelectDate;
+  if (checkoutEl) checkoutEl.innerText = t.searchSelectDate;
+  calendarSelectingType = 'checkin';
+  renderCalendarGrid();
 }
 
 function toggleLocationDropdown(e) {
@@ -779,31 +1020,26 @@ function closeAuthModal() {
 }
 
 function openProfileModal() {
-  const p = currentUser || {
-    name: 'Jasur Mamadaliyev',
-    phone: '+998 93 555 11 22',
-    email: 'jasur@zomin.uz',
-    car_plate: '01 A 777 AA',
-    role: 'SAYYOH / MEHMON'
-  };
+  const p = currentUser || GOOGLE_PROFILES.umrzoq;
 
-  const nameVal = p.name || p.full_name || 'Jasur Mamadaliyev';
-  const phoneVal = p.phone || p.phone_number || '+998 93 555 11 22';
-  const emailVal = p.email || 'jasur@zomin.uz';
+  const nameVal = p.name || p.full_name || 'Umrzoq Yulchiyev';
+  const phoneVal = p.phone || p.phone_number || '+998 91 593 30 18';
+  const emailVal = p.email || 'umrzoq.backend@gmail.com';
   const carVal = p.car_plate || '01 A 777 AA';
-  const roleVal = p.role || 'SAYYOH';
+  const roleVal = p.role || 'GUEST';
+  const avatarVal = p.avatar || '/static/assets/avatar.jpg';
 
-  const avatar = document.getElementById('prof-avatar-letter');
-  if (avatar) avatar.innerText = nameVal.charAt(0).toUpperCase();
+  const profImg = document.getElementById('prof-avatar-img');
+  if (profImg) profImg.src = avatarVal;
 
   const dName = document.getElementById('prof-display-name');
   if (dName) dName.innerText = nameVal;
 
   const dRole = document.getElementById('prof-display-role');
-  if (dRole) dRole.innerText = roleVal;
+  if (dRole) dRole.innerText = roleVal === 'OWNER' ? 'DACHA EGASI' : 'SAYYOH / MEHMON';
 
-  const dPhone = document.getElementById('prof-display-phone');
-  if (dPhone) dPhone.innerText = phoneVal;
+  const dEmail = document.getElementById('prof-display-email');
+  if (dEmail) dEmail.innerText = emailVal;
 
   const inName = document.getElementById('prof-input-name');
   if (inName) inName.value = nameVal;
@@ -836,21 +1072,16 @@ function handleSaveProfile(e) {
   e.preventDefault();
   const nameVal = document.getElementById('prof-input-name').value.trim();
   const phoneVal = document.getElementById('prof-input-phone').value.trim();
-  const emailVal = document.getElementById('prof-input-email').value.trim();
   const carVal = document.getElementById('prof-input-car').value.trim();
 
   if (!currentUser) {
-    currentUser = {
-      id: `usr-${Date.now()}`,
-      role: 'GUEST'
-    };
+    currentUser = Object.assign({}, GOOGLE_PROFILES.umrzoq);
   }
 
   currentUser.name = nameVal;
   currentUser.full_name = nameVal;
   currentUser.phone = phoneVal;
   currentUser.phone_number = phoneVal;
-  currentUser.email = emailVal;
   currentUser.car_plate = carVal;
 
   localStorage.setItem('zomin_user', JSON.stringify(currentUser));
@@ -858,7 +1089,7 @@ function handleSaveProfile(e) {
   closeProfileModal();
 
   const t = I18N[currentLang] || I18N.uz;
-  showToast(t.profSavedToast, 'success');
+  showToast(t.profSavedToast || 'Profil ma’lumotlari muvaffaqiyatli saqlandi!', 'success');
 }
 
 function handleLogout() {
@@ -870,47 +1101,50 @@ function handleLogout() {
   if (menu) menu.classList.add('hidden');
 
   const t = I18N[currentLang] || I18N.uz;
-  showToast(t.profLogoutToast, 'info');
+  showToast(t.profLogoutToast || 'Hisobdan chiqildi', 'info');
 }
 
-function switchAuthTab(tab) {
-  document.getElementById('tab-auth-phone').classList.toggle('active', tab === 'phone');
-  document.getElementById('tab-auth-demo').classList.toggle('active', tab === 'demo');
-  document.getElementById('auth-pane-phone').classList.toggle('active', tab === 'phone');
-  document.getElementById('auth-pane-demo').classList.toggle('active', tab === 'demo');
+// Google Authentication Handlers
+function handleGoogleOneClick() {
+  loginWithGoogleAccount('umrzoq');
 }
 
-async function handlePhoneLogin(e) {
-  e.preventDefault();
-  const phone = document.getElementById('auth-phone-number').value.trim();
-  const codeGroup = document.getElementById('group-sms-code');
-  const codeInput = document.getElementById('auth-sms-code');
-
-  if (codeGroup.style.display === 'none') {
-    codeGroup.style.display = 'block';
-    codeInput.focus();
-    showToast('Tasdiqlash kodi Telegram bot / SMS orqali yuborildi: 1234', 'info');
-    document.getElementById('btn-phone-submit').innerText = 'Tasdiqlash va kirish';
-    return;
-  }
-
-  // Complete login with phone
-  currentUser = {
-    id: `usr-${Date.now()}`,
-    phone_number: `+998${phone}`,
-    full_name: 'Foydalanuvchi',
-    name: 'Foydalanuvchi',
-    role: 'GUEST'
-  };
+function loginWithGoogleAccount(key) {
+  const profile = GOOGLE_PROFILES[key] || GOOGLE_PROFILES.umrzoq;
+  currentUser = Object.assign({}, profile);
   localStorage.setItem('zomin_user', JSON.stringify(currentUser));
   updateHeaderAuthState();
   closeAuthModal();
-  showToast('Tizimga muvaffaqiyatli kirdingiz!', 'success');
+  showToast(`${currentUser.name} (${currentUser.email}) Google hisobi orqali kirdingiz!`, 'success');
+}
+
+function handleCustomGoogleSubmit(e) {
+  e.preventDefault();
+  const emailInput = document.getElementById('custom-google-email-input');
+  const emailVal = emailInput ? emailInput.value.trim() : '';
+  if (!emailVal) return;
+
+  const namePart = emailVal.split('@')[0].replace(/[._-]/g, ' ');
+  const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+
+  currentUser = {
+    id: `usr-google-${Date.now()}`,
+    name: formattedName,
+    email: emailVal,
+    avatar: '/static/assets/avatar.jpg',
+    phone: '+998 91 593 30 18',
+    car_plate: '01 A 777 AA',
+    role: 'GUEST'
+  };
+
+  localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+  updateHeaderAuthState();
+  closeAuthModal();
+  showToast(`${currentUser.name} (${currentUser.email}) sifatida Google orqali kirdingiz!`, 'success');
 }
 
 function selectUserProfile(roleKey) {
-  const profile = DEMO_PROFILES[roleKey];
-  if (!profile) return;
+  const profile = DEMO_PROFILES[roleKey] || GOOGLE_PROFILES.umrzoq;
   currentUser = Object.assign({}, profile);
   localStorage.setItem('zomin_user', JSON.stringify(currentUser));
   updateHeaderAuthState();
@@ -924,19 +1158,23 @@ function selectUserProfile(roleKey) {
 
 function updateHeaderAuthState() {
   const btn = document.getElementById('header-kirish-btn');
+  const menuAvatar = document.getElementById('menu-user-avatar');
   const menuName = document.getElementById('menu-user-name');
+  const menuEmail = document.getElementById('menu-user-email');
   const menuRole = document.getElementById('menu-user-role');
   const adminLink = document.getElementById('admin-menu-link');
   const t = I18N[currentLang] || I18N.uz;
 
   if (currentUser) {
-    const displayName = (currentUser.name || currentUser.full_name || 'Foydalanuvchi').split(' ')[0];
-    const initial = (currentUser.name || currentUser.full_name || 'U').charAt(0).toUpperCase();
-    btn.innerHTML = `<span class="user-avatar-mini">${initial}</span><span id="user-btn-text">${displayName}</span><svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+    const displayName = (currentUser.name || currentUser.full_name || 'Umrzoq').split(' ')[0];
+    const avatarUrl = currentUser.avatar || '/static/assets/avatar.jpg';
+    btn.innerHTML = `<img src="${avatarUrl}" class="nav-avatar-img" alt="${displayName}"><span id="user-btn-text">${displayName}</span><svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
     btn.classList.add('logged-in');
 
-    if (menuName) menuName.innerText = currentUser.name || currentUser.full_name || 'Foydalanuvchi';
-    if (menuRole) menuRole.innerText = currentUser.role || 'GUEST';
+    if (menuAvatar) menuAvatar.src = avatarUrl;
+    if (menuName) menuName.innerText = currentUser.name || currentUser.full_name || 'Umrzoq Yulchiyev';
+    if (menuEmail) menuEmail.innerText = currentUser.email || 'umrzoq.backend@gmail.com';
+    if (menuRole) menuRole.innerText = currentUser.role === 'OWNER' ? 'DACHA EGASI' : 'SAYYOH / MEHMON';
     if (adminLink) adminLink.style.display = currentUser.role === 'ADMIN' ? 'flex' : 'none';
   } else {
     btn.innerHTML = `<span id="user-btn-text">${t.navLogin}</span>`;
@@ -1217,7 +1455,7 @@ function openOwnerPortalModal() {
   document.getElementById('owner-bookings-list').innerHTML = `
     <div style="background:#fff; padding:16px; border-radius:12px; border:1px solid #e7e4dc; display:flex; justify-content:space-between; align-items:center;">
       <div>
-        <strong>Jasur Mamadaliyev (6 mehmon)</strong>
+        <strong>Umrzoq Yulchiyev (6 mehmon)</strong>
         <div style="font-size:13px; color:#5c6e67;">2026-10-29 - 2026-10-31 | Mountain Chalet Zomin</div>
         <div style="font-size:13px; color:#0d382c; font-weight:700;">1 200 000 so'm (10% kafolat to'langan)</div>
       </div>
@@ -1243,7 +1481,7 @@ function openCaretakerModal() {
   document.getElementById('caretaker-arrivals-list').innerHTML = `
     <div style="background:#fff; padding:20px; border-radius:12px; border:2px solid #0d382c;">
       <div style="font-size:26px; font-weight:900; letter-spacing:2px; font-family:monospace; color:#0d382c;">01 A 777 AA</div>
-      <div style="font-size:16px; font-weight:700; margin-top:6px;">Jasur Mamadaliyev (6 nafar mehmon)</div>
+      <div style="font-size:16px; font-weight:700; margin-top:6px;">Umrzoq Yulchiyev (6 nafar mehmon)</div>
       <div style="font-size:13px; color:#5c6e67; margin-bottom:14px;">Kelish vaqti: Bugun, 14:00</div>
       <button class="btn-primary-pill w-100" onclick="showToast('Kalit topshirildi! Check-in muvaffaqiyatli.', 'success'); closeCaretakerModal();">
         Kalit topshirildi (Check-in)
