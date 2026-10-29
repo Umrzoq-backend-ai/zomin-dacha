@@ -13,3 +13,4 @@ node_modules/
 package*.json
 .env
 .env.*
+.vercel

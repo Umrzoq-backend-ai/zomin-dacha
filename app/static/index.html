@@ -25,7 +25,7 @@
   <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <link rel="stylesheet" href="/static/css/style.css?v=20261029_1220">
+  <link rel="stylesheet" href="/static/css/style.css?v=20261029_2250">
 </head>
 
 <body>
@@ -532,7 +532,7 @@
   </main>
 
   <!-- ================= 3. FOOTER (Matches Image 1 Master Reference) ================= -->
-  <footer class="zomin-footer">
+  <footer class="zomin-footer" id="site-footer">
     <div class="footer-container">
 
       <div class="footer-grid">
@@ -1301,19 +1301,92 @@
     </div>
   </div>
 
-  <!-- ================= 6. DEDICATED SUPERADMIN WORKSPACE ================= -->
+  <!-- ================= 6. MAXFIY SUPERADMIN LOGIN GATE ================= -->
+  <div id="admin-login-gate" class="admin-login-gate-wrapper hidden">
+    <div class="admin-login-gate-card">
+      <div class="admin-gate-header">
+        <span class="admin-gate-badge">MAXFIY HUHUD</span>
+        <div class="admin-gate-logo">
+          <svg viewBox="0 0 38 22" fill="none" class="admin-gate-icon">
+            <path d="M2 20L13 4L21 15L26 9L36 20H2Z" stroke="#10b981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13 4L18 11" stroke="#10b981" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <h2>Zomin Boshqaruv Markazi</h2>
+        </div>
+        <p class="admin-gate-sub">Faqat vakolatli ma'murlar va superadmin uchun himoyalangan portal</p>
+      </div>
+
+      <form onsubmit="handleAdminLoginSubmit(event)" class="admin-gate-form">
+        <div class="gate-form-group">
+          <label class="gate-label">Superadmin Logini</label>
+          <div class="gate-input-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <input type="text" id="admin-gate-username" placeholder="Login (masalan: Umrzoq)" required autocomplete="username">
+          </div>
+        </div>
+
+        <div class="gate-form-group">
+          <label class="gate-label">Maxfiy Parol</label>
+          <div class="gate-input-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input type="password" id="admin-gate-password" placeholder="Parol (masalan: pdp.university)" required autocomplete="current-password">
+            <button type="button" class="btn-toggle-eye" onclick="toggleAdminPasswordVisibility()">
+              <svg id="admin-eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="admin-gate-error" class="gate-error-alert hidden"></div>
+
+        <button type="submit" class="btn-gate-submit" id="btn-admin-gate-submit">
+          <span>Boshqaruv markaziga kirish</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+
+        <div class="gate-footer-links">
+          <button type="button" class="btn-gate-back" onclick="showTouristHome()">
+            ← Sayyoh saytiga qaytish
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= 7. DEDICATED SUPERADMIN WORKSPACE ================= -->
   <div id="portal-admin" class="portal-admin-view hidden">
     <div class="admin-top-bar">
       <div class="admin-brand">
-        <span class="admin-badge">SUPERADMIN</span>
+        <span class="admin-badge">SUPERADMIN: Umrzoq</span>
         <h1 class="admin-title">Zomin Boshqaruv & Operatsiyalar Markazi</h1>
       </div>
       <div class="admin-actions">
+        <button class="btn-add-property" onclick="openAddPropertyModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:4px;">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Yangi Dacha Qo'shish
+        </button>
         <button class="btn-refresh" onclick="refreshAdminData()">
           Ma'lumotlarni yangilash
         </button>
         <button class="btn-exit-admin" onclick="showTouristHome()">
-          Sayyoh saytiga qaytish
+          Saytga o'tish
+        </button>
+        <button class="btn-admin-logout" onclick="handleAdminLogout()">
+          Chiqish
         </button>
       </div>
     </div>
@@ -1483,8 +1556,145 @@
     </div>
   </div>
 
+  <!-- ================= 8. ADMIN PROPERTY ADD / EDIT MODAL ================= -->
+  <div id="modal-admin-property" class="modal-overlay hidden">
+    <div class="modal-card modal-lg admin-prop-modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="modal-badge-top">BOShQARUV MARKAZI</span>
+          <h3 class="modal-title" id="admin-prop-modal-title">Yangi Dacha Qo'shish</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeAdminPropertyModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <form onsubmit="handleAdminPropertySubmit(event)" id="admin-prop-form">
+          <input type="hidden" id="admin-prop-id" value="">
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="input-label">Dacha / Obyekt Nomi *</label>
+              <input type="text" id="admin-prop-title" class="form-input" required placeholder="Masalan: Shoxona Tog' Chalet">
+            </div>
+            <div class="form-group">
+              <label class="input-label">Mikro-Hudud *</label>
+              <select id="admin-prop-district" class="form-input" required>
+                <option value="DUOBA">Duoba MFY (Soy bo'yi)</option>
+                <option value="SUFFA">Suffa Platosi (2400m)</option>
+                <option value="ORIKLISOY">O'riklisoy (Shifobaxsh archazor)</option>
+                <option value="SANATORIY">Zomin Sanatoriysi</option>
+                <option value="DASHTOBOD">Dashtobod stansiyasi</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="input-label">Dacha Turi *</label>
+              <select id="admin-prop-type" class="form-input" required>
+                <option value="VILLA">Villa (Katta hovli)</option>
+                <option value="COTTAGE">Kottej (Yog'och chalet)</option>
+                <option value="GUEST_HOUSE">Mehmon uyi</option>
+                <option value="CHOYXONA_TAPCHAN">Choyxona & Tapchan</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="input-label">Kechalik Narx (so'm) *</label>
+              <input type="number" id="admin-prop-price" class="form-input" required placeholder="1500000" min="100000" step="50000">
+            </div>
+            <div class="form-group">
+              <label class="input-label">Dam Olish Kuni Narxi (so'm)</label>
+              <input type="number" id="admin-prop-weekend-price" class="form-input" placeholder="1800000" min="100000" step="50000">
+            </div>
+          </div>
+
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="input-label">Kunduzgi Tapchan Narxi (ixtiyoriy)</label>
+              <input type="number" id="admin-prop-dayuse-price" class="form-input" placeholder="Masalan: 400000" min="0" step="20000">
+            </div>
+            <div class="form-group">
+              <label class="input-label">Standart Sig'im (kishi)</label>
+              <input type="number" id="admin-prop-capacity" class="form-input" value="8" min="1" max="50">
+            </div>
+            <div class="form-group">
+              <label class="input-label">Maksimal Sig'im (kishi)</label>
+              <input type="number" id="admin-prop-max-capacity" class="form-input" value="12" min="1" max="100">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="input-label">Dacha Egasi Ism-Familiyasi</label>
+              <input type="text" id="admin-prop-owner-name" class="form-input" placeholder="Masalan: Alisher Zokirov" value="Umrzoq (Superadmin)">
+            </div>
+            <div class="form-group">
+              <label class="input-label">Aloqa Telefoni (GSM) *</label>
+              <input type="tel" id="admin-prop-owner-phone" class="form-input" required placeholder="+998 90 123 45 67" value="+998901234567">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="input-label">Aniq Manzil va Marshrut</label>
+              <input type="text" id="admin-prop-address" class="form-input" required placeholder="Zomin tumani, Duoba MFY, Soy bo'yi 14">
+            </div>
+            <div class="form-group">
+              <label class="input-label">Zomin Yo'l Sharoiti</label>
+              <select id="admin-prop-road" class="form-input" required>
+                <option value="ASPHALT_SEDAN">✅ Asfalt (Spark / Cobalt bemalol chiqadi)</option>
+                <option value="HIGH_CLEARANCE">🚙 Baland klirens (Gentra, Tracker, Krossover)</option>
+                <option value="4WD_ONLY">⛰️ Faqat 4WD / Jip (Tog' shag'al yo'li)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label">Qulayliklar (Belgilang):</label>
+            <div class="admin-amenities-checkboxes">
+              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Filtrli Hovuz (Basseyn)" checked> 🏊 Filtrli Hovuz</label>
+              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Wi-Fi 5G" checked> 📶 Wi-Fi 5G</label>
+              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Playstation & Bilyard" checked> 🎮 PS & Bilyard</label>
+              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Archa tandiri" checked> 🍖 Archa tandiri</label>
+              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Ochiq oshxona & Mangal" checked> 🥩 Ochiq oshxona & Mangal</label>
+              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Sauna & Fin hammomi"> 🧖 Sauna / Hammom</label>
+              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Konditsioner"> ❄️ Konditsioner</label>
+              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Elektr generatori"> ⚡ Generator bor</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label">Asosiy Rasm Havolasi (URL):</label>
+            <input type="text" id="admin-prop-photo" class="form-input" value="/static/assets/villa.jpg" placeholder="/static/assets/villa.jpg yoki https://...">
+            <div class="admin-preset-photos mt-2">
+              <span class="preset-label">Tezkor tanlash:</span>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/villa.jpg')">🏡 Villa</button>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/chalet.jpg')">🪵 Chalet</button>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/lodge.jpg')">🌲 Lodge</button>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/dacha_chashma.jpg')">🌊 Chashma</button>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/dacha_panorama.jpg')">🏔️ Panorama</button>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/shox_pool.jpg')">🏊 Hovuzli</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label">Tavsif (Dacha xususiyatlari):</label>
+            <textarea id="admin-prop-desc" class="form-input" rows="3" placeholder="Zomin tog'larining baland archazorlarida joylashgan, oilaviy dam olish uchun barcha qulayliklarga ega premium dacha."></textarea>
+          </div>
+
+          <div class="admin-modal-actions">
+            <button type="button" class="btn-outline-pill" onclick="closeAdminPropertyModal()">Bekor qilish</button>
+            <button type="submit" class="btn-primary-pill" id="btn-save-admin-prop">
+              <span>Saqlash va Saytga Chiqarish</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- JavaScript -->
-  <script src="/static/js/app.js?v=20261029_1220"></script>
+  <script src="/static/js/app.js?v=20261029_2250"></script>
 </body>
 
 </html>

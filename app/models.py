@@ -192,6 +192,33 @@ class ReviewResponse(BaseModel):
     created_at: str
 
 # Admin Panel Schemas (TZ 9)
+class AdminLoginRequest(BaseModel):
+    username: str
+    password: str
+
+class PropertyCreateUpdateRequest(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    property_type: str = "VILLA" # VILLA, COTTAGE, GUEST_HOUSE, CHOYXONA_TAPCHAN
+    micro_district: str = "DUOBA" # DUOBA, ORIKLISOY, SUFFA, SANATORIY, DASHTOBOD
+    address_text: str = "Zomin tumani"
+    road_condition: str = "ASPHALT_SEDAN" # ASPHALT_SEDAN, HIGH_CLEARANCE, 4WD_ONLY
+    base_price_weekday: float
+    base_price_weekend: Optional[float] = None
+    day_use_price: Optional[float] = None
+    standard_capacity: int = 8
+    max_capacity: int = 12
+    owner_name: Optional[str] = "Dacha Egasi"
+    owner_phone: Optional[str] = "+998901234567"
+    has_generator: bool = True
+    water_source: str = "SPRING_WATER"
+    heating_type: str = "GAS_CENTRAL"
+    mobile_coverage: str = "4G_EXCELLENT"
+    photos: List[str] = []
+    amenities: List[str] = []
+    is_published: bool = True
+    verification_status: str = "VERIFIED"
+
 class AdminDashboardStats(BaseModel):
     total_gmv: float
     total_platform_fee: float

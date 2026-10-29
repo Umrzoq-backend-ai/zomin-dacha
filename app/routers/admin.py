@@ -1,12 +1,15 @@
+import re
+import json
 import uuid
 from datetime import datetime, timezone
 from typing import Optional, List
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Header
 
 from app.database import get_db
 from app.models import (
     AdminDashboardStats, AdminPropertyVerifyRequest, AdminForceCancelRequest,
-    AdminUserStatusRequest, PropertyListItem, BookingDetailResponse
+    AdminUserStatusRequest, PropertyListItem, BookingDetailResponse,
+    AdminLoginRequest, PropertyCreateUpdateRequest
 )
 from app.services.booking_service import get_booking_detail
 
@@ -285,6 +288,54 @@ def update_user_status_admin(user_id: str, request: AdminUserStatusRequest):
             "role": new_role
         }
 
+@router.post("/auth/login")
+def admin_login(req: AdminLoginRequest):
+    """
+    Maxfiy Superadmin Kirish (Umrzoq / pdp.university).
+    """
+    clean_user = req.username.strip().lower()
+    valid_usernames = ["umrzoq", "admin", "school21dev", "umrzoq972@gmail.com", "school21dev@example.com"]
+    
+    if clean_user in valid_usernames and req.password.strip() == "pdp.university":
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE role = 'ADMIN' LIMIT 1")
+            admin_user = cursor.fetchone()
+            now_iso = datetime.now(timezone.utc).isoformat()
+            if not admin_user:
+                admin_id = str(uuid.uuid4())
+                cursor.execute("""
+                    INSERT INTO users (id, phone_number, full_name, role, is_active, created_at, updated_at)
+                    VALUES (?, '+998901234567', 'Umrzoq (Superadmin)', 'ADMIN', 1, ?, ?)
+                """, (admin_id, now_iso, now_iso))
+            else:
+                admin_id = admin_user["id"]
+
+        session_token = f"admin_sec_{uuid.uuid4().hex}"
+        return {
+            "ok": True,
+            "token": session_token,
+            "user": {
+                "id": admin_id,
+                "name": "Umrzoq",
+                "role": "ADMIN",
+                "phone": "+998 90 123 45 67",
+                "email": "umrzoq972@gmail.com"
+            },
+            "message": "Superadmin xush kelibsiz!"
+        }
+
+    raise HTTPException(status_code=401, detail="Login yoki parol noto'g'ri! Iltimos, qaytadan tekshiring.")
+
+@router.get("/auth/check")
+def admin_auth_check(authorization: Optional[str] = Header(None)):
+    """
+    Superadmin sessiya tokenini tekshirish.
+    """
+    if authorization and authorization.startswith("Bearer admin_sec_"):
+        return {"authenticated": True, "user": {"name": "Umrzoq", "role": "ADMIN"}}
+    return {"authenticated": False}
+
 @router.get("/audit-logs")
 def get_audit_logs_admin(limit: int = 50):
     """
@@ -294,3 +345,213 @@ def get_audit_logs_admin(limit: int = 50):
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT ?", (limit,))
         return [dict(r) for r in cursor.fetchall()]
+
+@router.post("/properties")
+def create_property_admin(req: PropertyCreateUpdateRequest):
+    """
+    Yangi dacha / e'lon joylash (Admin orqali to'g'ridan-to'g'ri saytga chiqarish).
+    """
+    with get_db() as conn:
+        cursor = conn.cursor()
+        prop_id = f"prop_{uuid.uuid4().hex[:12]}"
+        now_iso = datetime.now(timezone.utc).isoformat()
+        
+        # Ensure owner user exists
+        owner_phone = req.owner_phone or "+998901234567"
+        owner_name = req.owner_name or "Dacha Egasi"
+        cursor.execute("SELECT id FROM users WHERE phone_number = ? LIMIT 1", (owner_phone,))
+        owner = cursor.fetchone()
+        if owner:
+            owner_id = owner["id"]
+        else:
+            owner_id = str(uuid.uuid4())
+            cursor.execute("""
+                INSERT INTO users (id, phone_number, full_name, role, is_active, created_at, updated_at)
+                VALUES (?, ?, ?, 'OWNER', 1, ?, ?)
+            """, (owner_id, owner_phone, owner_name, now_iso, now_iso))
+
+        # Generate unique URL slug
+        base_slug = re.sub(r'[^a-z0-9]+', '-', req.title.lower()).strip('-')
+        slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
+
+        photos = req.photos if (req.photos and len(req.photos) > 0) else ["/static/assets/villa.jpg"]
+        amenities = req.amenities if (req.amenities and len(req.amenities) > 0) else [
+            "Filtrli Hovuz", "Wi-Fi 5G", "Playstation", "Archa tandiri", "Mangal"
+        ]
+
+        coords = {
+            "DUOBA": (39.7350, 68.4200),
+            "SUFFA": (39.6800, 68.4400),
+            "ORIKLISOY": (39.7100, 68.4100),
+            "SANATORIY": (39.7200, 68.4250),
+            "DASHTOBOD": (39.9500, 68.3500)
+        }
+        lat, lon = coords.get(req.micro_district.upper(), (39.7250, 68.4200))
+
+        cursor.execute("""
+            INSERT INTO properties (
+                id, owner_id, title, slug, description, property_type,
+                region, micro_district, address_text, latitude, longitude,
+                location_precision, road_condition, has_generator, water_source,
+                heating_type, mobile_coverage, verification_status, is_published,
+                photos_json, amenities_json, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, 'ZOMIN', ?, ?, ?, ?, 'EXACT', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            prop_id, owner_id, req.title, slug, req.description, req.property_type,
+            req.micro_district.upper(), req.address_text, lat, lon,
+            req.road_condition, 1 if req.has_generator else 0, req.water_source,
+            req.heating_type, req.mobile_coverage, req.verification_status,
+            1 if req.is_published else 0, json.dumps(photos), json.dumps(amenities),
+            now_iso, now_iso
+        ))
+
+        unit_id = f"unit_{uuid.uuid4().hex[:12]}"
+        weekend_price = req.base_price_weekend or (req.base_price_weekday * 1.25)
+        cursor.execute("""
+            INSERT INTO rental_units (
+                id, property_id, name, unit_category, standard_capacity,
+                max_capacity, base_price_weekday, base_price_weekend, is_active, created_at
+            ) VALUES (?, ?, ?, 'OVERNIGHT_STAY', ?, ?, ?, ?, 1, ?)
+        """, (
+            unit_id, prop_id, f"{req.title} Asosiy Bino",
+            req.standard_capacity, req.max_capacity, req.base_price_weekday,
+            weekend_price, now_iso
+        ))
+
+        if req.day_use_price and req.day_use_price > 0:
+            slot_id = f"slot_{uuid.uuid4().hex[:12]}"
+            cursor.execute("""
+                INSERT INTO day_use_slots (
+                    id, rental_unit_id, slot_name, start_time, end_time, price_weekday, price_weekend
+                ) VALUES (?, ?, 'FULL_DAY', '10:00', '22:00', ?, ?)
+            """, (slot_id, unit_id, req.day_use_price, req.day_use_price * 1.2))
+
+        log_audit(conn, "admin_umrzoq", "PROPERTY_CREATE", "PROPERTY", prop_id, f"Yangi dacha yaratildi: {req.title}")
+
+        return {
+            "ok": True,
+            "id": prop_id,
+            "slug": slug,
+            "title": req.title,
+            "message": "Dacha muvaffaqiyatli saqlandi va saytga joylandi!"
+        }
+
+@router.get("/properties/{property_id}/full")
+def get_property_admin_full(property_id: str):
+    """
+    Dachaning barcha tahrirlanadigan ma'lumotlarini olish (Edit modal uchun).
+    """
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT p.*, u.full_name as owner_name, u.phone_number as owner_phone
+            FROM properties p
+            LEFT JOIN users u ON p.owner_id = u.id
+            WHERE p.id = ?
+        """, (property_id,))
+        p = cursor.fetchone()
+        if not p:
+            raise HTTPException(status_code=404, detail="Dacha topilmadi")
+
+        cursor.execute("SELECT * FROM rental_units WHERE property_id = ? LIMIT 1", (property_id,))
+        unit = cursor.fetchone()
+
+        photos = json.loads(p["photos_json"]) if p["photos_json"] else []
+        amenities = json.loads(p["amenities_json"]) if p["amenities_json"] else []
+
+        return {
+            "id": p["id"],
+            "title": p["title"],
+            "description": p["description"] or "",
+            "property_type": p["property_type"],
+            "micro_district": p["micro_district"],
+            "address_text": p["address_text"],
+            "road_condition": p["road_condition"],
+            "has_generator": bool(p["has_generator"]),
+            "water_source": p["water_source"],
+            "heating_type": p["heating_type"],
+            "mobile_coverage": p["mobile_coverage"],
+            "verification_status": p["verification_status"],
+            "is_published": bool(p["is_published"]),
+            "photos": photos,
+            "amenities": amenities,
+            "base_price_weekday": unit["base_price_weekday"] if unit else 1200000.0,
+            "base_price_weekend": unit["base_price_weekend"] if unit else 1500000.0,
+            "standard_capacity": unit["standard_capacity"] if unit else 8,
+            "max_capacity": unit["max_capacity"] if unit else 12,
+            "owner_name": p["owner_name"] or "Dacha Egasi",
+            "owner_phone": p["owner_phone"] or "+998 90 123 45 67"
+        }
+
+@router.put("/properties/{property_id}")
+def update_property_admin(property_id: str, req: PropertyCreateUpdateRequest):
+    """
+    Dacha ma'lumotlarini tahrirlash va saqlash.
+    """
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM properties WHERE id = ?", (property_id,))
+        p = cursor.fetchone()
+        if not p:
+            raise HTTPException(status_code=404, detail="Dacha topilmadi")
+
+        now_iso = datetime.now(timezone.utc).isoformat()
+        photos = req.photos if (req.photos and len(req.photos) > 0) else (json.loads(p["photos_json"]) if p["photos_json"] else [])
+        amenities = req.amenities if (req.amenities and len(req.amenities) > 0) else (json.loads(p["amenities_json"]) if p["amenities_json"] else [])
+
+        cursor.execute("""
+            UPDATE properties
+            SET title = ?, description = ?, property_type = ?, micro_district = ?,
+                address_text = ?, road_condition = ?, has_generator = ?,
+                verification_status = ?, is_published = ?,
+                photos_json = ?, amenities_json = ?, updated_at = ?
+            WHERE id = ?
+        """, (
+            req.title, req.description, req.property_type, req.micro_district.upper(),
+            req.address_text, req.road_condition, 1 if req.has_generator else 0,
+            req.verification_status, 1 if req.is_published else 0,
+            json.dumps(photos), json.dumps(amenities), now_iso, property_id
+        ))
+
+        if req.owner_phone and p["owner_id"]:
+            cursor.execute("""
+                UPDATE users SET full_name = ?, phone_number = ?, updated_at = ?
+                WHERE id = ?
+            """, (req.owner_name or "Dacha Egasi", req.owner_phone, now_iso, p["owner_id"]))
+
+        cursor.execute("""
+            UPDATE rental_units
+            SET standard_capacity = ?, max_capacity = ?,
+                base_price_weekday = ?, base_price_weekend = ?
+            WHERE property_id = ?
+        """, (
+            req.standard_capacity, req.max_capacity,
+            req.base_price_weekday, req.base_price_weekend or (req.base_price_weekday * 1.25),
+            property_id
+        ))
+
+        log_audit(conn, "admin_umrzoq", "PROPERTY_UPDATE", "PROPERTY", property_id, f"Dacha yangilandi: {req.title}")
+
+        return {
+            "ok": True,
+            "id": property_id,
+            "message": "Dacha ma'lumotlari muvaffaqiyatli yangilandi!"
+        }
+
+@router.delete("/properties/{property_id}")
+def delete_property_admin(property_id: str):
+    """
+    Dachani tizimdan o'chirish (Admin).
+    """
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT title FROM properties WHERE id = ?", (property_id,))
+        p = cursor.fetchone()
+        if not p:
+            raise HTTPException(status_code=404, detail="Dacha topilmadi")
+
+        cursor.execute("DELETE FROM rental_units WHERE property_id = ?", (property_id,))
+        cursor.execute("DELETE FROM properties WHERE id = ?", (property_id,))
+        log_audit(conn, "admin_umrzoq", "PROPERTY_DELETE", "PROPERTY", property_id, f"Dacha o'chirildi: {p['title']}")
+
+        return {"ok": True, "message": f"'{p['title']}' muvaffaqiyatli o'chirildi."}

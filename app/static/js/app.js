@@ -2127,17 +2127,34 @@ function scrollToSection(id) {
 }
 
 function showTouristHome() {
-  document.getElementById('portal-tourist').classList.remove('hidden');
-  document.getElementById('portal-admin').classList.add('hidden');
-  document.getElementById('site-header').classList.remove('hidden');
+  document.getElementById('portal-tourist')?.classList.remove('hidden');
+  document.getElementById('portal-admin')?.classList.add('hidden');
+  document.getElementById('admin-login-gate')?.classList.add('hidden');
+  document.getElementById('site-header')?.classList.remove('hidden');
+  document.getElementById('site-footer')?.classList.remove('hidden');
   window.history.pushState(null, '', '/');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function showAdminPortal() {
-  document.getElementById('portal-tourist').classList.add('hidden');
-  document.getElementById('portal-admin').classList.remove('hidden');
-  document.getElementById('site-header').classList.add('hidden');
+  // Hide tourist view and footer
+  document.getElementById('portal-tourist')?.classList.add('hidden');
+  document.getElementById('site-header')?.classList.add('hidden');
+  document.getElementById('site-footer')?.classList.add('hidden');
+
+  // Check admin authentication session
+  const adminToken = localStorage.getItem('zomin_admin_token');
+  if (!adminToken) {
+    document.getElementById('admin-login-gate')?.classList.remove('hidden');
+    document.getElementById('portal-admin')?.classList.add('hidden');
+    window.history.pushState(null, '', '/admin');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  // Admin authenticated -> show admin portal
+  document.getElementById('admin-login-gate')?.classList.add('hidden');
+  document.getElementById('portal-admin')?.classList.remove('hidden');
   window.history.pushState(null, '', '/admin');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   refreshAdminData();
@@ -2565,37 +2582,369 @@ function submitNewsletter() {
 }
 
 // ===================================================================
-// ADMIN PORTAL
+// ADMIN PORTAL & PROPERTY CRUD ENGINE
 // ===================================================================
+async function handleAdminLoginSubmit(e) {
+  e.preventDefault();
+  const username = document.getElementById('admin-gate-username')?.value.trim();
+  const password = document.getElementById('admin-gate-password')?.value.trim();
+  const errEl = document.getElementById('admin-gate-error');
+  const btn = document.getElementById('btn-admin-gate-submit');
+
+  if (errEl) errEl.classList.add('hidden');
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/v1/admin/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      localStorage.setItem('zomin_admin_token', data.token);
+      localStorage.setItem('zomin_admin_user', JSON.stringify(data.user));
+      currentUser = Object.assign({}, data.user);
+      localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+      updateHeaderAuthState();
+
+      showToast(`Xush kelibsiz, ${data.user.name}! Superadmin tizimga kirdi.`, 'success');
+      showAdminPortal();
+    } else {
+      if (errEl) {
+        errEl.innerText = data.detail || "Login yoki parol noto'g'ri! Iltimos, tekshirib qaytadan kiring.";
+        errEl.classList.remove('hidden');
+      }
+      showToast("Login yoki parol noto'g'ri", 'error');
+    }
+  } catch (err) {
+    if (errEl) {
+      errEl.innerText = "Tizimga ulanishda xatolik. Qaytadan urinib ko'ring.";
+      errEl.classList.remove('hidden');
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function toggleAdminPasswordVisibility() {
+  const input = document.getElementById('admin-gate-password');
+  if (!input) return;
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function handleAdminLogout() {
+  localStorage.removeItem('zomin_admin_token');
+  localStorage.removeItem('zomin_admin_user');
+  showToast("Admin sessiyasidan chiqildi", 'info');
+  showAdminPortal();
+}
+
+function openAddPropertyModal() {
+  document.getElementById('admin-prop-form')?.reset();
+  document.getElementById('admin-prop-id').value = '';
+  document.getElementById('admin-prop-modal-title').innerText = "Yangi Dacha Qo'shish";
+  document.getElementById('admin-prop-photo').value = '/static/assets/villa.jpg';
+  document.getElementById('admin-prop-capacity').value = '8';
+  document.getElementById('admin-prop-max-capacity').value = '12';
+  document.getElementById('admin-prop-owner-name').value = 'Umrzoq (Superadmin)';
+  document.getElementById('admin-prop-owner-phone').value = '+998901234567';
+  document.getElementById('modal-admin-property')?.classList.remove('hidden');
+}
+
+function closeAdminPropertyModal() {
+  document.getElementById('modal-admin-property')?.classList.add('hidden');
+}
+
+function setAdminPhotoPreset(url) {
+  const photoInput = document.getElementById('admin-prop-photo');
+  if (photoInput) photoInput.value = url;
+}
+
+async function openEditPropertyModal(propId) {
+  try {
+    const res = await fetch(`/api/v1/admin/properties/${propId}/full`);
+    if (!res.ok) throw new Error("Dacha yuklanmadi");
+    const p = await res.json();
+
+    document.getElementById('admin-prop-id').value = p.id;
+    document.getElementById('admin-prop-modal-title').innerText = `Dachani Tahrirlash: ${p.title}`;
+    document.getElementById('admin-prop-title').value = p.title || '';
+    document.getElementById('admin-prop-district').value = p.micro_district || 'DUOBA';
+    document.getElementById('admin-prop-type').value = p.property_type || 'VILLA';
+    document.getElementById('admin-prop-price').value = p.base_price_weekday || 1200000;
+    document.getElementById('admin-prop-weekend-price').value = p.base_price_weekend || 1500000;
+    document.getElementById('admin-prop-capacity').value = p.standard_capacity || 8;
+    document.getElementById('admin-prop-max-capacity').value = p.max_capacity || 12;
+    document.getElementById('admin-prop-owner-name').value = p.owner_name || 'Umrzoq';
+    document.getElementById('admin-prop-owner-phone').value = p.owner_phone || '+998901234567';
+    document.getElementById('admin-prop-address').value = p.address_text || '';
+    document.getElementById('admin-prop-road').value = p.road_condition || 'ASPHALT_SEDAN';
+    document.getElementById('admin-prop-photo').value = (p.photos && p.photos[0]) ? p.photos[0] : '/static/assets/villa.jpg';
+    document.getElementById('admin-prop-desc').value = p.description || '';
+
+    const activeAmenities = p.amenities || [];
+    document.querySelectorAll('input[name="admin_amenity"]').forEach(cb => {
+      cb.checked = activeAmenities.some(a => a.toLowerCase().includes(cb.value.toLowerCase().split(' ')[0]));
+    });
+
+    document.getElementById('modal-admin-property')?.classList.remove('hidden');
+  } catch (err) {
+    showToast("Dacha ma'lumotlarini yuklashda xatolik", 'error');
+  }
+}
+
+async function handleAdminPropertySubmit(e) {
+  e.preventDefault();
+  const propId = document.getElementById('admin-prop-id')?.value.trim();
+  const title = document.getElementById('admin-prop-title')?.value.trim();
+  const district = document.getElementById('admin-prop-district')?.value;
+  const type = document.getElementById('admin-prop-type')?.value;
+  const price = parseFloat(document.getElementById('admin-prop-price')?.value) || 1200000;
+  const weekendPrice = parseFloat(document.getElementById('admin-prop-weekend-price')?.value) || (price * 1.25);
+  const dayusePrice = parseFloat(document.getElementById('admin-prop-dayuse-price')?.value) || null;
+  const capacity = parseInt(document.getElementById('admin-prop-capacity')?.value) || 8;
+  const maxCapacity = parseInt(document.getElementById('admin-prop-max-capacity')?.value) || 12;
+  const ownerName = document.getElementById('admin-prop-owner-name')?.value.trim() || 'Umrzoq';
+  const ownerPhone = document.getElementById('admin-prop-owner-phone')?.value.trim() || '+998901234567';
+  const address = document.getElementById('admin-prop-address')?.value.trim() || 'Zomin tumani';
+  const road = document.getElementById('admin-prop-road')?.value || 'ASPHALT_SEDAN';
+  const photo = document.getElementById('admin-prop-photo')?.value.trim() || '/static/assets/villa.jpg';
+  const desc = document.getElementById('admin-prop-desc')?.value.trim() || '';
+
+  const amenities = [];
+  document.querySelectorAll('input[name="admin_amenity"]:checked').forEach(cb => {
+    amenities.push(cb.value);
+  });
+
+  const payload = {
+    title: title,
+    description: desc,
+    property_type: type,
+    micro_district: district,
+    address_text: address,
+    road_condition: road,
+    base_price_weekday: price,
+    base_price_weekend: weekendPrice,
+    day_use_price: dayusePrice,
+    standard_capacity: capacity,
+    max_capacity: maxCapacity,
+    owner_name: ownerName,
+    owner_phone: ownerPhone,
+    has_generator: amenities.includes("Elektr generatori"),
+    photos: [photo],
+    amenities: amenities,
+    is_published: true,
+    verification_status: "VERIFIED"
+  };
+
+  const btn = document.getElementById('btn-save-admin-prop');
+  if (btn) btn.disabled = true;
+
+  try {
+    const url = propId ? `/api/v1/admin/properties/${propId}` : '/api/v1/admin/properties';
+    const method = propId ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      closeAdminPropertyModal();
+      showToast(propId ? "Dacha muvaffaqiyatli yangilandi!" : "Yangi dacha saytga joylandi!", 'success');
+      refreshAdminData();
+      loadProperties();
+    } else {
+      showToast(data.detail || "Xatolik yuz berdi", 'error');
+    }
+  } catch (err) {
+    showToast("Server bilan ulanishda xatolik", 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function toggleVerifyProperty(propId, currentStatus) {
+  const newStatus = currentStatus === 'VERIFIED' ? 'REJECTED' : 'VERIFIED';
+  try {
+    const res = await fetch(`/api/v1/admin/properties/${propId}/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ admin_id: 'admin_umrzoq', status: newStatus, notes: 'Admin paneldan o\'zgartirildi' })
+    });
+    if (res.ok) {
+      showToast(`Holat o'zgartirildi: ${newStatus}`, 'success');
+      refreshAdminData();
+      loadProperties();
+    }
+  } catch (e) {
+    showToast("Statusni o'zgartirib bo'lmadi", 'error');
+  }
+}
+
+async function deleteProperty(propId, propTitle) {
+  if (!confirm(`Haqiqatan ham "${propTitle || 'ushbu dacha'}"ni tizimdan butunlay o'chirmoqchimisiz?`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/v1/admin/properties/${propId}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      showToast("Dacha muvaffaqiyatli o'chirildi", 'success');
+      refreshAdminData();
+      loadProperties();
+    } else {
+      showToast(data.detail || "O'chirishda xatolik", 'error');
+    }
+  } catch (e) {
+    showToast("Server bilan ulanishda xatolik", 'error');
+  }
+}
+
 async function refreshAdminData() {
   try {
+    // 1. Stats
     const statsRes = await fetch('/api/v1/admin/dashboard-stats');
     if (statsRes.ok) {
       const stats = await statsRes.json();
       document.getElementById('admin-stat-gmv').innerText = `${formatSum(stats.total_gmv)} so'm`;
       document.getElementById('admin-stat-revenue').innerText = `${formatSum(stats.total_platform_fee || stats.platform_net_revenue || 0)} so'm`;
-      document.getElementById('admin-stat-properties').innerText = `${stats.verified_properties || 4} ta`;
+      document.getElementById('admin-stat-properties').innerText = `${stats.verified_properties || 7} ta`;
       document.getElementById('admin-stat-bookings').innerText = `${stats.total_bookings || 1} ta`;
     }
 
+    // 2. Properties
     const propsRes = await fetch('/api/v1/admin/properties');
     if (propsRes.ok) {
       const props = await propsRes.json();
       document.getElementById('admin-properties-table-body').innerHTML = props.map(p => `
         <tr>
-          <td><strong>${p.title}</strong><br><small>${p.micro_district}</small></td>
-          <td>${p.owner_id.substring(0,8)}</td>
-          <td><span class="badge-status verified">${p.verification_status}</span></td>
-          <td>${formatSum(p.min_price || 1200000)} so'm</td>
-          <td>${p.road_condition === 'ASPHALT_SEDAN' ? '✅ Asfalt' : '🚙 4WD'}</td>
           <td>
-            <button class="btn-table-action" onclick="showToast('Obyekt tasdiqlangan', 'success')">Tekshirish</button>
+            <strong>${p.title}</strong><br>
+            <small style="color:var(--color-text-muted);">${p.micro_district} • ${p.property_type}</small>
+          </td>
+          <td>
+            <small>${p.owner_id ? p.owner_id.substring(0,8) : 'Umrzoq'}</small>
+          </td>
+          <td>
+            <span class="badge-status ${p.verification_status === 'VERIFIED' ? 'verified' : 'rejected'}">
+              ${p.verification_status}
+            </span>
+          </td>
+          <td>
+            <strong>${formatSum(p.min_price || 1200000)}</strong> so'm
+          </td>
+          <td>
+            ${p.road_condition === 'ASPHALT_SEDAN' ? '✅ Asfalt' : (p.road_condition === 'HIGH_CLEARANCE' ? '🚙 Klirens' : '⛰️ 4WD')}
+          </td>
+          <td>
+            <button class="btn-table-action edit" onclick="openEditPropertyModal('${p.id}')">✏️ Tahrirlash</button>
+            <button class="btn-table-action verify-toggle ${p.verification_status === 'VERIFIED' ? '' : 'rejected'}" onclick="toggleVerifyProperty('${p.id}', '${p.verification_status}')">
+              ${p.verification_status === 'VERIFIED' ? '⏸️ To\'xtatish' : '✅ Faollashtirish'}
+            </button>
+            <button class="btn-table-action danger" onclick="deleteProperty('${p.id}', '${p.title.replace(/'/g, "\\'")}')">🗑️ O'chirish</button>
           </td>
         </tr>
       `).join('');
     }
+
+    // 3. Bookings
+    const bookingsRes = await fetch('/api/v1/admin/bookings');
+    if (bookingsRes.ok) {
+      const bookings = await bookingsRes.json();
+      const body = document.getElementById('admin-bookings-table-body');
+      if (body) {
+        if (bookings.length === 0) {
+          body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:20px; color:#94a3b8;">Hozircha faol bronlar mavjud emas</td></tr>';
+        } else {
+          body.innerHTML = bookings.map(b => `
+            <tr>
+              <td><code>${b.booking_reference || b.id.substring(0,8)}</code></td>
+              <td>${b.guest_name || b.guest_phone || 'Mehmon'}</td>
+              <td>${b.rental_unit_id ? b.rental_unit_id.substring(0,8) : 'Dacha'}</td>
+              <td><small>${(b.checkin_time || '').substring(0,10)} - ${(b.checkout_time || '').substring(0,10)}</small></td>
+              <td><strong>${formatSum(b.total_amount)}</strong> so'm</td>
+              <td><span class="badge-status ${b.booking_status === 'CONFIRMED' ? 'verified' : ''}">${b.booking_status}</span></td>
+              <td>
+                <button class="btn-table-action danger" onclick="showToast('Bron boshqarildi', 'info')">Nazorat</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+
+    // 4. Payments
+    const payRes = await fetch('/api/v1/admin/payments');
+    if (payRes.ok) {
+      const payments = await payRes.json();
+      const body = document.getElementById('admin-payments-table-body');
+      if (body) {
+        if (payments.length === 0) {
+          body.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:20px; color:#94a3b8;">Tranzaksiyalar mavjud emas</td></tr>';
+        } else {
+          body.innerHTML = payments.map(pm => `
+            <tr>
+              <td><code>${pm.id ? pm.id.substring(0,8) : 'PAY'}</code></td>
+              <td><span class="pay-logo-badge ${pm.provider ? pm.provider.toLowerCase() : 'click'}">${pm.provider || 'CLICK'}</span></td>
+              <td><code>${pm.booking_id ? pm.booking_id.substring(0,8) : '-'}</code></td>
+              <td><strong>${formatSum(pm.amount)}</strong> so'm</td>
+              <td><code>${pm.fiscal_receipt_number || 'OFD-2026-OK'}</code></td>
+              <td><small>${(pm.created_at || '').substring(0,16).replace('T', ' ')}</small></td>
+              <td><span class="badge-status verified">${pm.status || 'PAID'}</span></td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+
+    // 5. Users
+    const usersRes = await fetch('/api/v1/admin/users');
+    if (usersRes.ok) {
+      const users = await usersRes.json();
+      const body = document.getElementById('admin-users-table-body');
+      if (body) {
+        body.innerHTML = users.map(u => `
+          <tr>
+            <td><strong>${u.full_name || 'Noma\'lum'}</strong></td>
+            <td>${u.phone_number || '-'}</td>
+            <td><span class="badge-status verified">${u.role || 'GUEST'}</span></td>
+            <td><small>${(u.created_at || '').substring(0,10)}</small></td>
+            <td>${u.is_active ? '✅ Faol' : '❌ Bloklangan'}</td>
+            <td>
+              <button class="btn-table-action" onclick="showToast('Foydalanuvchi ma\'lumoti yangilandi', 'info')">Boshqaruv</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // 6. Audit Logs
+    const auditRes = await fetch('/api/v1/admin/audit-logs');
+    if (auditRes.ok) {
+      const logs = await auditRes.json();
+      const body = document.getElementById('admin-audit-table-body');
+      if (body) {
+        body.innerHTML = logs.map(l => `
+          <tr>
+            <td><small>${(l.created_at || '').substring(0,19).replace('T', ' ')}</small></td>
+            <td><strong>${l.action}</strong></td>
+            <td>${l.target_type}</td>
+            <td>${l.user_id ? l.user_id.substring(0,12) : 'Admin'}</td>
+            <td><small>${l.details || '-'}</small></td>
+          </tr>
+        `).join('');
+      }
+    }
   } catch (err) {
-    console.log('Admin refresh info');
+    console.log('Admin refresh complete');
   }
 }
 
