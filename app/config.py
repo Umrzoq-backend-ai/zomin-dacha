@@ -8,6 +8,7 @@ class Settings(BaseModel):
     
     SECRET_KEY: str = os.getenv("SECRET_KEY", "zominstay-mountain-ultra-secret-key-2026")
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "7123456789:AAH_zominstay_mountain_bot_sample_token")
+    WEBAPP_URL: str = os.getenv("WEBAPP_URL", "http://localhost:8000")
     
     DATABASE_PATH: str = os.getenv("DATABASE_PATH", "zominstay.db")
     PLATFORM_FEE_PERCENTAGE: float = 10.0  # 10% onlayn kafolat haqi

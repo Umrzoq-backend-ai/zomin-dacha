@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 <html lang="uz">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Zomin — Tog'lar, dam olish maskanlari va unutilmas sayohatlar</title>
-  
+
   <!-- Premium Fonts: Playfair Display (Serif Headings) & Plus Jakarta Sans (Modern Clean UI) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
   <!-- Leaflet Map CSS & JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  
+
   <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  
+
   <link rel="stylesheet" href="/static/css/style.css?v=20261029_1220">
 </head>
+
 <body>
 
   <!-- Toast Notification Container -->
@@ -33,8 +39,9 @@
       <!-- Logo: Mountain SVG + ZOMIN Serif -->
       <a href="/" class="brand-logo" onclick="event.preventDefault(); showTouristHome();">
         <svg class="brand-mountain-icon" viewBox="0 0 38 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2 20L13 4L21 15L26 9L36 20H2Z" stroke="#0d382c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M13 4L18 11" stroke="#0d382c" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M2 20L13 4L21 15L26 9L36 20H2Z" stroke="#0d382c" stroke-width="2.4" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <path d="M13 4L18 11" stroke="#0d382c" stroke-width="1.8" stroke-linecap="round" />
         </svg>
         <span class="brand-text">ZOMIN</span>
       </a>
@@ -43,9 +50,14 @@
       <nav class="main-nav-links">
         <a href="#stays" class="nav-link active" id="nav-link-stays" onclick="scrollToSection('stays-section')">
           <span id="nav-link-stays-text">Turar joylar</span>
-          <svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" style="display:inline-block; margin-left:4px; vertical-align:middle;"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"
+            style="display:inline-block; margin-left:4px; vertical-align:middle;">
+            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
         </a>
-        <a href="#discover" class="nav-link" id="nav-link-discover" onclick="scrollToSection('discover-section')">Kashf etish</a>
+        <a href="#discover" class="nav-link" id="nav-link-discover" onclick="scrollToSection('discover-section')">Kashf
+          etish</a>
         <a href="#routes" class="nav-link" id="nav-link-routes" onclick="scrollToSection('map-section')">Marshrutlar</a>
         <a href="#partner" class="nav-link" id="nav-link-partner" onclick="openPartnerModal()">Hamkor bo'lish</a>
       </nav>
@@ -55,15 +67,20 @@
         <!-- Language Selector -->
         <div class="lang-dropdown-wrapper">
           <button class="lang-btn" id="lang-btn" onclick="toggleLangMenu(event)">
-            <svg class="lang-globe-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="lang-globe-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="2" y1="12" x2="22" y2="12"></line>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+              </path>
             </svg>
             <span id="current-lang-code">UZ</span>
-            <svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none">
+              <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
           </button>
-          
+
           <div class="lang-dropdown-menu hidden" id="lang-dropdown-menu">
             <button class="lang-option-btn active" onclick="switchLanguage('uz')">
               <span class="flag-icon">🇺🇿</span> O'zbekcha (UZ)
@@ -82,7 +99,7 @@
           <button class="kirish-btn" id="header-kirish-btn" onclick="handleAuthButtonClick()">
             <span id="user-btn-text">Kirish</span>
           </button>
-          
+
           <!-- User Profile Dropdown Menu (When Logged In) -->
           <div class="profile-dropdown-menu hidden" id="profile-dropdown-menu">
             <div class="profile-dropdown-header" style="display:flex; align-items:center; gap:12px; padding:14px 16px;">
@@ -91,40 +108,67 @@
                 <div class="dropdown-user-name" id="menu-user-name">Umrzoq Yulchiyev</div>
                 <div class="dropdown-user-email" id="menu-user-email">school21dev@gmail.com</div>
                 <span class="badge-google-verified">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
                   Google hisobi ulangan
                 </span>
               </div>
             </div>
             <div class="profile-dropdown-divider"></div>
             <a href="#profile" class="profile-menu-item" onclick="openProfileModal()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
               <span id="lbl-menu-profile">Mening profilim</span>
             </a>
             <a href="#trips" class="profile-menu-item" onclick="openMyTripsModal()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
               <span id="lbl-menu-trips">Mening safarlarim</span>
             </a>
             <a href="#saved" class="profile-menu-item" onclick="scrollToSection('stays-section')">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                </path>
+              </svg>
               <span id="lbl-menu-saved">Saqlanganlar</span>
             </a>
             <a href="#owner" class="profile-menu-item" id="owner-menu-item" onclick="openOwnerPortalModal()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
               <span id="lbl-menu-owner">Ega kabineti</span>
             </a>
             <a href="#caretaker" class="profile-menu-item" id="caretaker-menu-item" onclick="openCaretakerModal()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M21 2l-9.6 9.6"></path><path d="M15.5 7.5l3 3"></path></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="7.5" cy="15.5" r="5.5"></circle>
+                <path d="M21 2l-9.6 9.6"></path>
+                <path d="M15.5 7.5l3 3"></path>
+              </svg>
               <span id="lbl-menu-caretaker">Bog'bon (Darvoza)</span>
             </a>
             <div class="profile-dropdown-divider" id="admin-menu-divider"></div>
-            <a href="/admin" class="profile-menu-item admin-highlight" id="admin-menu-link" onclick="event.preventDefault(); showAdminPortal();">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <a href="/admin" class="profile-menu-item admin-highlight" id="admin-menu-link"
+              onclick="event.preventDefault(); showAdminPortal();">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
               <span id="lbl-menu-admin">Boshqaruv Markazi (Admin)</span>
             </a>
             <div class="profile-dropdown-divider"></div>
             <button class="profile-menu-item logout-btn" onclick="handleLogout()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
               <span id="lbl-menu-switch">Hisobdan chiqish</span>
             </button>
           </div>
@@ -140,19 +184,21 @@
     <section class="zomin-hero" id="hero-section">
       <div class="hero-bg-overlay"></div>
       <div class="hero-container">
-        
+
         <div class="hero-text-box">
           <h1 class="hero-heading" id="hero-title">Zominni o‘zingizga<br>xos kashf eting.</h1>
-          <p class="hero-subheading" id="hero-subtitle">Tog‘lar, dam olish maskanlari va unutilmas sayohatlar — barchasi bir joyda.</p>
+          <p class="hero-subheading" id="hero-subtitle">Tog‘lar, dam olish maskanlari va unutilmas sayohatlar — barchasi
+            bir joyda.</p>
         </div>
 
         <!-- Floating Luxury Search Bar (Custom Vector Controls) -->
         <div class="floating-search-card">
-          
+
           <!-- Segment 1: Location -->
           <div class="search-segment segment-location" onclick="toggleLocationDropdown(event)">
             <div class="segment-icon-box">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                 <circle cx="12" cy="10" r="3"></circle>
               </svg>
@@ -161,7 +207,9 @@
               <span class="segment-title" id="lbl-search-where">Qayerga?</span>
               <div class="segment-value-row">
                 <span class="segment-val" id="search-val-district">Zomin</span>
-                <svg class="val-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <svg class="val-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
               </div>
             </div>
 
@@ -195,7 +243,8 @@
           <!-- Segment 2: Check-In Date -->
           <div class="search-segment segment-date" id="segment-checkin" onclick="openCalendarPicker('checkin', event)">
             <div class="segment-icon-box">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
                 <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -206,7 +255,9 @@
               <span class="segment-title" id="lbl-search-checkin">Kelish</span>
               <div class="segment-value-row">
                 <span class="segment-val" id="search-val-checkin">Sanani tanlang</span>
-                <svg class="val-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <svg class="val-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
               </div>
             </div>
           </div>
@@ -214,9 +265,11 @@
           <div class="search-divider"></div>
 
           <!-- Segment 3: Check-Out Date -->
-          <div class="search-segment segment-date" id="segment-checkout" onclick="openCalendarPicker('checkout', event)">
+          <div class="search-segment segment-date" id="segment-checkout"
+            onclick="openCalendarPicker('checkout', event)">
             <div class="segment-icon-box">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
                 <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -227,13 +280,16 @@
               <span class="segment-title" id="lbl-search-checkout">Ketish</span>
               <div class="segment-value-row">
                 <span class="segment-val" id="search-val-checkout">Sanani tanlang</span>
-                <svg class="val-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <svg class="val-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
               </div>
             </div>
           </div>
 
           <!-- In-Page Luxury Calendar Popup (Attached to floating search) -->
-          <div class="search-popup-dropdown calendar-popup hidden" id="dropdown-calendar" onclick="event.stopPropagation()">
+          <div class="search-popup-dropdown calendar-popup hidden" id="dropdown-calendar"
+            onclick="event.stopPropagation()">
             <div class="cal-header">
               <button type="button" class="cal-nav-btn" onclick="prevCalendarMonth(event)">❮</button>
               <div class="cal-month-title" id="cal-month-title">Oktabr 2026</div>
@@ -256,7 +312,8 @@
           <!-- Segment 4: Guests Counter -->
           <div class="search-segment segment-guests" onclick="toggleGuestsDropdown(event)">
             <div class="segment-icon-box">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -267,7 +324,9 @@
               <span class="segment-title" id="lbl-search-guests">Mehmonlar</span>
               <div class="segment-value-row">
                 <span class="segment-val" id="search-val-guests">2 mehmon</span>
-                <svg class="val-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <svg class="val-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
               </div>
             </div>
 
@@ -300,7 +359,8 @@
 
           <!-- Submit Search Button (Forest Green Pill) -->
           <button class="search-submit-btn" onclick="executeHeroSearch()">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
@@ -314,7 +374,7 @@
     <!-- ================= SECTION 1: SIZGA MOS DAM OLISH MASKANLARI (Image 1) ================= -->
     <section class="content-section" id="stays-section">
       <div class="section-container">
-        
+
         <!-- Section Header -->
         <div class="section-header-row">
           <div>
@@ -323,7 +383,11 @@
           </div>
           <a href="#stays" class="section-view-all" onclick="clearAllFilters()">
             <span id="lbl-view-all-stays">Barchasini ko'rish</span>
-            <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
           </a>
         </div>
 
@@ -338,7 +402,7 @@
     <!-- ================= SECTION 2: ZOMINNI KASHF ETING (Image 1) ================= -->
     <section class="content-section" id="discover-section">
       <div class="section-container">
-        
+
         <!-- Section Header -->
         <div class="section-header-row">
           <div>
@@ -347,13 +411,17 @@
           </div>
           <a href="#discover" class="section-view-all" onclick="scrollToSection('discover-section')">
             <span id="lbl-view-all-discover">Barchasini ko'rish</span>
-            <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
           </a>
         </div>
 
         <!-- Attractions Grid (3 Cards Matching Image 1) -->
         <div class="attractions-grid">
-          
+
           <!-- Card 1: Zomin Osma Ko'prigi -->
           <div class="attraction-card">
             <div class="attraction-img-wrapper">
@@ -361,14 +429,21 @@
             </div>
             <div class="attraction-body">
               <div class="attraction-meta-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                  <line x1="4" y1="22" x2="4" y2="15"></line>
+                </svg>
                 <span class="attraction-cat" id="cat-attr-bridge">Mashhur joy</span>
               </div>
               <h3 class="attraction-title" id="title-attr-bridge">Zomin osma ko‘prigi</h3>
-              <p class="attraction-desc" id="desc-attr-bridge">Tog‘lar ustidan o‘tuvchi betakror ko‘prik — jasorat va go‘zallik uyg‘unligi.</p>
+              <p class="attraction-desc" id="desc-attr-bridge">Tog‘lar ustidan o‘tuvchi betakror ko‘prik — jasorat va
+                go‘zallik uyg‘unligi.</p>
               <button class="attraction-btn" onclick="openAttractionModal('bridge')">
                 <span id="btn-attr-bridge">Batafsil</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
               </button>
             </div>
           </div>
@@ -380,14 +455,21 @@
             </div>
             <div class="attraction-body">
               <div class="attraction-meta-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
                 <span class="attraction-cat" id="cat-attr-cablecar">Faoliyat</span>
               </div>
               <h3 class="attraction-title" id="title-attr-cablecar">Kabel yo‘li</h3>
-              <p class="attraction-desc" id="desc-attr-cablecar">Zominning go‘zal manzaralarini balandlikdan kuzating.</p>
+              <p class="attraction-desc" id="desc-attr-cablecar">Zominning go‘zal manzaralarini balandlikdan kuzating.
+              </p>
               <button class="attraction-btn" onclick="openAttractionModal('cablecar')">
                 <span id="btn-attr-cablecar">Batafsil</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
               </button>
             </div>
           </div>
@@ -399,14 +481,19 @@
             </div>
             <div class="attraction-body">
               <div class="attraction-meta-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                </svg>
                 <span class="attraction-cat" id="cat-attr-hiking">Marshrutlar</span>
               </div>
               <h3 class="attraction-title" id="title-attr-hiking">Sayr va piyoda yo‘llar</h3>
               <p class="attraction-desc" id="desc-attr-hiking">Tabiat qo‘ynida unutilmas sayohat marshrutlari.</p>
               <button class="attraction-btn" onclick="openAttractionModal('hiking')">
                 <span id="btn-attr-hiking">Batafsil</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
               </button>
             </div>
           </div>
@@ -419,7 +506,7 @@
     <!-- ================= SECTION 3: INTERACTIVE MOUNTAIN MAP ================= -->
     <section class="content-section" id="map-section">
       <div class="section-container">
-        
+
         <div class="section-header-row">
           <div>
             <span class="section-category-tag" id="tag-map">INTERAKTIV XARITA</span>
@@ -428,8 +515,10 @@
           <div class="map-controls-group">
             <button class="map-ctrl-chip active" id="chip-map-all" onclick="filterMapMarkers('ALL')">Barchasi</button>
             <button class="map-ctrl-chip" id="chip-map-dachas" onclick="filterMapMarkers('DACHA')">Dachalar</button>
-            <button class="map-ctrl-chip" id="chip-map-tapchans" onclick="filterMapMarkers('TAPCHAN')">Tapchanlar</button>
-            <button class="map-ctrl-chip" id="chip-map-sights" onclick="filterMapMarkers('ATTRACTION')">Diqqatga sazovor</button>
+            <button class="map-ctrl-chip" id="chip-map-tapchans"
+              onclick="filterMapMarkers('TAPCHAN')">Tapchanlar</button>
+            <button class="map-ctrl-chip" id="chip-map-sights" onclick="filterMapMarkers('ATTRACTION')">Diqqatga
+              sazovor</button>
           </div>
         </div>
 
@@ -445,14 +534,15 @@
   <!-- ================= 3. FOOTER (Matches Image 1 Master Reference) ================= -->
   <footer class="zomin-footer">
     <div class="footer-container">
-      
+
       <div class="footer-grid">
         <!-- Col 1: Logo & Tagline -->
         <div class="footer-col brand-col">
           <a href="/" class="footer-logo">
             <svg class="footer-mountain-icon" viewBox="0 0 38 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 20L13 4L21 15L26 9L36 20H2Z" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M13 4L18 11" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M2 20L13 4L21 15L26 9L36 20H2Z" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M13 4L18 11" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
             </svg>
             <span class="footer-brand-name">ZOMIN</span>
           </a>
@@ -476,27 +566,48 @@
           <ul class="footer-nav-list">
             <li><a href="#discover" id="fl-about" onclick="openAttractionModal('bridge')">Zomin haqida</a></li>
             <li><a href="#discover" id="fl-rules" onclick="openAttractionModal('hiking')">Tashrif qoidalari</a></li>
-            <li><a href="#contact" id="fl-contact" onclick="showToast('Aloqa markazi: +998 78 120 00 21')">Aloqa</a></li>
-            <li><a href="#faq" id="fl-faq" onclick="showToast('FAQ: Zomin dachalari 10% kafolatli onlayn xizmat haqi bilan band qilinadi')">FAQ</a></li>
+            <li><a href="#contact" id="fl-contact" onclick="showToast('Aloqa markazi: +998 78 120 00 21')">Aloqa</a>
+            </li>
+            <li><a href="#faq" id="fl-faq"
+                onclick="showToast('FAQ: Zomin dachalari 10% kafolatli onlayn xizmat haqi bilan band qilinadi')">FAQ</a>
+            </li>
           </ul>
         </div>
 
         <!-- Col 4: Biz bilan bog'laning -->
         <div class="footer-col social-col">
           <h4 class="footer-col-title" id="footer-col-connect">Biz bilan bog'laning</h4>
-          
+
           <div class="social-icons-row">
             <a href="https://instagram.com" target="_blank" class="social-icon-btn" title="Instagram">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+              </svg>
             </a>
             <a href="https://t.me" target="_blank" class="social-icon-btn" title="Telegram">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
             </a>
             <a href="https://facebook.com" target="_blank" class="social-icon-btn" title="Facebook">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+              </svg>
             </a>
             <a href="https://youtube.com" target="_blank" class="social-icon-btn" title="YouTube">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path
+                  d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z">
+                </path>
+                <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+              </svg>
             </a>
           </div>
 
@@ -504,7 +615,11 @@
           <div class="newsletter-box">
             <input type="email" id="footer-newsletter-email" class="newsletter-input" placeholder="Email manzilingiz">
             <button class="newsletter-btn" onclick="submitNewsletter()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
             </button>
           </div>
 
@@ -514,12 +629,19 @@
       <!-- Footer Bottom Bar -->
       <div class="footer-bottom-bar">
         <div class="copyright-text" id="footer-copyright">
-          © 2025 ZOMIN. Barcha huquqlar himoyalangan.
+          © 2026 ZOMIN. Barcha huquqlar himoyalangan.
         </div>
         <div class="footer-lang-pill" onclick="toggleLangMenu(event)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
           <span id="footer-lang-name">UZ</span>
-          <svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none">
+            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
         </div>
       </div>
 
@@ -539,19 +661,26 @@
       <div class="modal-body">
         <div class="profile-avatar-row">
           <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-            <img src="/static/assets/avatar.jpg" id="prof-avatar-img" class="profile-avatar-big-img" alt="Google Profile">
+            <img src="/static/assets/avatar.jpg" id="prof-avatar-img" class="profile-avatar-big-img"
+              alt="Google Profile">
             <label class="avatar-change-btn" for="avatar-file-input" title="O'z rasmingizni yuklash">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
               <span>Rasm yuklash</span>
             </label>
-            <input type="file" id="avatar-file-input" accept="image/*" style="display:none;" onchange="handleUserAvatarUpload(event)">
+            <input type="file" id="avatar-file-input" accept="image/*" style="display:none;"
+              onchange="handleUserAvatarUpload(event)">
           </div>
           <div class="profile-avatar-info">
             <h4 id="prof-display-name">Umrzoq Yulchiyev</h4>
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
               <span class="badge-role-pill" id="prof-display-role">SAYYOH / MEHMON</span>
               <span class="badge-google-verified">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Google hisobi
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg> Google hisobi
               </span>
             </div>
             <div class="dropdown-user-email mt-1" id="prof-display-email">school21dev@gmail.com</div>
@@ -566,7 +695,8 @@
             </div>
             <div class="form-group">
               <label class="input-label" id="lbl-prof-email">Google elektron pochta:</label>
-              <input type="email" id="prof-input-email" class="form-input" readonly style="background:#f8fafc; color:#64748b; cursor:not-allowed;">
+              <input type="email" id="prof-input-email" class="form-input" readonly
+                style="background:#f8fafc; color:#64748b; cursor:not-allowed;">
             </div>
             <div class="form-group">
               <label class="input-label" id="lbl-prof-phone">Telefon raqam:</label>
@@ -591,7 +721,11 @@
 
           <div class="profile-actions-footer">
             <button type="button" class="btn-logout" onclick="handleLogout()">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
               <span id="lbl-prof-logout">Hisobdan chiqish</span>
             </button>
             <button type="submit" class="btn-primary-pill" id="lbl-prof-save">
@@ -614,15 +748,19 @@
         <button class="modal-close-btn" onclick="closeAuthModal()">✕</button>
       </div>
       <div class="modal-body">
-        
+
         <div class="google-auth-box">
           <!-- Big Google Button -->
           <button type="button" class="btn-google-main" onclick="handleGoogleOneClick()">
             <svg class="google-icon-svg" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              <path fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+              <path fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+              <path fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+              <path fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
             </svg>
             <span id="lbl-google-btn-text">Google hisobi bilan davom etish</span>
           </button>
@@ -635,22 +773,29 @@
           <form onsubmit="handleCustomGoogleSubmit(event)" id="auth-clean-form" class="auth-clean-form">
             <div class="form-group">
               <label class="input-label" id="lbl-auth-email">Google elektron pochta manzili:</label>
-              <input type="email" id="custom-google-email-input" class="form-input" placeholder="nomingiz@gmail.com" required autocomplete="email">
+              <input type="email" id="custom-google-email-input" class="form-input" placeholder="nomingiz@gmail.com"
+                required autocomplete="email">
             </div>
 
             <div class="form-group mt-2">
               <label class="input-label" id="lbl-auth-name">Ism-familiyangiz (ixtiyoriy):</label>
-              <input type="text" id="custom-google-name-input" class="form-input" placeholder="Ismingizni kiriting" autocomplete="name">
+              <input type="text" id="custom-google-name-input" class="form-input" placeholder="Ismingizni kiriting"
+                autocomplete="name">
             </div>
 
             <button type="submit" class="btn-auth-submit mt-3" id="lbl-btn-google-login">
               <span>Davom etish</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
             </button>
           </form>
 
           <div class="google-trust-badge mt-3">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
             <span id="lbl-google-trust">Google OAuth 2.0 bilan himoyalangan</span>
           </div>
         </div>
@@ -672,18 +817,31 @@
           <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:4px;">
             <span class="modal-address" id="modal-property-address">📍 Zomin, Jizzax</span>
             <button type="button" class="btn-link-map" onclick="closeBookingModal(); scrollToSection('map-section');">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
               <span id="lbl-modal-show-map">Xaritada ko'rsatish</span>
             </button>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
           <button type="button" class="btn-modal-action-pill" onclick="shareCurrentProperty()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
             <span id="lbl-modal-share">Ulashish</span>
           </button>
           <button type="button" class="btn-modal-action-pill" id="modal-save-btn" onclick="toggleModalSaveProperty()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+              </path>
+            </svg>
             <span id="modal-save-text">Saqlash</span>
           </button>
           <button class="modal-close-btn" onclick="closeBookingModal()">✕</button>
@@ -691,7 +849,7 @@
       </div>
 
       <div class="modal-body">
-        
+
         <!-- Photo Gallery Carousel with Thumbnails (Bronla.uz style) -->
         <div class="property-gallery-slider">
           <div class="gallery-main-wrap">
@@ -702,10 +860,10 @@
         </div>
 
         <div class="modal-grid-2col">
-          
+
           <!-- Left Column: Rules, Schedule, Details & Amenities -->
           <div class="modal-details-col">
-            
+
             <!-- 1. Joylashish tartibi (Bronla.uz rules) -->
             <div class="booking-section-card">
               <h3 class="subsection-title" id="lbl-modal-rules-title">Joylashish tartibi</h3>
@@ -736,7 +894,8 @@
                     <span class="rule-icon">📜</span>
                     <span class="rule-name" id="lbl-rule-marriage">Nikoh guvohnoma</span>
                   </div>
-                  <div class="rule-desc-text" id="rule-val-marriage">Oilaviy mehmonlar farzandlarsiz kelsa, nikoh guvohnomasini ko'rsatish so'raladi.</div>
+                  <div class="rule-desc-text" id="rule-val-marriage">Oilaviy mehmonlar farzandlarsiz kelsa, nikoh
+                    guvohnomasini ko'rsatish so'raladi.</div>
                 </div>
               </div>
             </div>
@@ -786,7 +945,7 @@
           <!-- Right Column: Booking Configuration & Quote -->
           <div class="modal-booking-sidebar">
             <div class="sidebar-card">
-              
+
               <div class="unit-selector-row">
                 <label class="unit-label" id="lbl-modal-room">Xona / Uy turini tanlang:</label>
                 <select id="modal-unit-select" class="form-input" onchange="onUnitSelectChange()">
@@ -796,7 +955,8 @@
 
               <!-- Overnight vs Day-Use Toggle -->
               <div class="booking-mode-pills">
-                <button type="button" id="btn-mode-overnight" class="mode-pill active" onclick="switchBookingMode('OVERNIGHT')">
+                <button type="button" id="btn-mode-overnight" class="mode-pill active"
+                  onclick="switchBookingMode('OVERNIGHT')">
                   <span id="lbl-mode-overnight">🌙 Kechasi yotib qolish</span>
                 </button>
                 <button type="button" id="btn-mode-dayuse" class="mode-pill" onclick="switchBookingMode('DAY_USE')">
@@ -859,8 +1019,10 @@
               </div>
 
               <div class="form-group mt-2">
-                <label class="input-label" id="lbl-car-plate">Avtomobil raqami (Darvozadagi bog'bon tekshiruvi uchun):</label>
-                <input type="text" id="modal-car-plate" class="form-input text-uppercase" placeholder="Masalan: 01 A 777 AA">
+                <label class="input-label" id="lbl-car-plate">Avtomobil raqami (Darvozadagi bog'bon tekshiruvi
+                  uchun):</label>
+                <input type="text" id="modal-car-plate" class="form-input text-uppercase"
+                  placeholder="Masalan: 01 A 777 AA">
               </div>
 
               <!-- Quote Price Breakdown (Bronla.uz style calculation) -->
@@ -881,7 +1043,8 @@
               </div>
 
               <!-- Booking Submit Button -->
-              <button type="button" class="btn-book-action" id="btn-proceed-booking" onclick="submitBookingReservation()">
+              <button type="button" class="btn-book-action" id="btn-proceed-booking"
+                onclick="submitBookingReservation()">
                 <span id="lbl-proceed-booking">Band Qilish (15 daqiqa kafolatli qulf)</span>
               </button>
 
@@ -914,7 +1077,7 @@
         <button class="modal-close-btn" onclick="closePaymentModal()">✕</button>
       </div>
       <div class="modal-body">
-        
+
         <div class="hold-timer-alert">
           <span class="timer-icon">⏳</span>
           <div>
@@ -967,7 +1130,7 @@
         <button class="modal-close-btn" onclick="closeVoucherModal()">✕</button>
       </div>
       <div class="modal-body">
-        
+
         <div class="voucher-ticket-box" id="voucher-printable-area">
           <div class="voucher-top-bar">
             <span class="voucher-code" id="vouch-code">VOUCH-000000</span>
@@ -1002,7 +1165,8 @@
 
           <div class="vouch-directions-box">
             <div class="dir-title">Yo'l yo'riqnomasi:</div>
-            <p id="vouch-directions-text" class="dir-text">Tog' yo'lidan o'tib, chap tomondagi archazor orqali kiring.</p>
+            <p id="vouch-directions-text" class="dir-text">Tog' yo'lidan o'tib, chap tomondagi archazor orqali kiring.
+            </p>
           </div>
 
           <div class="vouch-ofd-box" id="vouch-ofd-box">
@@ -1090,7 +1254,8 @@
       </div>
       <div class="modal-body">
         <div class="caretaker-note-box">
-          <p>Ushbu portal dacha darvozasidagi bog'bon uchun mo'ljallangan. Mehmon mashina raqami va ismi tekshirilib, kalit topshiriladi. Moliyaviy summalar sir tutiladi.</p>
+          <p>Ushbu portal dacha darvozasidagi bog'bon uchun mo'ljallangan. Mehmon mashina raqami va ismi tekshirilib,
+            kalit topshiriladi. Moliyaviy summalar sir tutiladi.</p>
         </div>
         <div id="caretaker-arrivals-list" class="caretaker-arrivals-stack"></div>
       </div>
@@ -1106,7 +1271,8 @@
       </div>
       <div class="modal-body">
         <p class="partner-lead-text">
-          Zomindagi dachangiz yoki choyxonangiz bormi? Zomin platformasida 100% rasmiy tekshiruvdan o'ting, kafolatlangan mijozlar oqimiga ega bo'ling va double-booking muammosini unuting.
+          Zomindagi dachangiz yoki choyxonangiz bormi? Zomin platformasida 100% rasmiy tekshiruvdan o'ting,
+          kafolatlangan mijozlar oqimiga ega bo'ling va double-booking muammosini unuting.
         </p>
 
         <form onsubmit="handlePartnerSubmit(event)" class="partner-form">
@@ -1209,7 +1375,9 @@
                 </tr>
               </thead>
               <tbody id="admin-properties-table-body">
-                <tr><td colspan="6" class="text-center">Yuklanmoqda...</td></tr>
+                <tr>
+                  <td colspan="6" class="text-center">Yuklanmoqda...</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1232,7 +1400,9 @@
                 </tr>
               </thead>
               <tbody id="admin-bookings-table-body">
-                <tr><td colspan="7" class="text-center">Yuklanmoqda...</td></tr>
+                <tr>
+                  <td colspan="7" class="text-center">Yuklanmoqda...</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1255,7 +1425,9 @@
                 </tr>
               </thead>
               <tbody id="admin-payments-table-body">
-                <tr><td colspan="7" class="text-center">Yuklanmoqda...</td></tr>
+                <tr>
+                  <td colspan="7" class="text-center">Yuklanmoqda...</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1277,7 +1449,9 @@
                 </tr>
               </thead>
               <tbody id="admin-users-table-body">
-                <tr><td colspan="6" class="text-center">Yuklanmoqda...</td></tr>
+                <tr>
+                  <td colspan="6" class="text-center">Yuklanmoqda...</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1298,7 +1472,9 @@
                 </tr>
               </thead>
               <tbody id="admin-audit-table-body">
-                <tr><td colspan="5" class="text-center">Yuklanmoqda...</td></tr>
+                <tr>
+                  <td colspan="5" class="text-center">Yuklanmoqda...</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1310,4 +1486,5 @@
   <!-- JavaScript -->
   <script src="/static/js/app.js?v=20261029_1220"></script>
 </body>
+
 </html>

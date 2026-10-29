@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import init_db, seed_initial_data
 from app.routers import (
-    auth, properties, quotes, bookings, payments, vouchers, owner, admin
+    auth, properties, quotes, bookings, payments, vouchers, owner, admin, telegram
 )
 
 @asynccontextmanager
@@ -48,6 +48,7 @@ app.include_router(payments.router, prefix=settings.API_V1_PREFIX)
 app.include_router(vouchers.router, prefix=settings.API_V1_PREFIX)
 app.include_router(owner.router, prefix=settings.API_V1_PREFIX)
 app.include_router(admin.router, prefix=settings.API_V1_PREFIX)
+app.include_router(telegram.router, prefix=settings.API_V1_PREFIX)
 
 @app.get("/health")
 def health_check():

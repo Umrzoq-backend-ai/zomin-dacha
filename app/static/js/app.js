@@ -821,6 +821,47 @@ function formatSum(num) {
 
 // Initialize on DOM load
 window.addEventListener('DOMContentLoaded', async () => {
+  // Telegram Mini App (TMA) Native SDK Integration
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    try {
+      tg.ready();
+      tg.expand();
+      if (tg.setHeaderColor) tg.setHeaderColor('#18221e');
+      if (tg.setBackgroundColor) tg.setBackgroundColor('#f8f9fa');
+
+      // Auto-authenticate via TMA HMAC-SHA256 initData if available and not logged in
+      const savedUser = localStorage.getItem('zomin_user');
+      if (tg.initData && !savedUser) {
+        fetch('/api/v1/auth/telegram-webapp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ init_data: tg.initData })
+        })
+        .then(res => res.ok ? res.json() : null)
+        .then(userData => {
+          if (userData) {
+            currentUser = {
+              id: userData.id,
+              name: userData.full_name,
+              email: `${userData.telegram_id || 'tg'}@telegram.org`,
+              phone: userData.phone_number || '',
+              role: userData.role || 'GUEST',
+              telegram_id: userData.telegram_id,
+              avatar: generateUserAvatar(userData.full_name, 'tg@telegram.org')
+            };
+            localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+            updateHeaderAuthState();
+            showToast(`Telegram orqali kirdingiz: ${userData.full_name}`, 'success');
+          }
+        })
+        .catch(err => console.log('Telegram auto-login skipped:', err));
+      }
+    } catch (e) {
+      console.warn('Telegram WebApp init warning:', e);
+    }
+  }
+
   // Load saved user if any
   const savedUser = localStorage.getItem('zomin_user');
   if (savedUser) {
@@ -2389,6 +2430,20 @@ function processPaymentSimulation() {
   closePaymentModal();
   showToast('To\'lov muvaffaqiyatli! Soliq OFD elektron cheki berildi.', 'success');
   openOfflineVoucher(currentBooking?.id || 'demo');
+
+  // Trigger Telegram Host Alert
+  if (currentBooking?.id) {
+    fetch('/api/v1/telegram/notify-owner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ booking_id: currentBooking.id })
+    }).catch(e => console.log('Owner notification ping complete'));
+  }
+
+  // Telegram WebApp Haptic Feedback
+  if (window.Telegram?.WebApp?.HapticFeedback) {
+    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+  }
 }
 
 function openOfflineVoucher(id) {
