@@ -48,12 +48,29 @@ const I18N = {
     perNight: "/ kecha",
     perDay: "/ kun",
     guestsCount: (n) => `${n} mehmon`,
-    cardChaletTitle: "Mountain Chalet Zomin",
-    cardChaletDesc: "Tog‘ manzarali, yog‘och uy. Oila va do‘stlar uchun ideal.",
-    cardVillaTitle: "Zomin Villa",
-    cardVillaDesc: "Shaxsiy hovuz, zamonaviy qulayliklar va betakror manzara.",
-    cardLodgeTitle: "Forest Lodge",
-    cardLodgeDesc: "Tabiat bag‘rida, sokin va qulay dam olish maskani.",
+    guestsAdults: "Kattalar",
+    guestsAdultsSub: "13 yosh va undan katta",
+    guestsChildren: "Bolalar",
+    guestsChildrenSub: "2 - 12 yosh",
+    calClear: "Tozalash",
+    calHintCheckin: "Kelish sanasini tanlang",
+    calHintCheckout: "Ketish sanasini tanlang",
+    calWeekdays: ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"],
+    locAll: "Zomin (Barchasi)",
+    locAllDesc: "Barcha tog' kottejlari va choyxonalar",
+    locDuoba: "Duoba",
+    locDuobaDesc: "Soy bo'yidagi basseynli dachalar (Asfalt)",
+    locSuffa: "Suffa Platosi (2400m)",
+    locSuffaDesc: "Bartholet dor yo'li va osma ko'prik",
+    locOriklisoy: "O'riklisoy",
+    locOriklisoyDesc: "Buloq suvi ustidagi soy tapchanlari",
+    locSanatoriy: "Sanatoriy",
+    locSanatoriyDesc: "Shifobaxsh qarag'ay va archazorlar",
+    distAll: "Zomin",
+    distDuoba: "Duoba",
+    distSuffa: "Suffa",
+    distOriklisoy: "O'riklisoy",
+    distSanatoriy: "Sanatoriy",
     tagDiscover: "TABIAT VA SAYOHAT",
     titleDiscover: "Zominni kashf eting",
     tagMap: "INTERAKTIV XARITA",
@@ -73,6 +90,25 @@ const I18N = {
     footerInfo: "Foydali ma'lumotlar",
     footerConnect: "Biz bilan bog'laning",
     footerCopyright: "© 2025 ZOMIN. Barcha huquqlar himoyalangan.",
+    flStays: "Turar joylar",
+    flDiscover: "Kashf etish",
+    flRoutes: "Marshrutlar",
+    flPartner: "Hamkor bo'lish",
+    flAbout: "Zomin haqida",
+    flRules: "Tashrif qoidalari",
+    flContact: "Aloqa",
+    flFaq: "FAQ",
+    footerEmailPlaceholder: "Email manzilingiz",
+    authBadge: "XAVFSIZ VA TEZKOR",
+    authTitle: "Tizimga kirish",
+    authGoogleBtn: "Google hisobi bilan davom etish",
+    authDivider: "yoki elektron pochta bilan",
+    authEmailLbl: "Google elektron pochta manzili:",
+    authEmailPlaceholder: "nomingiz@gmail.com",
+    authNameLbl: "Ism-familiyangiz (ixtiyoriy):",
+    authNamePlaceholder: "Ismingizni kiriting",
+    authSubmitBtn: "Davom etish",
+    authTrust: "Google OAuth 2.0 bilan himoyalangan",
     profBadge: "SHAXSIY KABINET",
     profTitle: "Foydalanuvchi Profili",
     profNameLabel: "To'liq ism va familiya:",
@@ -94,7 +130,52 @@ const I18N = {
     mapAll: "Barchasi",
     mapDachas: "Dachalar",
     mapTapchans: "Tapchanlar",
-    mapSights: "Diqqatga sazovor"
+    mapSights: "Diqqatga sazovor",
+    badgeNew: "Yangi",
+    btnShowOnMap: "Xaritada ko'rsatish",
+    btnShare: "Ulashish",
+    btnSave: "Saqlash",
+    btnSaved: "Saqlandi",
+    galleryBadge: "📷 RASM VA VIDEOLAR",
+    rulesTitle: "Joylashish tartibi",
+    ruleCorp: "Korporativ",
+    ruleAlcohol: "Alkogol",
+    rulePets: "Uy hayvonlari",
+    ruleMarriage: "Nikoh guvohnoma",
+    ruleNotAllowed: "Mumkin emas",
+    ruleAllowed: "Mumkin",
+    ruleMarriageDesc: "Oilaviy mehmonlar farzandlarsiz kelsa, nikoh guvohnomasini ko'rsatish so'raladi.",
+    scheduleTitle: "Tartib va qoidalar",
+    schedCheckin: "Kirish",
+    schedCheckout: "Chiqish",
+    schedQuiet: "Tungi sukunat",
+    modalAboutTitle: "Obyekt haqida",
+    modalAmenitiesTitle: "Qulayliklar va Sharoitlar",
+    modalRoadInfo: "🚗 Asfalt yo'l (Spark/Cobalt bemalol chiqadi)",
+    modalGenInfo: "⚡ Avtomat generator mavjud (Elektr kafolat)",
+    modalWaterInfo: "💧 Muzdek toza buloq suvi",
+    modalRoomLbl: "Xona / Uy turini tanlang:",
+    modeOvernight: "🌙 Kechasi yotib qolish",
+    modeDayuse: "☀️ Kunduzgi tapchan",
+    slotSelectLbl: "Kunduzgi oraliqni tanlang:",
+    slotFullDay: "To'liq kun",
+    slotLunch: "Tushlik",
+    slotDinner: "Kechki salqin",
+    modalStartDate: "Kirish sanasi:",
+    modalEndDate: "Chiqish sanasi:",
+    tandirTitle: "Zomin Archa Tandiri",
+    tandirSub: "150 000 so'm / kg tog' qo'zisi",
+    phoneLbl: "Telefon raqamingiz:",
+    carPlateLbl: "Avtomobil raqami (Darvozadagi bog'bon tekshiruvi uchun):",
+    carPlatePlaceholder: "Masalan: 01 A 777 AA",
+    quoteTotal: "Umumiy summa:",
+    quoteRemaining: "Kirishda to'lov (85%):",
+    quoteDeposit: "⚡ Avans to'lov (15% kafolatli onlayn):",
+    btnBookAction: "Band Qilish (15 daqiqa kafolatli qulf)",
+    paymentTrust: "Kafolatlangan xavfsiz to'lov:",
+    toastShare: "Havola nusxalandi!",
+    toastSaved: "Saqlanganlarga qo'shildi!",
+    toastRemoved: "Saqlanganlardan olib tashlandi"
   },
   ru: {
     navStays: "Жилье",
@@ -119,13 +200,30 @@ const I18N = {
     locationZaamin: "Заамин, Джизак",
     perNight: "/ ночь",
     perDay: "/ день",
-    guestsCount: (n) => `${n} гостей`,
-    cardChaletTitle: "Mountain Chalet Zomin",
-    cardChaletDesc: "С видом на горы, деревянный коттедж. Идеально для семьи и друзей.",
-    cardVillaTitle: "Zomin Villa",
-    cardVillaDesc: "Частный бассейн, современные удобства и неповторимый пейзаж.",
-    cardLodgeTitle: "Forest Lodge",
-    cardLodgeDesc: "На лоне природы, спокойное и комфортное место отдыха.",
+    guestsCount: (n) => `${n} ${n === 1 ? 'гость' : (n < 5 ? 'гостя' : 'гостей')}`,
+    guestsAdults: "Взрослые",
+    guestsAdultsSub: "от 13 лет и старше",
+    guestsChildren: "Дети",
+    guestsChildrenSub: "от 2 до 12 лет",
+    calClear: "Очистить",
+    calHintCheckin: "Выберите дату заезда",
+    calHintCheckout: "Выберите дату выезда",
+    calWeekdays: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+    locAll: "Заамин (Все)",
+    locAllDesc: "Все горные коттеджи и чайханы",
+    locDuoba: "Дуоба",
+    locDuobaDesc: "Дачи с бассейном у горной реки (Асфальт)",
+    locSuffa: "Плато Суффа (2400м)",
+    locSuffaDesc: "Канатная дорога Bartholet и мост",
+    locOriklisoy: "Уриклисай",
+    locOriklisoyDesc: "Топчаны над родниковой водой",
+    locSanatoriy: "Санаторий",
+    locSanatoriyDesc: "Лечебные хвойные и арчовые леса",
+    distAll: "Заамин",
+    distDuoba: "Дуоба",
+    distSuffa: "Плато Суффа",
+    distOriklisoy: "Уриклисай",
+    distSanatoriy: "Санаторий",
     tagDiscover: "ПРИРОДА И ПУТЕШЕСТВИЯ",
     titleDiscover: "Исследуйте Заамин",
     tagMap: "ИНТЕРАКТИВНАЯ КАРТА",
@@ -145,6 +243,25 @@ const I18N = {
     footerInfo: "Полезная информация",
     footerConnect: "Свяжитесь с нами",
     footerCopyright: "© 2025 ZOMIN. Все права защищены.",
+    flStays: "Жилье",
+    flDiscover: "Исследовать",
+    flRoutes: "Маршруты",
+    flPartner: "Стать партнером",
+    flAbout: "О Заамине",
+    flRules: "Правила посещения",
+    flContact: "Контакты",
+    flFaq: "Частые вопросы",
+    footerEmailPlaceholder: "Ваш e-mail",
+    authBadge: "БЫСТРЫЙ И БЕЗОПАСНЫЙ",
+    authTitle: "Вход в систему",
+    authGoogleBtn: "Продолжить с Google",
+    authDivider: "или через эл. почту",
+    authEmailLbl: "Ваш Google e-mail:",
+    authEmailPlaceholder: "vash.email@gmail.com",
+    authNameLbl: "Ваше имя (необязательно):",
+    authNamePlaceholder: "Введите ваше имя",
+    authSubmitBtn: "Продолжить",
+    authTrust: "Защищено Google OAuth 2.0",
     profBadge: "ЛИЧНЫЙ КАБИНЕТ",
     profTitle: "Профиль пользователя",
     profNameLabel: "Полное имя и фамилия:",
@@ -166,7 +283,52 @@ const I18N = {
     mapAll: "Все",
     mapDachas: "Дачи",
     mapTapchans: "Тапчаны",
-    mapSights: "Достопримечательности"
+    mapSights: "Достопримечательности",
+    badgeNew: "Новый",
+    btnShowOnMap: "Показать на карте",
+    btnShare: "Поделиться",
+    btnSave: "Сохранить",
+    btnSaved: "Сохранено",
+    galleryBadge: "📷 ФОТО И ВИДЕО",
+    rulesTitle: "Правила проживания",
+    ruleCorp: "Корпоративы",
+    ruleAlcohol: "Алкоголь",
+    rulePets: "Домашние животные",
+    ruleMarriage: "Свидетельство о браке",
+    ruleNotAllowed: "Не разрешено",
+    ruleAllowed: "Разрешено",
+    ruleMarriageDesc: "Семейным парам без детей требуется предоставить свидетельство о браке.",
+    scheduleTitle: "График и распорядок",
+    schedCheckin: "Заезд",
+    schedCheckout: "Выезд",
+    schedQuiet: "Режим тишины",
+    modalAboutTitle: "Об объекте",
+    modalAmenitiesTitle: "Удобства и оснащение",
+    modalRoadInfo: "🚗 Асфальтированная дорога (легкий заезд)",
+    modalGenInfo: "⚡ Автоматический генератор (электричество 24/7)",
+    modalWaterInfo: "💧 Чистейшая горная родниковая вода",
+    modalRoomLbl: "Выберите тип размещения:",
+    modeOvernight: "🌙 Ночевка (Сутки)",
+    modeDayuse: "☀️ Дневной отдых",
+    slotSelectLbl: "Выберите интервал времени:",
+    slotFullDay: "Полный день",
+    slotLunch: "Обед",
+    slotDinner: "Вечерний отдых",
+    modalStartDate: "Дата заезда:",
+    modalEndDate: "Дата выезда:",
+    tandirTitle: "Зааминский тандыр",
+    tandirSub: "150 000 сум / кг горный барашек",
+    phoneLbl: "Ваш номер телефона:",
+    carPlateLbl: "Госномер авто (для смотрителя ворот):",
+    carPlatePlaceholder: "Например: 01 A 777 AA",
+    quoteTotal: "Общая стоимость:",
+    quoteRemaining: "Оплата при заезде (85%):",
+    quoteDeposit: "⚡ Предоплата (15% онлайн):",
+    btnBookAction: "Забронировать (фиксация на 15 мин)",
+    paymentTrust: "Гарантия безопасной оплаты:",
+    toastShare: "Ссылка скопирована!",
+    toastSaved: "Добавлено в избранное!",
+    toastRemoved: "Удалено из избранного"
   },
   en: {
     navStays: "Stays",
@@ -191,13 +353,30 @@ const I18N = {
     locationZaamin: "Zaamin, Jizzakh",
     perNight: "/ night",
     perDay: "/ day",
-    guestsCount: (n) => `${n} guests`,
-    cardChaletTitle: "Mountain Chalet Zomin",
-    cardChaletDesc: "Mountain view, wooden chalet. Ideal for family and friends.",
-    cardVillaTitle: "Zomin Villa",
-    cardVillaDesc: "Private pool, modern amenities and breathtaking scenery.",
-    cardLodgeTitle: "Forest Lodge",
-    cardLodgeDesc: "In the heart of nature, peaceful and cozy retreat.",
+    guestsCount: (n) => `${n} ${n === 1 ? 'guest' : 'guests'}`,
+    guestsAdults: "Adults",
+    guestsAdultsSub: "Age 13 and above",
+    guestsChildren: "Children",
+    guestsChildrenSub: "Ages 2 – 12",
+    calClear: "Clear",
+    calHintCheckin: "Select check-in date",
+    calHintCheckout: "Select check-out date",
+    calWeekdays: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+    locAll: "Zaamin (All)",
+    locAllDesc: "All mountain cottages & tea houses",
+    locDuoba: "Duoba",
+    locDuobaDesc: "Riverside cottages with pool (Asphalt)",
+    locSuffa: "Suffa Plateau (2400m)",
+    locSuffaDesc: "Bartholet cable car & bridge",
+    locOriklisoy: "Uriklisoy",
+    locOriklisoyDesc: "Riverside tapchans over spring water",
+    locSanatoriy: "Sanatorium",
+    locSanatoriyDesc: "Healing pine and juniper forests",
+    distAll: "Zaamin",
+    distDuoba: "Duoba",
+    distSuffa: "Suffa Plateau",
+    distOriklisoy: "Uriklisoy",
+    distSanatoriy: "Sanatorium",
     tagDiscover: "NATURE & TRAVEL",
     titleDiscover: "Discover Zaamin",
     tagMap: "INTERACTIVE MAP",
@@ -217,6 +396,25 @@ const I18N = {
     footerInfo: "Helpful Info",
     footerConnect: "Connect With Us",
     footerCopyright: "© 2025 ZOMIN. All rights reserved.",
+    flStays: "Stays",
+    flDiscover: "Discover",
+    flRoutes: "Routes",
+    flPartner: "Become a Host",
+    flAbout: "About Zaamin",
+    flRules: "Visitor Rules",
+    flContact: "Contact",
+    flFaq: "FAQ",
+    footerEmailPlaceholder: "Your email address",
+    authBadge: "FAST & SECURE",
+    authTitle: "Sign in to Zomin",
+    authGoogleBtn: "Continue with Google",
+    authDivider: "or via email",
+    authEmailLbl: "Google email address:",
+    authEmailPlaceholder: "your.email@gmail.com",
+    authNameLbl: "Your name (optional):",
+    authNamePlaceholder: "Enter your name",
+    authSubmitBtn: "Continue",
+    authTrust: "Secured with Google OAuth 2.0",
     profBadge: "PERSONAL ACCOUNT",
     profTitle: "User Profile",
     profNameLabel: "Full Name:",
@@ -238,9 +436,308 @@ const I18N = {
     mapAll: "All",
     mapDachas: "Stays",
     mapTapchans: "Tapchans",
-    mapSights: "Attractions"
+    mapSights: "Attractions",
+    badgeNew: "New",
+    btnShowOnMap: "Show on map",
+    btnShare: "Share",
+    btnSave: "Save",
+    btnSaved: "Saved",
+    galleryBadge: "📷 PHOTOS & VIDEOS",
+    rulesTitle: "Accommodation Rules",
+    ruleCorp: "Corporate events",
+    ruleAlcohol: "Alcohol",
+    rulePets: "Pets",
+    ruleMarriage: "Marriage certificate",
+    ruleNotAllowed: "Not allowed",
+    ruleAllowed: "Allowed",
+    ruleMarriageDesc: "Married couples without children are required to present a marriage certificate.",
+    scheduleTitle: "Schedule & Policies",
+    schedCheckin: "Check-in",
+    schedCheckout: "Check-out",
+    schedQuiet: "Quiet hours",
+    modalAboutTitle: "About this property",
+    modalAmenitiesTitle: "Amenities & Features",
+    modalRoadInfo: "🚗 Paved asphalt road (accessible for sedans)",
+    modalGenInfo: "⚡ Automatic backup generator (reliable power 24/7)",
+    modalWaterInfo: "💧 Pure natural mountain spring water",
+    modalRoomLbl: "Select accommodation type:",
+    modeOvernight: "🌙 Overnight stay",
+    modeDayuse: "☀️ Day-use retreat",
+    slotSelectLbl: "Select time slot:",
+    slotFullDay: "Full Day",
+    slotLunch: "Lunch",
+    slotDinner: "Evening",
+    modalStartDate: "Check-in date:",
+    modalEndDate: "Check-out date:",
+    tandirTitle: "Zaamin Juniper Tandoor",
+    tandirSub: "150,000 UZS / kg mountain lamb",
+    phoneLbl: "Phone number:",
+    carPlateLbl: "Vehicle License Plate (For gate pass):",
+    carPlatePlaceholder: "e.g. 01 A 777 AA",
+    quoteTotal: "Total amount:",
+    quoteRemaining: "Pay at check-in (85%):",
+    quoteDeposit: "⚡ Advance deposit (15% online):",
+    btnBookAction: "Book Now (15-min instant hold)",
+    paymentTrust: "Guaranteed secure payment:",
+    toastShare: "Link copied to clipboard!",
+    toastSaved: "Saved to favorites!",
+    toastRemoved: "Removed from favorites"
   }
 };
+
+// Comprehensive Localization Catalog for ALL 7 Properties
+const PROPERTY_I18N = {
+  "shox-dacha-zomin": {
+    uz: {
+      title: "Shox_dacha",
+      desc: "O'riklisoyning betakror manzarasi qo'ynida, Tog' Terak qishlog'ida joylashgan premium darajadagi dacha. Shaxsiy filtrli basseyn (3.5x7.5m), Playstation 3, karaoke, bilyard, stol tennisi, yozgi va qishki oshxona.",
+      address: "O'riklisoy, Zomin tumani · Tog' Terak qishlog'i 31",
+      district: "O'riklisoy, Zomin",
+      unitName: "Shox Dacha To'liq Majmua",
+      amenities: ["Filtrli Hovuz (3.5x7.5m)", "Playstation 3 & Karaoke", "Bilyard & Stol tennisi", "Wi-Fi 5G", "Ochiq oshxona & Mangal", "Archa tandiri", "Konditsioner", "Muzlatgich & Mikroto'lqinli pech"]
+    },
+    ru: {
+      title: "Shox_dacha (VIP Коттедж)",
+      desc: "Премиум дача в живописном поселке Тог Терак (Уриклисай). Бассейн с фильтрацией (3.5x7.5м), Playstation 3, караоке, бильярд, настольный теннис, летняя и зимняя кухня, зааминский тандыр.",
+      address: "Уриклисай, Зааминский район · пос. Тог Терак 31",
+      district: "Уриклисай, Заамин",
+      unitName: "Shox Dacha Полный комплекс",
+      amenities: ["Бассейн с фильтром (3.5x7.5м)", "Playstation 3 и Караоке", "Бильярд и Настольный теннис", "Wi-Fi 5G", "Летняя кухня и Мангал", "Арчовый тандыр", "Кондиционер", "Холодильник и Микроволновка"]
+    },
+    en: {
+      title: "Shox_dacha VIP Mountain Retreat",
+      desc: "Premium mountain retreat in Tog Terak village (Uriklisoy). Filtered private pool (3.5x7.5m), Playstation 3, karaoke, billiards, table tennis, summer & winter kitchen, authentic Zaamin tandoor.",
+      address: "Uriklisoy, Zaamin district · Tog Terak village 31",
+      district: "Uriklisoy, Zaamin",
+      unitName: "Shox Dacha Full Complex",
+      amenities: ["Filtered Pool (3.5x7.5m)", "Playstation 3 & Karaoke", "Billiards & Table tennis", "Wi-Fi 5G", "Outdoor kitchen & BBQ", "Juniper tandoor", "Air conditioning", "Refrigerator & Microwave"]
+    }
+  },
+  "chashma-eco-dacha": {
+    uz: {
+      title: "Chashma Eco Dacha",
+      desc: "Tog' daryosi va musaffo chashma suvi yoqasida joylashgan zamonaviy eko-dacha. Keng ayvon, hovuz, barbekyu hududi va archazor havosi.",
+      address: "Chashma qishlog'i, Buloqboshi, Zomin",
+      district: "O'riklisoy, Zomin",
+      unitName: "Chashma Eko Kottej (To'liq)",
+      amenities: ["Chashma bo'yida shiypon", "Basseyn", "Karaoke & Smart TV", "Wi-Fi 5G", "Barbekyu hududi", "Qozon-o'choq"]
+    },
+    ru: {
+      title: "Chashma Eco Dacha",
+      desc: "Современная эко-дача на берегу горной реки и родника. Просторная терраса, бассейн, зона барбекю и свежий хвойный воздух.",
+      address: "Поселок Чашма, Булокбоши, Заамин",
+      district: "Уриклисай, Заамин",
+      unitName: "Эко-коттедж Чашма (Полный)",
+      amenities: ["Беседка у родника", "Бассейн", "Караоке и Smart TV", "Wi-Fi 5G", "Зона барбекю", "Казан-очаг"]
+    },
+    en: {
+      title: "Chashma Eco Dacha",
+      desc: "Modern eco-chalet by mountain streams and natural springs. Spacious terrace, swimming pool, barbecue area and fresh pine air.",
+      address: "Chashma village, Buloqboshi, Zaamin",
+      district: "Uriklisoy, Zaamin",
+      unitName: "Chashma Eco Cottage (Entire)",
+      amenities: ["Springside gazebo", "Swimming pool", "Karaoke & Smart TV", "Wi-Fi 5G", "Barbecue area", "Traditional kazan & hearth"]
+    }
+  },
+  "suffa-panorama-kottej": {
+    uz: {
+      title: "Suffa Panorama Kottej",
+      desc: "Suffa platosining 2400 metr balandlikdagi panoramali manzarasi. Panoramik derazalar, yulduzli tunlar, kamin va to'liq avtonom isitish.",
+      address: "Suffa platosi, Radioastronomiya observatoriyasi yo'li, Zomin",
+      district: "Suffa platosi, Zomin",
+      unitName: "Suffa Panorama VIP Chalet",
+      amenities: ["360° Panorama", "Issiq pol & Kamin", "Yulduzlar kuzatuvi terassasi", "Wi-Fi 5G", "Avtomat generator", "Tandir go'shti"]
+    },
+    ru: {
+      title: "Suffa Panorama Kottej",
+      desc: "Панорамный коттедж на высоте 2400 метров на плато Суффа. Панорамные окна, терраса с видом на горы, камин и автономное отопление.",
+      address: "Плато Суффа, дорога к Радиообсерватории, Заамин",
+      district: "Плато Суффа, Заамин",
+      unitName: "Suffa Panorama VIP Шале",
+      amenities: ["Панорама 360°", "Теплый пол и Камин", "Терраса для наблюдения звезд", "Wi-Fi 5G", "Автономный генератор", "Мясо в тандыре"]
+    },
+    en: {
+      title: "Suffa Panorama Chalet",
+      desc: "Panoramic chalet perched at 2,400m on Suffa Plateau. Floor-to-ceiling windows, stargazing deck, cozy fireplace and central heating.",
+      address: "Suffa Plateau, Radio Observatory road, Zaamin",
+      district: "Suffa Plateau, Zaamin",
+      unitName: "Suffa Panorama VIP Chalet",
+      amenities: ["360° Panorama", "Heated floors & Fireplace", "Stargazing observation deck", "Wi-Fi 5G", "Backup generator", "Tandoor roasted meat"]
+    }
+  },
+  "mountain-chalet-zomin": {
+    uz: {
+      title: "Mountain Chalet Zomin",
+      desc: "Tog‘ manzarali, yog‘och uy. Oila va do‘stlar uchun ideal.",
+      address: "Suffa platosi, Dor yo'li yaqinida, Zomin",
+      district: "Suffa platosi, Zomin",
+      unitName: "Asosiy Kottej (Barcha xonalar)",
+      amenities: ["Tog' manzarasi", "Kamin", "Balkon/Ayvon", "Wi-Fi 5G", "Oila uchun shinam", "Mangal"]
+    },
+    ru: {
+      title: "Mountain Chalet Zomin",
+      desc: "Деревянный горный коттедж с прекрасным видом. Идеально для отдыха семьи и друзей.",
+      address: "Плато Суффа, возле канатной дороги, Заамин",
+      district: "Плато Суффа, Заамин",
+      unitName: "Основной коттедж (Все комнаты)",
+      amenities: ["Вид на горы", "Камин", "Балкон и Терраса", "Wi-Fi 5G", "Уют для всей семьи", "Мангал"]
+    },
+    en: {
+      title: "Mountain Chalet Zaamin",
+      desc: "Alpine wooden chalet overlooking mountain ranges. Ideal for family and friends retreat.",
+      address: "Suffa Plateau, near the Cable Car, Zaamin",
+      district: "Suffa Plateau, Zaamin",
+      unitName: "Main Chalet (Entire property)",
+      amenities: ["Mountain view", "Fireplace", "Balcony & Veranda", "Wi-Fi 5G", "Family-friendly", "BBQ grill"]
+    }
+  },
+  "zomin-villa": {
+    uz: {
+      title: "Zomin Villa",
+      desc: "Shaxsiy hovuz, zamonaviy qulayliklar va betakror manzara.",
+      address: "Duoba MFY, Soy bo'yi ko'chasi 14-uy, Zomin",
+      district: "Duoba, Zomin",
+      unitName: "VIP Villa (Basseyn va Sauna bilan)",
+      amenities: ["Shaxsiy hovuz (Basseyn)", "Sauna", "Bilyard", "Smart TV", "Tandir & Mangal", "Wi-Fi 4G"]
+    },
+    ru: {
+      title: "Zomin Villa",
+      desc: "Частный бассейн, современные премиум удобства, сауна и прекрасный вид на горы.",
+      address: "Поселок Дуоба, Набережная 14, Заамин",
+      district: "Дуоба, Заамин",
+      unitName: "VIP Вилла (С бассейном и сауной)",
+      amenities: ["Частный бассейн", "Финская сауна", "Бильярд", "Smart TV", "Тандыр и Мангал", "Wi-Fi 4G"]
+    },
+    en: {
+      title: "Zaamin Villa",
+      desc: "Private pool, modern luxury amenities, sauna and breathtaking alpine vistas.",
+      address: "Duoba village, Riverside street 14, Zaamin",
+      district: "Duoba, Zaamin",
+      unitName: "VIP Villa (With Pool & Sauna)",
+      amenities: ["Private pool", "Finnish sauna", "Billiards table", "Smart TV", "Tandoor & BBQ", "Wi-Fi 4G"]
+    }
+  },
+  "forest-lodge": {
+    uz: {
+      title: "Forest Lodge",
+      desc: "Tabiat bag‘rida, sokin va qulay dam olish maskani.",
+      address: "Sanatoriy ko'chasi 8-uy, Zomin",
+      district: "Sanatoriy, Zomin",
+      unitName: "O'rmon uyi (To'liq ijara)",
+      amenities: ["Qarag'ayzor", "Oshxona barcha jihozlar bilan", "Wi-Fi", "Buloq suvi", "Tinch hordiq"]
+    },
+    ru: {
+      title: "Forest Lodge",
+      desc: "Уютный лесной коттедж среди хвойных рощ. Тишина, родниковая вода и чистейший воздух.",
+      address: "Улица Санаторная 8, Заамин",
+      district: "Санаторий, Заамин",
+      unitName: "Лесной домик (Полная аренда)",
+      amenities: ["Хвойный бор", "Кухня со всей посудой", "Wi-Fi", "Родниковая вода", "Спокойный отдых"]
+    },
+    en: {
+      title: "Forest Lodge",
+      desc: "Cozy forest retreat nestled in pine groves. Serenity, pure spring water and crisp alpine air.",
+      address: "Sanatorium street 8, Zaamin",
+      district: "Sanatorium, Zaamin",
+      unitName: "Forest Cabin (Entire stay)",
+      amenities: ["Pine forest surroundings", "Fully equipped kitchen", "Wi-Fi", "Fresh spring water", "Peaceful getaway"]
+    }
+  },
+  "oriklisoy-buloq-boyi-tapchanlar": {
+    uz: {
+      title: "O'riklisoy Buloq Bo'yi Choyxonasi & Tapchanlari",
+      desc: "O'riklisoyning salqin tog' suvlari ustida qurilgan milliy tapchanlar majmuasi. Kunduzgi hordiq, oilaviy dam olish, archa tandiri.",
+      address: "O'riklisoy dam olish hududi, Buloqboshi, Zomin",
+      district: "O'riklisoy, Zomin",
+      unitName: "Soy ustidagi VIP Tapchan",
+      amenities: ["Suv ustidagi tapchan", "Zomin archa tandiri", "Samovar choy", "Buloq suvi", "Soyda suzish"]
+    },
+    ru: {
+      title: "Топчаны и Чайхана Уриклисай",
+      desc: "Комплекс национальных топчанов прямо над прохладной горной речкой. Дневной отдых, семейные пикники, зааминский тандыр.",
+      address: "Зона отдыха Уриклисай, Булокбоши, Заамин",
+      district: "Уриклисай, Заамин",
+      unitName: "VIP Топчан над горной речкой",
+      amenities: ["Топчан над водой", "Зааминский арчовый тандыр", "Чай из самовара", "Родниковая вода", "Купание в горной реке"]
+    },
+    en: {
+      title: "Uriklisoy Springside Tapchans & Tea House",
+      desc: "Riverside open-air tapchan complex suspended over crystalline mountain streams. Day outings, authentic Zaamin tandoor.",
+      address: "Uriklisoy resort area, Buloqboshi, Zaamin",
+      district: "Uriklisoy, Zaamin",
+      unitName: "Riverside VIP Tapchan",
+      amenities: ["Over-water tapchan", "Authentic Zaamin tandoor", "Samovar herbal tea", "Pure spring water", "Stream dipping"]
+    }
+  }
+};
+
+// Helper: Get fully localized property object
+function getLocalizedProperty(p, lang) {
+  if (!p) return null;
+  const slug = p.slug || '';
+  const matchKey = Object.keys(PROPERTY_I18N).find(k => slug.includes(k) || (k.includes('shox') && slug.includes('shox')));
+  if (matchKey && PROPERTY_I18N[matchKey] && PROPERTY_I18N[matchKey][lang]) {
+    const loc = PROPERTY_I18N[matchKey][lang];
+    return {
+      title: loc.title,
+      description: loc.desc,
+      address_text: loc.address,
+      districtText: loc.district,
+      unitName: loc.unitName,
+      amenities: loc.amenities
+    };
+  }
+
+  let dist = "Zomin, Jizzax";
+  if (lang === 'ru') {
+    if (p.micro_district === 'ORIKLISOY') dist = "Уриклисай, Заамин";
+    else if (p.micro_district === 'SUFFA') dist = "Плато Суффа, Заамин";
+    else if (p.micro_district === 'DUOBA') dist = "Дуоба, Заамин";
+    else if (p.micro_district === 'SANATORIY') dist = "Санаторий, Заамин";
+    else dist = "Заамин, Джизак";
+  } else if (lang === 'en') {
+    if (p.micro_district === 'ORIKLISOY') dist = "Uriklisoy, Zaamin";
+    else if (p.micro_district === 'SUFFA') dist = "Suffa Plateau, Zaamin";
+    else if (p.micro_district === 'DUOBA') dist = "Duoba, Zaamin";
+    else if (p.micro_district === 'SANATORIY') dist = "Sanatorium, Zaamin";
+    else dist = "Zaamin, Jizzakh";
+  } else {
+    if (p.micro_district === 'ORIKLISOY') dist = "O'riklisoy, Zomin";
+    else if (p.micro_district === 'SUFFA') dist = "Suffa platosi, Zomin";
+    else if (p.micro_district === 'DUOBA') dist = "Duoba, Zomin";
+    else if (p.micro_district === 'SANATORIY') dist = "Sanatoriy, Zomin";
+  }
+  return {
+    title: p.title,
+    description: p.description,
+    address_text: p.address_text || dist,
+    districtText: dist,
+    unitName: p.rental_units && p.rental_units[0] ? p.rental_units[0].name : "Dacha",
+    amenities: p.amenities || []
+  };
+}
+
+// Render dynamic location dropdown
+function renderLocationDropdown(lang) {
+  const dropdown = document.getElementById('dropdown-locations');
+  if (!dropdown) return;
+  const t = I18N[lang] || I18N.uz;
+
+  const locs = [
+    { code: 'ALL', name: t.locAll, desc: t.locAllDesc },
+    { code: 'DUOBA', name: t.locDuoba, desc: t.locDuobaDesc },
+    { code: 'SUFFA', name: t.locSuffa, desc: t.locSuffaDesc },
+    { code: 'ORIKLISOY', name: t.locOriklisoy, desc: t.locOriklisoyDesc },
+    { code: 'SANATORIY', name: t.locSanatoriy, desc: t.locSanatoriyDesc }
+  ];
+
+  dropdown.innerHTML = locs.map(l => `
+    <div class="popup-option ${searchSelectedDistrict === l.code ? 'active' : ''}" onclick="selectSearchLocation('${l.code}')">
+      <div class="opt-name">${l.name}</div>
+      <div class="opt-desc">${l.desc}</div>
+    </div>
+  `).join('');
+}
 
 // Google Auth User Profiles
 const GOOGLE_PROFILES = {
@@ -441,9 +938,18 @@ function applyLanguage(lang) {
 
   // Search Bar
   document.getElementById('lbl-search-where').innerText = t.searchWhere;
-  if (searchSelectedDistrict === 'ALL') {
-    document.getElementById('search-val-district').innerText = t.searchLocationDefault;
-  }
+  
+  // Location Dropdown & Selected Value
+  renderLocationDropdown(lang);
+  const nameMap = {
+    'ALL': t.searchLocationDefault,
+    'DUOBA': t.distDuoba,
+    'SUFFA': t.distSuffa,
+    'ORIKLISOY': t.distOriklisoy,
+    'SANATORIY': t.distSanatoriy
+  };
+  document.getElementById('search-val-district').innerText = nameMap[searchSelectedDistrict] || t.searchLocationDefault;
+
   document.getElementById('lbl-search-checkin').innerText = t.searchCheckIn;
   document.getElementById('lbl-search-checkout').innerText = t.searchCheckOut;
   if (!searchCheckInDate) {
@@ -457,6 +963,25 @@ function applyLanguage(lang) {
   document.getElementById('lbl-search-guests').innerText = t.searchGuests;
   document.getElementById('search-val-guests').innerText = t.searchGuestsFormat(guestsAdults + guestsChildren);
   document.getElementById('lbl-search-btn').innerText = t.searchBtn;
+
+  // Guests Dropdown Labels
+  const lblAdults = document.getElementById('lbl-adults');
+  if (lblAdults) lblAdults.innerText = t.guestsAdults;
+  const lblAdultsSub = document.getElementById('lbl-adults-sub');
+  if (lblAdultsSub) lblAdultsSub.innerText = t.guestsAdultsSub;
+  const lblChildren = document.getElementById('lbl-children');
+  if (lblChildren) lblChildren.innerText = t.guestsChildren;
+  const lblChildrenSub = document.getElementById('lbl-children-sub');
+  if (lblChildrenSub) lblChildrenSub.innerText = t.guestsChildrenSub;
+
+  // Calendar Weekdays & Controls
+  const calWeekdaysEl = document.getElementById('cal-weekdays');
+  if (calWeekdaysEl && t.calWeekdays) {
+    calWeekdaysEl.innerHTML = t.calWeekdays.map(d => `<span>${d}</span>`).join('');
+  }
+  const btnCalClear = document.querySelector('.btn-cal-clear');
+  if (btnCalClear) btnCalClear.innerText = t.calClear;
+  renderCalendarGrid();
 
   // Sections
   document.getElementById('tag-recommended').innerText = t.tagRecommended;
@@ -496,12 +1021,31 @@ function applyLanguage(lang) {
   document.getElementById('desc-attr-hiking').innerText = t.hikingDesc;
   document.getElementById('btn-attr-hiking').innerText = t.detailsBtn;
 
-  // Footer
+  // Footer Links & Content
   document.getElementById('footer-tagline').innerText = t.footerTagline;
   document.getElementById('footer-col-main').innerText = t.footerMain;
   document.getElementById('footer-col-info').innerText = t.footerInfo;
   document.getElementById('footer-col-connect').innerText = t.footerConnect;
   document.getElementById('footer-copyright').innerText = t.footerCopyright;
+
+  const flStays = document.getElementById('fl-stays');
+  if (flStays) flStays.innerText = t.flStays;
+  const flDiscover = document.getElementById('fl-discover');
+  if (flDiscover) flDiscover.innerText = t.flDiscover;
+  const flRoutes = document.getElementById('fl-routes');
+  if (flRoutes) flRoutes.innerText = t.flRoutes;
+  const flPartner = document.getElementById('fl-partner');
+  if (flPartner) flPartner.innerText = t.flPartner;
+  const flAbout = document.getElementById('fl-about');
+  if (flAbout) flAbout.innerText = t.flAbout;
+  const flRules = document.getElementById('fl-rules');
+  if (flRules) flRules.innerText = t.flRules;
+  const flContact = document.getElementById('fl-contact');
+  if (flContact) flContact.innerText = t.flContact;
+  const flFaq = document.getElementById('fl-faq');
+  if (flFaq) flFaq.innerText = t.flFaq;
+  const newsletterInput = document.getElementById('footer-newsletter-email');
+  if (newsletterInput) newsletterInput.placeholder = t.footerEmailPlaceholder;
 
   // Profile Dropdown Menu Labels
   const mProf = document.getElementById('lbl-menu-profile');
@@ -540,6 +1084,151 @@ function applyLanguage(lang) {
   if (pSaveBtn) pSaveBtn.innerText = t.profSaveBtn;
   const pLogoutBtn = document.getElementById('lbl-prof-logout');
   if (pLogoutBtn) pLogoutBtn.innerText = t.profLogoutBtn;
+
+  // Auth Modal Elements
+  const lblAuthBadge = document.getElementById('lbl-auth-badge');
+  if (lblAuthBadge) lblAuthBadge.innerText = t.authBadge;
+  const authModalTitle = document.getElementById('auth-modal-title');
+  if (authModalTitle) authModalTitle.innerText = t.authTitle;
+  const lblGoogleBtn = document.getElementById('lbl-google-btn-text');
+  if (lblGoogleBtn) lblGoogleBtn.innerText = t.authGoogleBtn;
+  const lblGoogleDivider = document.getElementById('lbl-google-divider');
+  if (lblGoogleDivider) lblGoogleDivider.innerText = t.authDivider;
+  const lblAuthEmail = document.getElementById('lbl-auth-email');
+  if (lblAuthEmail) lblAuthEmail.innerText = t.authEmailLbl;
+  const inputAuthEmail = document.getElementById('custom-google-email-input');
+  if (inputAuthEmail) inputAuthEmail.placeholder = t.authEmailPlaceholder;
+  const lblAuthName = document.getElementById('lbl-auth-name');
+  if (lblAuthName) lblAuthName.innerText = t.authNameLbl;
+  const inputAuthName = document.getElementById('custom-google-name-input');
+  if (inputAuthName) inputAuthName.placeholder = t.authNamePlaceholder;
+  const btnGoogleLogin = document.getElementById('lbl-btn-google-login');
+  if (btnGoogleLogin) {
+    const span = btnGoogleLogin.querySelector('span');
+    if (span) span.innerText = t.authSubmitBtn;
+  }
+  const lblGoogleTrust = document.getElementById('lbl-google-trust');
+  if (lblGoogleTrust) lblGoogleTrust.innerText = t.authTrust;
+
+  // Booking Modal Elements
+  const modalShowMap = document.getElementById('lbl-modal-show-map');
+  if (modalShowMap) modalShowMap.innerText = t.btnShowOnMap;
+  const modalShare = document.getElementById('lbl-modal-share');
+  if (modalShare) modalShare.innerText = t.btnShare;
+  const modalBadgeNew = document.getElementById('modal-property-new-badge');
+  if (modalBadgeNew) modalBadgeNew.innerText = t.badgeNew;
+  const modalGalleryBadge = document.getElementById('lbl-modal-gallery-badge');
+  if (modalGalleryBadge) modalGalleryBadge.innerText = t.galleryBadge;
+
+  const lblModalRules = document.getElementById('lbl-modal-rules-title');
+  if (lblModalRules) lblModalRules.innerText = t.rulesTitle;
+  const lblRuleCorp = document.getElementById('lbl-rule-corp');
+  if (lblRuleCorp) lblRuleCorp.innerText = t.ruleCorp;
+  const ruleValCorp = document.getElementById('rule-val-corp');
+  if (ruleValCorp) ruleValCorp.innerText = t.ruleNotAllowed;
+  const lblRuleAlcohol = document.getElementById('lbl-rule-alcohol');
+  if (lblRuleAlcohol) lblRuleAlcohol.innerText = t.ruleAlcohol;
+  const ruleValAlcohol = document.getElementById('rule-val-alcohol');
+  if (ruleValAlcohol) ruleValAlcohol.innerText = t.ruleNotAllowed;
+  const lblRulePets = document.getElementById('lbl-rule-pets');
+  if (lblRulePets) lblRulePets.innerText = t.rulePets;
+  const ruleValPets = document.getElementById('rule-val-pets');
+  if (ruleValPets) ruleValPets.innerText = t.ruleNotAllowed;
+  const lblRuleMarriage = document.getElementById('lbl-rule-marriage');
+  if (lblRuleMarriage) lblRuleMarriage.innerText = t.ruleMarriage;
+  const ruleValMarriage = document.getElementById('rule-val-marriage');
+  if (ruleValMarriage) ruleValMarriage.innerText = t.ruleMarriageDesc;
+
+  const lblModalSched = document.getElementById('lbl-modal-schedule-title');
+  if (lblModalSched) lblModalSched.innerText = t.scheduleTitle;
+  const lblSchedIn = document.getElementById('lbl-sched-checkin');
+  if (lblSchedIn) lblSchedIn.innerText = t.schedCheckin;
+  const lblSchedOut = document.getElementById('lbl-sched-checkout');
+  if (lblSchedOut) lblSchedOut.innerText = t.schedCheckout;
+  const lblSchedQuiet = document.getElementById('lbl-sched-quiet');
+  if (lblSchedQuiet) lblSchedQuiet.innerText = t.schedQuiet;
+
+  const lblAbout = document.getElementById('lbl-modal-about');
+  if (lblAbout) lblAbout.innerText = t.modalAboutTitle;
+  const lblAmenities = document.getElementById('lbl-modal-amenities');
+  if (lblAmenities) lblAmenities.innerText = t.modalAmenitiesTitle;
+
+  const mRoad = document.getElementById('modal-road-info');
+  if (mRoad) mRoad.innerText = t.modalRoadInfo;
+  const mGen = document.getElementById('modal-generator-info');
+  if (mGen) mGen.innerText = t.modalGenInfo;
+  const mWater = document.getElementById('modal-water-info');
+  if (mWater) mWater.innerText = t.modalWaterInfo;
+
+  const lblRoom = document.getElementById('lbl-modal-room');
+  if (lblRoom) lblRoom.innerText = t.modalRoomLbl;
+  const lblOvernight = document.getElementById('lbl-mode-overnight');
+  if (lblOvernight) lblOvernight.innerText = t.modeOvernight;
+  const lblDayuse = document.getElementById('lbl-mode-dayuse');
+  if (lblDayuse) lblDayuse.innerText = t.modeDayuse;
+
+  const lblSlotTitle = document.getElementById('lbl-slot-title');
+  if (lblSlotTitle) lblSlotTitle.innerText = t.slotSelectLbl;
+  const lblSlotFull = document.getElementById('lbl-slot-full');
+  if (lblSlotFull) lblSlotFull.innerText = t.slotFullDay;
+  const lblSlotLunch = document.getElementById('lbl-slot-lunch');
+  if (lblSlotLunch) lblSlotLunch.innerText = t.slotLunch;
+  const lblSlotDinner = document.getElementById('lbl-slot-dinner');
+  if (lblSlotDinner) lblSlotDinner.innerText = t.slotDinner;
+
+  const lblStartDate = document.getElementById('label-start-date');
+  if (lblStartDate) lblStartDate.innerText = t.modalStartDate;
+  const lblEndDate = document.getElementById('label-end-date');
+  if (lblEndDate) lblEndDate.innerText = t.modalEndDate;
+
+  const lblTandirTitle = document.getElementById('lbl-tandir-title');
+  if (lblTandirTitle) lblTandirTitle.innerText = t.tandirTitle;
+  const lblTandirSub = document.getElementById('lbl-tandir-sub');
+  if (lblTandirSub) lblTandirSub.innerText = t.tandirSub;
+
+  const lblPhone = document.getElementById('lbl-guest-phone');
+  if (lblPhone) lblPhone.innerText = t.phoneLbl;
+  const lblPlate = document.getElementById('lbl-car-plate');
+  if (lblPlate) lblPlate.innerText = t.carPlateLbl;
+  const inputPlate = document.getElementById('modal-car-plate');
+  if (inputPlate) inputPlate.placeholder = t.carPlatePlaceholder;
+
+  const lblQTotal = document.getElementById('lbl-quote-total');
+  if (lblQTotal) lblQTotal.innerText = t.quoteTotal;
+  const lblQRemaining = document.getElementById('lbl-quote-remaining');
+  if (lblQRemaining) lblQRemaining.innerText = t.quoteRemaining;
+  const lblQDeposit = document.getElementById('lbl-quote-deposit');
+  if (lblQDeposit) lblQDeposit.innerText = t.quoteDeposit;
+
+  const lblProcBooking = document.getElementById('lbl-proceed-booking');
+  if (lblProcBooking) lblProcBooking.innerText = t.btnBookAction;
+
+  const lblPayTrust = document.getElementById('lbl-payment-trust');
+  if (lblPayTrust) lblPayTrust.innerText = t.paymentTrust;
+
+  updateModalSaveButtonState();
+  updateTandirDisplay();
+
+  // If a property is currently opened in modal, update its dynamic fields too!
+  if (selectedProperty) {
+    const loc = getLocalizedProperty(selectedProperty, lang);
+    const titleEl = document.getElementById('modal-property-title');
+    if (titleEl) titleEl.innerText = loc.title;
+    const descEl = document.getElementById('modal-property-desc');
+    if (descEl) descEl.innerText = loc.description;
+    const addrEl = document.getElementById('modal-property-address');
+    if (addrEl) addrEl.innerText = `📍 ${loc.address_text}`;
+    const amEl = document.getElementById('modal-amenities-tags');
+    if (amEl && loc.amenities && loc.amenities.length > 0) {
+      amEl.innerHTML = loc.amenities.map(a => `<span class="amenity-chip">✓ ${a}</span>`).join('');
+    }
+    const unitSel = document.getElementById('modal-unit-select');
+    if (unitSel && selectedProperty.rental_units && selectedProperty.rental_units.length > 0) {
+      unitSel.innerHTML = selectedProperty.rental_units.map(u => `
+        <option value="${u.id}">${loc.unitName || u.name} (${formatSum(u.base_price_weekday)} ${t.currency})</option>
+      `).join('');
+    }
+  }
 
   // Highlight active lang in dropdown
   document.querySelectorAll('.lang-option-btn').forEach(btn => {
@@ -1022,14 +1711,10 @@ function renderProperties() {
     const rating = p.rating || (p.slug.includes('shox') ? 4.95 : (p.slug.includes('villa') ? 4.9 : (p.slug.includes('panorama') ? 4.92 : 4.8)));
     const reviews = p.reviews_count || (p.slug.includes('shox') ? 54 : (p.slug.includes('villa') ? 98 : (p.slug.includes('panorama') ? 65 : 124)));
 
-    let cardTitle = p.title;
-    let cardDesc = p.description;
-
-    let districtText = "Zomin, Jizzax";
-    if (p.micro_district === 'ORIKLISOY') districtText = "O'riklisoy, Zomin";
-    else if (p.micro_district === 'SUFFA') districtText = "Suffa platosi, Zomin";
-    else if (p.micro_district === 'DUOBA') districtText = "Duoba, Zomin";
-    else if (p.micro_district === 'SANATORIY') districtText = "Sanatoriy, Zomin";
+    const loc = getLocalizedProperty(p, currentLang);
+    const cardTitle = loc.title;
+    const cardDesc = loc.description;
+    const districtText = loc.districtText;
 
     return `
       <div class="property-card" onclick="openBookingModal('${p.id}')">
@@ -1424,15 +2109,21 @@ async function openBookingModal(propId) {
   selectedProperty = propertiesCache.find(p => p.id === propId) || propertiesCache[0];
   if (!selectedProperty) return;
 
+  const t = I18N[currentLang] || I18N.uz;
+  const loc = getLocalizedProperty(selectedProperty, currentLang);
+
   document.getElementById('booking-modal').classList.remove('hidden');
-  document.getElementById('modal-property-title').innerText = selectedProperty.title;
-  document.getElementById('modal-property-desc').innerText = selectedProperty.description;
-  document.getElementById('modal-property-address').innerText = `📍 ${selectedProperty.address_text || "Zomin, Jizzax"}`;
+  document.getElementById('modal-property-title').innerText = loc.title;
+  document.getElementById('modal-property-desc').innerText = loc.description;
+  document.getElementById('modal-property-address').innerText = `📍 ${loc.address_text || "Zomin, Jizzax"}`;
 
   // "Yangi" badge visibility
   const isNew = selectedProperty.slug.includes('shox') || selectedProperty.slug.includes('chashma') || selectedProperty.slug.includes('panorama');
   const badgeEl = document.getElementById('modal-property-new-badge');
-  if (badgeEl) badgeEl.style.display = isNew ? 'inline-block' : 'none';
+  if (badgeEl) {
+    badgeEl.style.display = isNew ? 'inline-block' : 'none';
+    badgeEl.innerText = t.badgeNew;
+  }
 
   // Photo Gallery
   let photos = selectedProperty.photos || [];
@@ -1464,24 +2155,27 @@ async function openBookingModal(propId) {
   const unitSel = document.getElementById('modal-unit-select');
   if (selectedProperty.rental_units && selectedProperty.rental_units.length > 0) {
     unitSel.innerHTML = selectedProperty.rental_units.map(u => `
-      <option value="${u.id}">${u.name} (${formatSum(u.base_price_weekday)} so'm)</option>
+      <option value="${u.id}">${loc.unitName || u.name} (${formatSum(u.base_price_weekday)} ${t.currency})</option>
     `).join('');
   } else {
     unitSel.innerHTML = `
-      <option value="unit-standard">Standart Joylashuv (${formatSum(selectedProperty.min_price || 1400000)} so'm/kecha)</option>
-      <option value="unit-deluxe">Deluxe Kottej (${formatSum((selectedProperty.min_price || 1400000) * 1.3)} so'm/kecha)</option>
+      <option value="unit-standard">${loc.unitName || 'Standart'} (${formatSum(selectedProperty.min_price || 1400000)} ${t.currency}${t.perNight})</option>
+      <option value="unit-deluxe">Deluxe (${formatSum((selectedProperty.min_price || 1400000) * 1.3)} ${t.currency}${t.perNight})</option>
     `;
   }
 
   // Amenities
-  const amenities = selectedProperty.amenities || [
+  const amenities = (loc.amenities && loc.amenities.length > 0) ? loc.amenities : (selectedProperty.amenities || [
     "Filtrli Hovuz (3.5x7.5m)", "Playstation 3 & Karaoke", "Bilyard & Stol tennisi", 
     "Wi-Fi 5G", "Ochiq oshxona & Mangal", "Archa tandiri", "Konditsioner", "Muzlatgich & Mikroto'lqinli pech"
-  ];
+  ]);
   const amEl = document.getElementById('modal-amenities-tags');
   if (amEl) {
     amEl.innerHTML = amenities.map(a => `<span class="amenity-chip">✓ ${a}</span>`).join('');
   }
+
+  // Apply modal UI translations
+  applyLanguage(currentLang);
 
   // Autofill user phone & car plate if logged in
   if (currentUser) {
@@ -1514,10 +2208,11 @@ function selectModalGalleryPhoto(src, thumbEl) {
 
 function shareCurrentProperty() {
   if (!selectedProperty) return;
+  const t = I18N[currentLang] || I18N.uz;
   const shareUrl = window.location.origin + '/#stays';
   if (navigator.clipboard) {
     navigator.clipboard.writeText(shareUrl).then(() => {
-      showToast(`${selectedProperty.title} havolasi nusxalandi!`, 'success');
+      showToast(`${selectedProperty.title}: ${t.toastShare || 'Havola nusxalandi!'}`, 'success');
     }).catch(() => {
       showToast(`${selectedProperty.title}: ${shareUrl}`, 'info');
     });
@@ -1528,13 +2223,14 @@ function shareCurrentProperty() {
 
 function toggleModalSaveProperty() {
   if (!selectedProperty) return;
+  const t = I18N[currentLang] || I18N.uz;
   const slug = selectedProperty.slug;
   if (wishlistItems.has(slug)) {
     wishlistItems.delete(slug);
-    showToast(`${selectedProperty.title} saqlanganlardan olib tashlandi`, 'info');
+    showToast(`${selectedProperty.title}: ${t.toastRemoved || 'Saqlanganlardan olib tashlandi'}`, 'info');
   } else {
     wishlistItems.add(slug);
-    showToast(`${selectedProperty.title} saqlanganlarga qo'shildi!`, 'success');
+    showToast(`${selectedProperty.title}: ${t.toastSaved || "Saqlanganlarga qo'shildi!"}`, 'success');
   }
   updateModalSaveButtonState();
   renderProperties();
@@ -1543,6 +2239,7 @@ function toggleModalSaveProperty() {
 function updateModalSaveButtonState() {
   if (!selectedProperty) return;
   const isFav = wishlistItems.has(selectedProperty.slug);
+  const t = I18N[currentLang] || I18N.uz;
   const btn = document.getElementById('modal-save-btn');
   const txt = document.getElementById('modal-save-text');
   if (btn) {
@@ -1550,7 +2247,7 @@ function updateModalSaveButtonState() {
     btn.style.borderColor = isFav ? '#fca5a5' : 'var(--color-border)';
   }
   if (txt) {
-    txt.innerText = isFav ? "Saqlandi" : "Saqlash";
+    txt.innerText = isFav ? t.btnSaved : t.btnSave;
   }
 }
 
@@ -1585,11 +2282,15 @@ function adjustTandir(d) {
 }
 
 function updateTandirDisplay() {
-  document.getElementById('tandir-kg-display').innerText = `${currentTandirKg} kg`;
-  document.getElementById('tandir-cost-display').innerText = `${formatSum(currentTandirKg * 150000)} so'm`;
+  const t = I18N[currentLang] || I18N.uz;
+  const kgEl = document.getElementById('tandir-kg-display');
+  const costEl = document.getElementById('tandir-cost-display');
+  if (kgEl) kgEl.innerText = `${currentTandirKg} ${currentLang === 'ru' ? 'кг' : 'kg'}`;
+  if (costEl) costEl.innerText = `${formatSum(currentTandirKg * 150000)} ${t.currency}`;
 }
 
 async function recalculateQuote() {
+  const t = I18N[currentLang] || I18N.uz;
   const basePrice = selectedProperty ? (selectedProperty.min_price || 1400000) : 1400000;
   const nights = currentBookingMode === 'DAY_USE' ? 1 : 1;
   const stayAmount = basePrice * nights;
@@ -1608,18 +2309,18 @@ async function recalculateQuote() {
   };
 
   const elStay = document.getElementById('quote-stay-amount');
-  if (elStay) elStay.innerText = `${formatSum(stayAmount)} so'm`;
+  if (elStay) elStay.innerText = `${formatSum(stayAmount)} ${t.currency}`;
   const elTandir = document.getElementById('quote-tandir-amount');
-  if (elTandir) elTandir.innerText = `${formatSum(tandirAmount)} so'm`;
+  if (elTandir) elTandir.innerText = `${formatSum(tandirAmount)} ${t.currency}`;
 
   const elTotal = document.getElementById('quote-total-amount');
-  if (elTotal) elTotal.innerText = `${formatSum(total)} so'm`;
+  if (elTotal) elTotal.innerText = `${formatSum(total)} ${t.currency}`;
 
   const elRemaining = document.getElementById('quote-remaining-amount');
-  if (elRemaining) elRemaining.innerText = `${formatSum(remaining)} so'm`;
+  if (elRemaining) elRemaining.innerText = `${formatSum(remaining)} ${t.currency}`;
 
   const elDeposit = document.getElementById('quote-deposit-amount');
-  if (elDeposit) elDeposit.innerText = `${formatSum(deposit)} so'm`;
+  if (elDeposit) elDeposit.innerText = `${formatSum(deposit)} ${t.currency}`;
 }
 
 async function submitBookingReservation() {
@@ -1629,7 +2330,8 @@ async function submitBookingReservation() {
   const guestPhone = phoneInput ? phoneInput.value.trim() : '';
 
   if (!currentUser && (!guestPhone || guestPhone.length < 9)) {
-    showToast('Iltimos, telefon raqamingizni kiriting yoki Google orqali kiring', 'error');
+    const errorMsg = currentLang === 'uz' ? 'Iltimos, telefon raqamingizni kiriting yoki Google orqali kiring' : (currentLang === 'ru' ? 'Пожалуйста, укажите ваш номер телефона или войдите через Google' : 'Please enter your phone number or sign in with Google');
+    showToast(errorMsg, 'error');
     if (phoneInput) phoneInput.focus();
     return;
   }
@@ -1645,10 +2347,12 @@ async function submitBookingReservation() {
 }
 
 function openPaymentModal(b) {
+  const t = I18N[currentLang] || I18N.uz;
+  const loc = getLocalizedProperty(selectedProperty, currentLang);
   document.getElementById('payment-modal').classList.remove('hidden');
-  document.getElementById('pay-summary-title').innerText = selectedProperty?.title || 'Mountain Chalet Zomin';
+  document.getElementById('pay-summary-title').innerText = loc ? loc.title : (selectedProperty?.title || 'Mountain Chalet Zomin');
   document.getElementById('pay-summary-dates').innerText = b.dates;
-  document.getElementById('pay-summary-amount').innerText = `${formatSum(b.platform_fee_deposit)} so'm`;
+  document.getElementById('pay-summary-amount').innerText = `${formatSum(b.platform_fee_deposit)} ${t.currency}`;
   startHoldTimer(15 * 60);
 }
 

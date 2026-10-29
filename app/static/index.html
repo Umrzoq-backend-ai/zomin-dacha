@@ -651,13 +651,6 @@
 
           <div class="google-trust-badge mt-3">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            <span id="lbl-google-trust">Google OAuth 2.0 xavfsiz tizimi</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
             <span id="lbl-google-trust">Google OAuth 2.0 bilan himoyalangan</span>
           </div>
         </div>
@@ -680,14 +673,14 @@
             <span class="modal-address" id="modal-property-address">📍 Zomin, Jizzax</span>
             <button type="button" class="btn-link-map" onclick="closeBookingModal(); scrollToSection('map-section');">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              <span>Xaritada ko'rsatish</span>
+              <span id="lbl-modal-show-map">Xaritada ko'rsatish</span>
             </button>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
           <button type="button" class="btn-modal-action-pill" onclick="shareCurrentProperty()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-            <span>Ulashish</span>
+            <span id="lbl-modal-share">Ulashish</span>
           </button>
           <button type="button" class="btn-modal-action-pill" id="modal-save-btn" onclick="toggleModalSaveProperty()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
@@ -703,7 +696,7 @@
         <div class="property-gallery-slider">
           <div class="gallery-main-wrap">
             <img id="modal-main-photo" src="" alt="Dacha" class="modal-gallery-main">
-            <span class="gallery-photo-badge">📷 RASM VA VIDEOLAR</span>
+            <span class="gallery-photo-badge" id="lbl-modal-gallery-badge">📷 RASM VA VIDEOLAR</span>
           </div>
           <div class="gallery-thumbs" id="modal-gallery-thumbs"></div>
         </div>
@@ -715,33 +708,33 @@
             
             <!-- 1. Joylashish tartibi (Bronla.uz rules) -->
             <div class="booking-section-card">
-              <h3 class="subsection-title">Joylashish tartibi</h3>
+              <h3 class="subsection-title" id="lbl-modal-rules-title">Joylashish tartibi</h3>
               <div class="bronla-rules-grid">
                 <div class="rule-row">
                   <div class="rule-icon-label">
                     <span class="rule-icon">🏢</span>
-                    <span class="rule-name">Korporativ</span>
+                    <span class="rule-name" id="lbl-rule-corp">Korporativ</span>
                   </div>
                   <div class="rule-status status-no" id="rule-val-corp">Mumkin emas</div>
                 </div>
                 <div class="rule-row">
                   <div class="rule-icon-label">
                     <span class="rule-icon">🍷</span>
-                    <span class="rule-name">Alkogol</span>
+                    <span class="rule-name" id="lbl-rule-alcohol">Alkogol</span>
                   </div>
                   <div class="rule-status status-yes" id="rule-val-alcohol">Mumkin</div>
                 </div>
                 <div class="rule-row">
                   <div class="rule-icon-label">
                     <span class="rule-icon">🐾</span>
-                    <span class="rule-name">Uy hayvonlari</span>
+                    <span class="rule-name" id="lbl-rule-pets">Uy hayvonlari</span>
                   </div>
                   <div class="rule-status status-no" id="rule-val-pets">Mumkin emas</div>
                 </div>
                 <div class="rule-row full-width">
                   <div class="rule-icon-label">
                     <span class="rule-icon">📜</span>
-                    <span class="rule-name">Nikoh guvohnoma</span>
+                    <span class="rule-name" id="lbl-rule-marriage">Nikoh guvohnoma</span>
                   </div>
                   <div class="rule-desc-text" id="rule-val-marriage">Oilaviy mehmonlar farzandlarsiz kelsa, nikoh guvohnomasini ko'rsatish so'raladi.</div>
                 </div>
@@ -750,21 +743,21 @@
 
             <!-- 2. Tartib va qoidalar (Schedule) -->
             <div class="booking-section-card mt-3">
-              <h3 class="subsection-title">Tartib va qoidalar</h3>
+              <h3 class="subsection-title" id="lbl-modal-schedule-title">Tartib va qoidalar</h3>
               <div class="schedule-rules-row">
                 <div class="schedule-rule-box">
                   <span class="sched-icon">🕒</span>
-                  <span class="sched-label">Kirish</span>
+                  <span class="sched-label" id="lbl-sched-checkin">Kirish</span>
                   <strong class="sched-val" id="sched-val-checkin">14:00</strong>
                 </div>
                 <div class="schedule-rule-box">
                   <span class="sched-icon">🕛</span>
-                  <span class="sched-label">Chiqish</span>
+                  <span class="sched-label" id="lbl-sched-checkout">Chiqish</span>
                   <strong class="sched-val" id="sched-val-checkout">12:00</strong>
                 </div>
                 <div class="schedule-rule-box">
                   <span class="sched-icon">🌙</span>
-                  <span class="sched-label">Tungi sukunat</span>
+                  <span class="sched-label" id="lbl-sched-quiet">Tungi sukunat</span>
                   <strong class="sched-val" id="sched-val-quiet">22:00 - 07:00</strong>
                 </div>
               </div>
@@ -804,27 +797,27 @@
               <!-- Overnight vs Day-Use Toggle -->
               <div class="booking-mode-pills">
                 <button type="button" id="btn-mode-overnight" class="mode-pill active" onclick="switchBookingMode('OVERNIGHT')">
-                  🌙 Kechasi yotib qolish
+                  <span id="lbl-mode-overnight">🌙 Kechasi yotib qolish</span>
                 </button>
                 <button type="button" id="btn-mode-dayuse" class="mode-pill" onclick="switchBookingMode('DAY_USE')">
-                  ☀️ Kunduzgi tapchan
+                  <span id="lbl-mode-dayuse">☀️ Kunduzgi tapchan</span>
                 </button>
               </div>
 
               <!-- Day-Use Slot Selection (Hidden by default) -->
               <div id="day-use-slot-picker" class="day-slot-picker hidden">
-                <label class="slot-label">Kunduzgi oraliqni tanlang:</label>
+                <label class="slot-label" id="lbl-slot-title">Kunduzgi oraliqni tanlang:</label>
                 <div class="slot-cards-row">
                   <div class="slot-card" id="slot-card-FULL_DAY" onclick="selectDaySlot('FULL_DAY')">
-                    <span class="slot-name">To'liq kun</span>
+                    <span class="slot-name" id="lbl-slot-full">To'liq kun</span>
                     <span class="slot-time">10:00 - 22:00</span>
                   </div>
                   <div class="slot-card" id="slot-card-LUNCH" onclick="selectDaySlot('LUNCH')">
-                    <span class="slot-name">Tushlik</span>
+                    <span class="slot-name" id="lbl-slot-lunch">Tushlik</span>
                     <span class="slot-time">10:00 - 16:00</span>
                   </div>
                   <div class="slot-card" id="slot-card-DINNER" onclick="selectDaySlot('DINNER')">
-                    <span class="slot-name">Kechki salqin</span>
+                    <span class="slot-name" id="lbl-slot-dinner">Kechki salqin</span>
                     <span class="slot-time">17:00 - 23:00</span>
                   </div>
                 </div>
@@ -847,8 +840,8 @@
                 <div class="tandir-header">
                   <span class="tandir-icon">🥩</span>
                   <div>
-                    <span class="tandir-title">Zomin Archa Tandiri</span>
-                    <span class="tandir-sub">150 000 so'm / kg tog' qo'zisi</span>
+                    <span class="tandir-title" id="lbl-tandir-title">Zomin Archa Tandiri</span>
+                    <span class="tandir-sub" id="lbl-tandir-sub">150 000 so'm / kg tog' qo'zisi</span>
                   </div>
                 </div>
                 <div class="tandir-counter-row">
@@ -861,40 +854,40 @@
 
               <!-- Guest Phone & Car Plate Number -->
               <div class="form-group mt-3">
-                <label class="input-label">Telefon raqamingiz:</label>
+                <label class="input-label" id="lbl-guest-phone">Telefon raqamingiz:</label>
                 <input type="tel" id="modal-guest-phone" class="form-input" placeholder="+998 90 123 45 67">
               </div>
 
               <div class="form-group mt-2">
-                <label class="input-label">Avtomobil raqami (Darvozadagi bog'bon tekshiruvi uchun):</label>
+                <label class="input-label" id="lbl-car-plate">Avtomobil raqami (Darvozadagi bog'bon tekshiruvi uchun):</label>
                 <input type="text" id="modal-car-plate" class="form-input text-uppercase" placeholder="Masalan: 01 A 777 AA">
               </div>
 
               <!-- Quote Price Breakdown (Bronla.uz style calculation) -->
               <div class="quote-summary-box" id="quote-summary-box">
                 <div class="quote-row highlight">
-                  <span>Umumiy summa:</span>
+                  <span id="lbl-quote-total">Umumiy summa:</span>
                   <span id="quote-total-amount" class="bold">1 400 000 so'm</span>
                 </div>
                 <div class="quote-row">
-                  <span>Kirishda to'lov (85%):</span>
+                  <span id="lbl-quote-remaining">Kirishda to'lov (85%):</span>
                   <span id="quote-remaining-amount">1 190 000 so'm</span>
                 </div>
                 <div class="quote-divider"></div>
                 <div class="quote-row deposit-row">
-                  <span class="deposit-label">⚡ Avans to'lov (15% kafolatli onlayn):</span>
+                  <span class="deposit-label" id="lbl-quote-deposit">⚡ Avans to'lov (15% kafolatli onlayn):</span>
                   <span id="quote-deposit-amount" class="deposit-val">210 000 so'm</span>
                 </div>
               </div>
 
               <!-- Booking Submit Button -->
               <button type="button" class="btn-book-action" id="btn-proceed-booking" onclick="submitBookingReservation()">
-                <span>Band Qilish (15 daqiqa kafolatli qulf)</span>
+                <span id="lbl-proceed-booking">Band Qilish (15 daqiqa kafolatli qulf)</span>
               </button>
 
               <!-- Payment System Logos (Bronla.uz match) -->
               <div class="payment-trust-footer">
-                <span class="payment-trust-title">Kafolatlangan xavfsiz to'lov:</span>
+                <span class="payment-trust-title" id="lbl-payment-trust">Kafolatlangan xavfsiz to'lov:</span>
                 <div class="payment-badges-row">
                   <span class="pay-logo-badge payme">PAYME</span>
                   <span class="pay-logo-badge click">CLICK</span>
