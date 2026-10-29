@@ -141,3 +141,49 @@ def test_admin_auth_login_and_property_crud():
     # 7. Check deleted
     get_del = client.get(f"/api/v1/admin/properties/{created_id}/full")
     assert get_del.status_code == 404
+
+def test_admin_change_password():
+    client = TestClient(app)
+
+    # 1. Bad current password
+    bad_req = client.post("/api/v1/admin/auth/change-password", json={
+        "current_password": "wrong_password",
+        "new_password": "new_secret_123"
+    })
+    assert bad_req.status_code == 400
+
+    # 2. Too short new password
+    short_req = client.post("/api/v1/admin/auth/change-password", json={
+        "current_password": "pdp.university",
+        "new_password": "123"
+    })
+    assert short_req.status_code == 400
+
+    # 3. Successful change
+    ok_req = client.post("/api/v1/admin/auth/change-password", json={
+        "current_password": "pdp.university",
+        "new_password": "new_secret_password_2026"
+    })
+    assert ok_req.status_code == 200
+    assert ok_req.json()["ok"] is True
+
+    # 4. Old password fails
+    old_fail = client.post("/api/v1/admin/auth/login", json={
+        "username": "Umrzoq",
+        "password": "pdp.university"
+    })
+    assert old_fail.status_code == 401
+
+    # 5. New password succeeds
+    new_ok = client.post("/api/v1/admin/auth/login", json={
+        "username": "Umrzoq",
+        "password": "new_secret_password_2026"
+    })
+    assert new_ok.status_code == 200
+
+    # Revert back to pdp.university for consistency
+    revert_req = client.post("/api/v1/admin/auth/change-password", json={
+        "current_password": "new_secret_password_2026",
+        "new_password": "pdp.university"
+    })
+    assert revert_req.status_code == 200

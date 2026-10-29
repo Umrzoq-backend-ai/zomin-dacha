@@ -196,6 +196,10 @@ class AdminLoginRequest(BaseModel):
     username: str
     password: str
 
+class AdminChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
 class PropertyCreateUpdateRequest(BaseModel):
     title: str
     description: Optional[str] = ""

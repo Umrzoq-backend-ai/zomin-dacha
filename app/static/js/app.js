@@ -2808,51 +2808,146 @@ async function deleteProperty(propId, propTitle) {
   }
 }
 
+let adminPropertiesCache = [];
+
+function renderAdminProperties(props) {
+  const tbody = document.getElementById('admin-properties-table-body');
+  const countSpan = document.getElementById('admin-items-count');
+  const tabCount = document.getElementById('tab-count-props');
+  if (countSpan) countSpan.innerText = `${props.length} ta obyekt`;
+  if (tabCount) tabCount.innerText = `${props.length}`;
+  if (!tbody) return;
+
+  if (props.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 36px 20px; color: #94a3b8;">Qidiruv bo\'yicha mos dacha topilmadi</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = props.map(p => {
+    // Road badge with vector SVG (no emojis)
+    let roadBadge = '';
+    if (p.road_condition === 'ASPHALT_SEDAN') {
+      roadBadge = `<span class="badge-road-asphalt"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Asfalt (Spark)</span>`;
+    } else if (p.road_condition === 'HIGH_CLEARANCE') {
+      roadBadge = `<span class="badge-road-clearance"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg> Baland klirens</span>`;
+    } else {
+      roadBadge = `<span class="badge-road-4wd"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1L1 14v2h3"></path><circle cx="6.5" cy="16.5" r="2.5"></circle><circle cx="16.5" cy="16.5" r="2.5"></circle></svg> 4WD Jip</span>`;
+    }
+
+    const cover = p.cover_photo || '/static/assets/villa.jpg';
+    const ownerInitial = (p.owner_name ? p.owner_name.charAt(0) : 'U').toUpperCase();
+    const ownerName = p.owner_name || 'Umrzoq (Superadmin)';
+    const ownerPhone = p.owner_phone || '+998 90 123 45 67';
+    const isVerified = p.verification_status === 'VERIFIED';
+    const safeTitle = (p.title || '').replace(/'/g, "\\'");
+
+    return `
+      <tr>
+        <td>
+          <div class="dacha-cell-row">
+            <img src="${cover}" alt="${p.title}" class="dacha-thumb-img" onerror="this.src='/static/assets/villa.jpg'">
+            <div>
+              <div class="dacha-title-text">${p.title}</div>
+              <span class="dacha-district-chip">${p.micro_district} • ${p.property_type}</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="owner-chip-row">
+            <div class="owner-avatar-mini">${ownerInitial}</div>
+            <div>
+              <div class="owner-name-bold">${ownerName}</div>
+              <a href="tel:${ownerPhone.replace(/\s+/g, '')}" class="owner-phone-link">${ownerPhone}</a>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="badge-status ${isVerified ? 'verified' : 'rejected'}">
+            ${isVerified ? 'Tasdiqlangan' : 'To\'xtatilgan'}
+          </span>
+        </td>
+        <td>
+          <strong style="color: #0f172a; font-size: 14px;">${formatSum(p.min_price || 1200000)}</strong>
+          <span style="font-size: 12px; color: #64748b;"> so'm / kun</span>
+        </td>
+        <td>
+          ${roadBadge}
+        </td>
+        <td>
+          <div class="admin-row-actions">
+            <button class="btn-action-edit" onclick="openEditPropertyModal('${p.id}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Tahrirlash</span>
+            </button>
+            <button class="btn-action-toggle ${isVerified ? '' : 'paused'}" onclick="toggleVerifyProperty('${p.id}', '${p.verification_status}')">
+              ${isVerified
+                ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg><span>To'xtatish</span>`
+                : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>Faollashtirish</span>`
+              }
+            </button>
+            <button class="btn-action-delete" title="Dachani o'chirish" onclick="deleteProperty('${p.id}', '${safeTitle}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterAdminPropertiesTable() {
+  const query = (document.getElementById('admin-search-input')?.value || '').toLowerCase().trim();
+  const district = document.getElementById('admin-district-filter')?.value || 'ALL';
+  const status = document.getElementById('admin-status-filter')?.value || 'ALL';
+
+  const filtered = adminPropertiesCache.filter(p => {
+    // 1. Text filter
+    if (query) {
+      const matchTitle = (p.title || '').toLowerCase().includes(query);
+      const matchOwner = (p.owner_name || '').toLowerCase().includes(query);
+      const matchDistrict = (p.micro_district || '').toLowerCase().includes(query);
+      const matchType = (p.property_type || '').toLowerCase().includes(query);
+      if (!matchTitle && !matchOwner && !matchDistrict && !matchType) return false;
+    }
+    // 2. District filter
+    if (district !== 'ALL' && p.micro_district !== district) return false;
+    // 3. Status filter
+    if (status !== 'ALL' && p.verification_status !== status) return false;
+
+    return true;
+  });
+
+  renderAdminProperties(filtered);
+}
+
 async function refreshAdminData() {
   try {
     // 1. Stats
     const statsRes = await fetch('/api/v1/admin/dashboard-stats');
     if (statsRes.ok) {
       const stats = await statsRes.json();
-      document.getElementById('admin-stat-gmv').innerText = `${formatSum(stats.total_gmv)} so'm`;
-      document.getElementById('admin-stat-revenue').innerText = `${formatSum(stats.total_platform_fee || stats.platform_net_revenue || 0)} so'm`;
-      document.getElementById('admin-stat-properties').innerText = `${stats.verified_properties || 7} ta`;
-      document.getElementById('admin-stat-bookings').innerText = `${stats.total_bookings || 1} ta`;
+      const gmvElem = document.getElementById('admin-stat-gmv');
+      const revElem = document.getElementById('admin-stat-revenue');
+      const propElem = document.getElementById('admin-stat-properties');
+      const bookElem = document.getElementById('admin-stat-bookings');
+
+      if (gmvElem) gmvElem.innerText = `${formatSum(stats.total_gmv)} so'm`;
+      if (revElem) revElem.innerText = `${formatSum(stats.total_platform_fee || stats.platform_net_revenue || 0)} so'm`;
+      if (propElem) propElem.innerText = `${stats.verified_properties || 7} ta`;
+      if (bookElem) bookElem.innerText = `${stats.total_bookings || 1} ta`;
     }
 
     // 2. Properties
     const propsRes = await fetch('/api/v1/admin/properties');
     if (propsRes.ok) {
-      const props = await propsRes.json();
-      document.getElementById('admin-properties-table-body').innerHTML = props.map(p => `
-        <tr>
-          <td>
-            <strong>${p.title}</strong><br>
-            <small style="color:var(--color-text-muted);">${p.micro_district} • ${p.property_type}</small>
-          </td>
-          <td>
-            <small>${p.owner_id ? p.owner_id.substring(0,8) : 'Umrzoq'}</small>
-          </td>
-          <td>
-            <span class="badge-status ${p.verification_status === 'VERIFIED' ? 'verified' : 'rejected'}">
-              ${p.verification_status}
-            </span>
-          </td>
-          <td>
-            <strong>${formatSum(p.min_price || 1200000)}</strong> so'm
-          </td>
-          <td>
-            ${p.road_condition === 'ASPHALT_SEDAN' ? '✅ Asfalt' : (p.road_condition === 'HIGH_CLEARANCE' ? '🚙 Klirens' : '⛰️ 4WD')}
-          </td>
-          <td>
-            <button class="btn-table-action edit" onclick="openEditPropertyModal('${p.id}')">✏️ Tahrirlash</button>
-            <button class="btn-table-action verify-toggle ${p.verification_status === 'VERIFIED' ? '' : 'rejected'}" onclick="toggleVerifyProperty('${p.id}', '${p.verification_status}')">
-              ${p.verification_status === 'VERIFIED' ? '⏸️ To\'xtatish' : '✅ Faollashtirish'}
-            </button>
-            <button class="btn-table-action danger" onclick="deleteProperty('${p.id}', '${p.title.replace(/'/g, "\\'")}')">🗑️ O'chirish</button>
-          </td>
-        </tr>
-      `).join('');
+      adminPropertiesCache = await propsRes.json();
+      filterAdminPropertiesTable();
     }
 
     // 3. Bookings
@@ -2873,7 +2968,7 @@ async function refreshAdminData() {
               <td><strong>${formatSum(b.total_amount)}</strong> so'm</td>
               <td><span class="badge-status ${b.booking_status === 'CONFIRMED' ? 'verified' : ''}">${b.booking_status}</span></td>
               <td>
-                <button class="btn-table-action danger" onclick="showToast('Bron boshqarildi', 'info')">Nazorat</button>
+                <button class="btn-action-edit" onclick="showToast('Bron boshqarildi', 'info')">Nazorat</button>
               </td>
             </tr>
           `).join('');
@@ -2917,9 +3012,13 @@ async function refreshAdminData() {
             <td>${u.phone_number || '-'}</td>
             <td><span class="badge-status verified">${u.role || 'GUEST'}</span></td>
             <td><small>${(u.created_at || '').substring(0,10)}</small></td>
-            <td>${u.is_active ? '✅ Faol' : '❌ Bloklangan'}</td>
             <td>
-              <button class="btn-table-action" onclick="showToast('Foydalanuvchi ma\'lumoti yangilandi', 'info')">Boshqaruv</button>
+              <span class="badge-status ${u.is_active ? 'verified' : 'rejected'}">
+                ${u.is_active ? 'Faol' : 'Bloklangan'}
+              </span>
+            </td>
+            <td>
+              <button class="btn-action-edit" onclick="showToast('Foydalanuvchi ma\'lumoti yangilandi', 'info')">Boshqaruv</button>
             </td>
           </tr>
         `).join('');
@@ -2948,10 +3047,70 @@ async function refreshAdminData() {
   }
 }
 
-function switchAdminTab(key) {
-  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+function switchAdminTab(key, evt) {
+  document.querySelectorAll('.tab-btn-modern, .admin-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.admin-tab-pane').forEach(p => p.classList.remove('active'));
-  event.target.classList.add('active');
+  const btn = evt ? (evt.currentTarget || evt.target) : (typeof event !== 'undefined' && event ? (event.currentTarget || event.target) : null);
+  if (btn) btn.classList.add('active');
   const target = document.getElementById(`admin-tab-${key}`);
   if (target) target.classList.add('active');
+}
+
+function openChangePasswordModal() {
+  const modal = document.getElementById('modal-admin-password');
+  if (modal) modal.classList.remove('hidden');
+  const err = document.getElementById('admin-pwd-err');
+  if (err) { err.classList.add('hidden'); err.innerText = ''; }
+  const curr = document.getElementById('admin-curr-pwd');
+  const nw = document.getElementById('admin-new-pwd');
+  if (curr) curr.value = '';
+  if (nw) nw.value = '';
+}
+
+function closeChangePasswordModal() {
+  const modal = document.getElementById('modal-admin-password');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function handleAdminChangePasswordSubmit(e) {
+  e.preventDefault();
+  const currPwd = document.getElementById('admin-curr-pwd')?.value || '';
+  const newPwd = document.getElementById('admin-new-pwd')?.value || '';
+  const errDiv = document.getElementById('admin-pwd-err');
+  const btn = document.getElementById('btn-save-pwd');
+
+  if (!currPwd || !newPwd) {
+    if (errDiv) { errDiv.innerText = "Iltimos, barcha maydonlarni to'ldiring"; errDiv.classList.remove('hidden'); }
+    return;
+  }
+  if (newPwd.length < 6) {
+    if (errDiv) { errDiv.innerText = "Yangi parol kamida 6 ta belgidan iborat bo'lishi kerak"; errDiv.classList.remove('hidden'); }
+    return;
+  }
+
+  try {
+    if (btn) { btn.disabled = true; btn.innerText = "Saqlanmoqda..."; }
+    const res = await fetch('/api/v1/admin/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ current_password: currPwd, new_password: newPwd })
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      closeChangePasswordModal();
+      showToast("Parol muvaffaqiyatli yangilandi!", "success");
+    } else {
+      if (errDiv) {
+        errDiv.innerText = data.detail || "Parolni o'zgartirishda xatolik yuz berdi";
+        errDiv.classList.remove('hidden');
+      }
+    }
+  } catch (err) {
+    if (errDiv) {
+      errDiv.innerText = "Server bilan ulanishda xatolik yuz berdi";
+      errDiv.classList.remove('hidden');
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerText = "Parolni saqlash"; }
+  }
 }

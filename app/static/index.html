@@ -25,7 +25,7 @@
   <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <link rel="stylesheet" href="/static/css/style.css?v=20261029_2250">
+  <link rel="stylesheet" href="/static/css/style.css?v=20261030_0045">
 </head>
 
 <body>
@@ -1228,7 +1228,12 @@
       <div class="modal-body">
         <div class="owner-quick-summary">
           <div class="owner-name-tag">
-            <span class="owner-avatar">🏡</span>
+            <span class="owner-avatar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+            </span>
             <div>
               <strong id="owner-modal-name">Dacha Egasi</strong>
               <span id="owner-modal-phone">+998 90 111 22 33</span>
@@ -1366,85 +1371,243 @@
 
   <!-- ================= 7. DEDICATED SUPERADMIN WORKSPACE ================= -->
   <div id="portal-admin" class="portal-admin-view hidden">
-    <div class="admin-top-bar">
-      <div class="admin-brand">
-        <span class="admin-badge">SUPERADMIN: Umrzoq</span>
-        <h1 class="admin-title">Zomin Boshqaruv & Operatsiyalar Markazi</h1>
-      </div>
-      <div class="admin-actions">
-        <button class="btn-add-property" onclick="openAddPropertyModal()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:4px;">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
+    <!-- Luxury Modern Top Bar -->
+    <header class="admin-top-bar-modern">
+      <div class="admin-brand-cluster">
+        <div class="admin-emblem-badge">
+          <svg viewBox="0 0 38 24" fill="none" class="admin-header-mountain-svg">
+            <path d="M2 22L13 4L21 16L26 10L36 22H2Z" fill="url(#adminMtnGrad)" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13 4L18 12" stroke="#34d399" stroke-width="1.8" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="adminMtnGrad" x1="2" y1="4" x2="36" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#064e3b" stop-opacity="0.8"/>
+                <stop offset="1" stop-color="#022c22" stop-opacity="0.95"/>
+              </linearGradient>
+            </defs>
           </svg>
-          Yangi Dacha Qo'shish
+        </div>
+        <div class="admin-title-box">
+          <div class="admin-title-row">
+            <span class="admin-brand-name">ZOMIN</span>
+            <span class="admin-role-pill">SUPERADMIN CONSOLE</span>
+            <span class="admin-live-pulse" title="Tizim server bilan bog'langan">
+              <span class="pulse-dot"></span> Online
+            </span>
+          </div>
+          <p class="admin-subtext">Operatsiyalar, dacha e'lonlari va to'lovlar monitoring markazi • <strong>Umrzoq</strong></p>
+        </div>
+      </div>
+
+      <div class="admin-actions-group">
+        <button class="btn-admin-cta-add" onclick="openAddPropertyModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <span>Yangi Dacha Qo'shish</span>
         </button>
-        <button class="btn-refresh" onclick="refreshAdminData()">
-          Ma'lumotlarni yangilash
+
+        <button class="btn-admin-glass" onclick="refreshAdminData()" title="Ma'lumotlarni yangilash">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+          </svg>
+          <span>Yangilash</span>
         </button>
-        <button class="btn-exit-admin" onclick="showTouristHome()">
-          Saytga o'tish
+
+        <button class="btn-admin-glass" onclick="openChangePasswordModal()" title="Parolni o'zgartirish">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Parol</span>
         </button>
-        <button class="btn-admin-logout" onclick="handleAdminLogout()">
-          Chiqish
+
+        <button class="btn-admin-glass" onclick="showTouristHome()" title="Sayyoh saytiga o'tish">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          <span>Saytga o'tish</span>
         </button>
+
+        <button class="btn-admin-danger-glass" onclick="handleAdminLogout()" title="Tizimdan chiqish">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Chiqish</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Luxury KPI Stat Cards (SVG Icons, zero emojis) -->
+    <div class="admin-kpi-modern-grid">
+      <!-- Card 1: GMV -->
+      <div class="kpi-modern-card">
+        <div class="kpi-icon-wrap kpi-gold">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+            <path d="M12 18V6"></path>
+          </svg>
+        </div>
+        <div class="kpi-details">
+          <span class="kpi-tag">Jami Savdo (GMV)</span>
+          <h3 class="kpi-number" id="admin-stat-gmv">0 so'm</h3>
+          <span class="kpi-sub-badge badge-green">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+            100% kafolatlangan
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 2: Platform Fee -->
+      <div class="kpi-modern-card highlight-emerald">
+        <div class="kpi-icon-wrap kpi-emerald">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div class="kpi-details">
+          <span class="kpi-tag">Sof Platforma Foydasi (10%)</span>
+          <h3 class="kpi-number text-emerald" id="admin-stat-revenue">0 so'm</h3>
+          <span class="kpi-sub-badge badge-emerald">
+            Sof onlayn komissiya
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 3: Properties -->
+      <div class="kpi-modern-card">
+        <div class="kpi-icon-wrap kpi-blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <div class="kpi-details">
+          <span class="kpi-tag">Tasdiqlangan Dachalar</span>
+          <h3 class="kpi-number" id="admin-stat-properties">7 ta</h3>
+          <span class="kpi-sub-badge badge-blue">
+            Saytda e'lon qilingan
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 4: Bookings -->
+      <div class="kpi-modern-card">
+        <div class="kpi-icon-wrap kpi-purple">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <div class="kpi-details">
+          <span class="kpi-tag">Jami Safar Bronlari</span>
+          <h3 class="kpi-number" id="admin-stat-bookings">1 ta</h3>
+          <span class="kpi-sub-badge badge-purple">
+            98.7% muvaffaqiyatli
+          </span>
+        </div>
       </div>
     </div>
 
-    <!-- Admin KPI Cards Row -->
-    <div class="admin-stats-grid">
-      <div class="admin-stat-card">
-        <div class="stat-icon">💰</div>
-        <div class="stat-meta">
-          <span class="stat-label">Jami Savdo (GMV)</span>
-          <span class="stat-value" id="admin-stat-gmv">0 so'm</span>
-        </div>
-      </div>
-      <div class="admin-stat-card highlight">
-        <div class="stat-icon">⚡</div>
-        <div class="stat-meta">
-          <span class="stat-label">Platforma Sof Foydasi (10%)</span>
-          <span class="stat-value" id="admin-stat-revenue">0 so'm</span>
-        </div>
-      </div>
-      <div class="admin-stat-card">
-        <div class="stat-icon">🏡</div>
-        <div class="stat-meta">
-          <span class="stat-label">Dachalar (Tasdiqlangan)</span>
-          <span class="stat-value" id="admin-stat-properties">0 ta</span>
-        </div>
-      </div>
-      <div class="admin-stat-card">
-        <div class="stat-icon">📋</div>
-        <div class="stat-meta">
-          <span class="stat-label">Jami Bronlar</span>
-          <span class="stat-value" id="admin-stat-bookings">0 ta</span>
-        </div>
-      </div>
-    </div>
+    <!-- Modern Admin Tabs with SVG Icons -->
+    <div class="admin-tabs-modern">
+      <button class="tab-btn-modern active" onclick="switchAdminTab('props')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        </svg>
+        <span>Dachalar va Obyektlar</span>
+        <span class="tab-count-pill" id="tab-count-props">7</span>
+      </button>
 
-    <!-- Admin Operations Tabs -->
-    <div class="admin-tabs-nav">
-      <button class="admin-tab active" onclick="switchAdminTab('props')">Obyektlar Moderatsiyasi</button>
-      <button class="admin-tab" onclick="switchAdminTab('bookings')">Bronlar Nazorati</button>
-      <button class="admin-tab" onclick="switchAdminTab('payments')">Click / Payme & OFD Cheklar</button>
-      <button class="admin-tab" onclick="switchAdminTab('users')">Foydalanuvchilar</button>
-      <button class="admin-tab" onclick="switchAdminTab('audit')">Audit Tarixi</button>
+      <button class="tab-btn-modern" onclick="switchAdminTab('bookings')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Bronlar Nazorati</span>
+      </button>
+
+      <button class="tab-btn-modern" onclick="switchAdminTab('payments')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+          <line x1="1" y1="10" x2="23" y2="10"></line>
+        </svg>
+        <span>Click / Payme & OFD Cheklar</span>
+      </button>
+
+      <button class="tab-btn-modern" onclick="switchAdminTab('users')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Foydalanuvchilar</span>
+      </button>
+
+      <button class="tab-btn-modern" onclick="switchAdminTab('audit')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>Audit va Xavfsizlik</span>
+      </button>
     </div>
 
     <div class="admin-tab-content-wrapper">
       <div id="admin-tab-props" class="admin-tab-pane active">
+        <!-- Search and Quick Filter Toolbar -->
+        <div class="admin-toolbar-card">
+          <div class="admin-search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="admin-search-input" placeholder="Dacha nomi, egasi yoki manzili bo'yicha qidirish..." oninput="filterAdminPropertiesTable()">
+          </div>
+
+          <div class="admin-filter-group">
+            <select id="admin-district-filter" onchange="filterAdminPropertiesTable()" class="admin-select-filter">
+              <option value="ALL">Barcha Hududlar</option>
+              <option value="DUOBA">Duoba</option>
+              <option value="SUFFA">Suffa Platosi</option>
+              <option value="ORIKLISOY">O'riklisoy</option>
+              <option value="SANATORIY">Zomin Sanatoriysi</option>
+            </select>
+
+            <select id="admin-status-filter" onchange="filterAdminPropertiesTable()" class="admin-select-filter">
+              <option value="ALL">Barcha Holatlar</option>
+              <option value="VERIFIED">Tasdiqlangan (Faol)</option>
+              <option value="REJECTED">To'xtatilgan</option>
+            </select>
+
+            <span class="admin-items-count" id="admin-items-count">7 ta obyekt</span>
+          </div>
+        </div>
+
         <div class="admin-table-card">
           <div class="table-responsive">
-            <table class="data-table">
+            <table class="data-table modern-table">
               <thead>
                 <tr>
-                  <th>Nomi / Hudud</th>
-                  <th>Ega</th>
+                  <th style="min-width: 260px;">Dacha / Hudud</th>
+                  <th>Dacha Egasi</th>
                   <th>Holati</th>
                   <th>Boshlang'ich Narx</th>
-                  <th>Spark yo'li</th>
-                  <th>Amallar</th>
+                  <th>Yo'l sharoiti</th>
+                  <th style="text-align: right; min-width: 220px;">Boshqaruv Amallari</th>
                 </tr>
               </thead>
               <tbody id="admin-properties-table-body">
@@ -1642,24 +1805,56 @@
             <div class="form-group">
               <label class="input-label">Zomin Yo'l Sharoiti</label>
               <select id="admin-prop-road" class="form-input" required>
-                <option value="ASPHALT_SEDAN">✅ Asfalt (Spark / Cobalt bemalol chiqadi)</option>
-                <option value="HIGH_CLEARANCE">🚙 Baland klirens (Gentra, Tracker, Krossover)</option>
-                <option value="4WD_ONLY">⛰️ Faqat 4WD / Jip (Tog' shag'al yo'li)</option>
+                <option value="ASPHALT_SEDAN">Asfalt yo'l (Spark va barcha yengil avtolar bemalol chiqadi)</option>
+                <option value="HIGH_CLEARANCE">Baland klirens (Gentra, Tracker, Krossover)</option>
+                <option value="4WD_ONLY">4WD Tog' yo'li (Faqat to'liq privodli Jip)</option>
               </select>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="input-label">Qulayliklar (Belgilang):</label>
+            <label class="input-label">Qulayliklar va Xizmatlar:</label>
             <div class="admin-amenities-checkboxes">
-              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Filtrli Hovuz (Basseyn)" checked> 🏊 Filtrli Hovuz</label>
-              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Wi-Fi 5G" checked> 📶 Wi-Fi 5G</label>
-              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Playstation & Bilyard" checked> 🎮 PS & Bilyard</label>
-              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Archa tandiri" checked> 🍖 Archa tandiri</label>
-              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Ochiq oshxona & Mangal" checked> 🥩 Ochiq oshxona & Mangal</label>
-              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Sauna & Fin hammomi"> 🧖 Sauna / Hammom</label>
-              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Konditsioner"> ❄️ Konditsioner</label>
-              <label class="amenity-checkbox-item"><input type="checkbox" name="admin_amenity" value="Elektr generatori"> ⚡ Generator bor</label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="admin_amenity" value="Filtrli Hovuz (Basseyn)" checked>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 17h20M2 7c3 0 4-2 7-2s4 2 7 2 4-2 6-2"></path></svg>
+                <span>Filtrli Hovuz</span>
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="admin_amenity" value="Wi-Fi 5G" checked>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"></path></svg>
+                <span>Wi-Fi 5G</span>
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="admin_amenity" value="Playstation & Bilyard" checked>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="6"></rect><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><circle cx="16" cy="11" r="1"></circle><circle cx="18" cy="13" r="1"></circle></svg>
+                <span>PS & Bilyard</span>
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="admin_amenity" value="Archa tandiri" checked>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+                <span>Archa tandiri</span>
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="admin_amenity" value="Ochiq oshxona & Mangal" checked>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+                <span>Ochiq oshxona</span>
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="admin_amenity" value="Sauna & Fin hammomi">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <span>Sauna / Hammom</span>
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="admin_amenity" value="Konditsioner">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg>
+                <span>Konditsioner</span>
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="admin_amenity" value="Elektr generatori">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Generator bor</span>
+              </label>
             </div>
           </div>
 
@@ -1667,13 +1862,31 @@
             <label class="input-label">Asosiy Rasm Havolasi (URL):</label>
             <input type="text" id="admin-prop-photo" class="form-input" value="/static/assets/villa.jpg" placeholder="/static/assets/villa.jpg yoki https://...">
             <div class="admin-preset-photos mt-2">
-              <span class="preset-label">Tezkor tanlash:</span>
-              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/villa.jpg')">🏡 Villa</button>
-              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/chalet.jpg')">🪵 Chalet</button>
-              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/lodge.jpg')">🌲 Lodge</button>
-              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/dacha_chashma.jpg')">🌊 Chashma</button>
-              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/dacha_panorama.jpg')">🏔️ Panorama</button>
-              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/shox_pool.jpg')">🏊 Hovuzli</button>
+              <span class="preset-label">Tezkor rasmlar:</span>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/villa.jpg')">
+                <img src="/static/assets/villa.jpg" class="preset-thumb" alt="Villa">
+                <span>Villa</span>
+              </button>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/chalet.jpg')">
+                <img src="/static/assets/chalet.jpg" class="preset-thumb" alt="Chalet">
+                <span>Chalet</span>
+              </button>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/lodge.jpg')">
+                <img src="/static/assets/lodge.jpg" class="preset-thumb" alt="Lodge">
+                <span>Lodge</span>
+              </button>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/dacha_chashma.jpg')">
+                <img src="/static/assets/dacha_chashma.jpg" class="preset-thumb" alt="Chashma">
+                <span>Chashma</span>
+              </button>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/dacha_panorama.jpg')">
+                <img src="/static/assets/dacha_panorama.jpg" class="preset-thumb" alt="Panorama">
+                <span>Panorama</span>
+              </button>
+              <button type="button" class="btn-preset-photo" onclick="setAdminPhotoPreset('/static/assets/shox_pool.jpg')">
+                <img src="/static/assets/shox_pool.jpg" class="preset-thumb" alt="Hovuzli">
+                <span>Hovuzli</span>
+              </button>
             </div>
           </div>
 
@@ -1693,8 +1906,38 @@
     </div>
   </div>
 
+  <!-- ================= 9. ADMIN CHANGE PASSWORD MODAL ================= -->
+  <div id="modal-admin-password" class="modal-overlay hidden">
+    <div class="modal-card modal-sm admin-pwd-modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="modal-badge-top">XAVFSIZLIK</span>
+          <h3 class="modal-title">Admin Parolini Yangilash</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeChangePasswordModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleAdminChangePasswordSubmit(event)">
+          <div class="form-group mb-3">
+            <label class="input-label">Joriy Parol</label>
+            <input type="password" id="admin-curr-pwd" class="form-input" required placeholder="Hozirgi parol (masalan: pdp.university)">
+          </div>
+          <div class="form-group mb-3">
+            <label class="input-label">Yangi Maxfiy Parol</label>
+            <input type="password" id="admin-new-pwd" class="form-input" required placeholder="Yangi parol (kamida 6 ta belgi)">
+          </div>
+          <div id="admin-pwd-err" class="gate-error-alert hidden mb-3"></div>
+          <div class="admin-modal-actions">
+            <button type="button" class="btn-outline-pill" onclick="closeChangePasswordModal()">Bekor qilish</button>
+            <button type="submit" class="btn-primary-pill" id="btn-save-pwd">Parolni saqlash</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- JavaScript -->
-  <script src="/static/js/app.js?v=20261029_2250"></script>
+  <script src="/static/js/app.js?v=20261030_0045"></script>
 </body>
 
 </html>

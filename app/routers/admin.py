@@ -9,11 +9,15 @@ from app.database import get_db
 from app.models import (
     AdminDashboardStats, AdminPropertyVerifyRequest, AdminForceCancelRequest,
     AdminUserStatusRequest, PropertyListItem, BookingDetailResponse,
-    AdminLoginRequest, PropertyCreateUpdateRequest
+    AdminLoginRequest, PropertyCreateUpdateRequest, AdminChangePasswordRequest
 )
 from app.services.booking_service import get_booking_detail
 
 router = APIRouter(prefix="/admin", tags=["Admin Operations"])
+
+ADMIN_CREDENTIALS = {
+    "password": "pdp.university"
+}
 
 def log_audit(conn, user_id: str, action: str, target_type: str, target_id: str, details: str):
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -91,15 +95,20 @@ def get_all_properties_admin(
     """
     with get_db() as conn:
         cursor = conn.cursor()
-        query = "SELECT * FROM properties WHERE 1=1"
+        query = """
+            SELECT p.*, u.full_name as owner_name, u.phone_number as owner_phone
+            FROM properties p
+            LEFT JOIN users u ON p.owner_id = u.id
+            WHERE 1=1
+        """
         params = []
         if status:
-            query += " AND verification_status = ?"
+            query += " AND p.verification_status = ?"
             params.append(status)
         if micro_district:
-            query += " AND micro_district = ?"
+            query += " AND p.micro_district = ?"
             params.append(micro_district)
-        query += " ORDER BY created_at DESC"
+        query += " ORDER BY p.created_at DESC"
 
         cursor.execute(query, params)
         rows = cursor.fetchall()
@@ -108,9 +117,19 @@ def get_all_properties_admin(
         for r in rows:
             cursor.execute("SELECT * FROM rental_units WHERE property_id = ?", (r["id"],))
             units = cursor.fetchall()
+            photos = json.loads(r["photos_json"]) if r["photos_json"] else []
+            cover = photos[0] if (photos and len(photos) > 0) else "/static/assets/villa.jpg"
+            min_price = units[0]["base_price_weekday"] if units else 1200000.0
+            capacity = units[0]["standard_capacity"] if units else 8
+
             results.append({
                 "id": r["id"],
                 "owner_id": r["owner_id"],
+                "owner_name": r["owner_name"] or "Umrzoq (Superadmin)",
+                "owner_phone": r["owner_phone"] or "+998 90 123 45 67",
+                "cover_photo": cover,
+                "min_price": min_price,
+                "capacity": capacity,
                 "title": r["title"],
                 "slug": r["slug"],
                 "description": r["description"],
@@ -296,7 +315,7 @@ def admin_login(req: AdminLoginRequest):
     clean_user = req.username.strip().lower()
     valid_usernames = ["umrzoq", "admin", "school21dev", "umrzoq972@gmail.com", "school21dev@example.com"]
     
-    if clean_user in valid_usernames and req.password.strip() == "pdp.university":
+    if clean_user in valid_usernames and req.password.strip() == ADMIN_CREDENTIALS["password"]:
         with get_db() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM users WHERE role = 'ADMIN' LIMIT 1")
@@ -326,6 +345,18 @@ def admin_login(req: AdminLoginRequest):
         }
 
     raise HTTPException(status_code=401, detail="Login yoki parol noto'g'ri! Iltimos, qaytadan tekshiring.")
+
+@router.post("/auth/change-password")
+def admin_change_password(req: AdminChangePasswordRequest):
+    """
+    Superadmin parolini yangilash.
+    """
+    if req.current_password.strip() != ADMIN_CREDENTIALS["password"]:
+        raise HTTPException(status_code=400, detail="Joriy parol noto'g'ri kiritildi!")
+    if len(req.new_password.strip()) < 6:
+        raise HTTPException(status_code=400, detail="Yangi parol kamida 6 ta belgidan iborat bo'lishi shart!")
+    ADMIN_CREDENTIALS["password"] = req.new_password.strip()
+    return {"ok": True, "message": "Parol muvaffaqiyatli o'zgartirildi!"}
 
 @router.get("/auth/check")
 def admin_auth_check(authorization: Optional[str] = Header(None)):
