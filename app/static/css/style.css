@@ -394,10 +394,10 @@ img {
    =================================================================== */
 .zomin-hero {
   position: relative;
-  min-height: 640px;
-  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.12) 42%, rgba(0, 0, 0, 0.0) 72%), url('/static/assets/hero.jpg?v=2');
+  min-height: 620px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.24) 0%, rgba(0, 0, 0, 0.08) 42%, rgba(0, 0, 0, 0.0) 72%), url('/static/assets/hero.jpg?v=4');
   background-size: cover;
-  background-position: center top;
+  background-position: center center;
   display: flex;
   align-items: center;
   padding: 85px 0 115px 0;

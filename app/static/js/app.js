@@ -247,7 +247,7 @@ const GOOGLE_PROFILES = {
   umrzoq: {
     id: "usr-google-umrzoq",
     name: "Umrzoq Yulchiyev",
-    email: "umrzoq.backend@gmail.com",
+    email: "school21dev@gmail.com",
     avatar: "/static/assets/avatar.jpg",
     phone: "+998 91 593 30 18",
     car_plate: "01 A 777 AA",
@@ -263,6 +263,19 @@ const GOOGLE_PROFILES = {
     role: "OWNER"
   }
 };
+
+// Generate high-resolution user avatar for any Google user
+function generateUserAvatar(name, email) {
+  if (email === 'school21dev@gmail.com' || email === 'umrzoq.backend@gmail.com') {
+    return '/static/assets/avatar.jpg';
+  }
+  if (email === 'alisher.zomin@gmail.com') {
+    return '/static/assets/avatar2.jpg';
+  }
+  const initial = (name || 'U').charAt(0).toUpperCase();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0d382c"/><stop offset="100%" stop-color="#165b47"/></linearGradient></defs><circle cx="64" cy="64" r="64" fill="url(#g)"/><text x="50%" y="54%" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-weight="700" font-size="52" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">${initial}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
 // Demo User Profiles
 const DEMO_PROFILES = {
@@ -302,11 +315,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (savedUser) {
     try {
       currentUser = JSON.parse(savedUser);
-      if (currentUser && (!currentUser.avatar || currentUser.name === 'Jasur Mamadaliyev' || currentUser.name === 'Foydalanuvchi' || !currentUser.email)) {
-        currentUser = Object.assign({}, GOOGLE_PROFILES.umrzoq, currentUser, {
-          name: currentUser.name && currentUser.name !== 'Jasur Mamadaliyev' && currentUser.name !== 'Foydalanuvchi' ? currentUser.name : 'Umrzoq Yulchiyev',
-          email: currentUser.email && currentUser.email.includes('@') && !currentUser.email.includes('jasur') ? currentUser.email : 'umrzoq.backend@gmail.com',
-          avatar: currentUser.avatar || '/static/assets/avatar.jpg'
+      if (currentUser && (!currentUser.avatar || currentUser.name === 'Jasur Mamadaliyev' || currentUser.name === 'Foydalanuvchi' || !currentUser.email || currentUser.email === 'umrzoq.backend@gmail.com')) {
+        currentUser = Object.assign({}, GOOGLE_PROFILES.umrzoq, {
+          name: (currentUser.name && currentUser.name !== 'Jasur Mamadaliyev' && currentUser.name !== 'Foydalanuvchi') ? currentUser.name : 'Umrzoq Yulchiyev',
+          email: (currentUser.email && currentUser.email.includes('@') && !currentUser.email.includes('jasur') && currentUser.email !== 'umrzoq.backend@gmail.com') ? currentUser.email : 'school21dev@gmail.com',
+          avatar: '/static/assets/avatar.jpg'
         });
         localStorage.setItem('zomin_user', JSON.stringify(currentUser));
       }
@@ -1024,10 +1037,10 @@ function openProfileModal() {
 
   const nameVal = p.name || p.full_name || 'Umrzoq Yulchiyev';
   const phoneVal = p.phone || p.phone_number || '+998 91 593 30 18';
-  const emailVal = p.email || 'umrzoq.backend@gmail.com';
+  const emailVal = p.email || 'school21dev@gmail.com';
   const carVal = p.car_plate || '01 A 777 AA';
   const roleVal = p.role || 'GUEST';
-  const avatarVal = p.avatar || '/static/assets/avatar.jpg';
+  const avatarVal = p.avatar || generateUserAvatar(nameVal, emailVal);
 
   const profImg = document.getElementById('prof-avatar-img');
   if (profImg) profImg.src = avatarVal;
@@ -1121,18 +1134,23 @@ function loginWithGoogleAccount(key) {
 function handleCustomGoogleSubmit(e) {
   e.preventDefault();
   const emailInput = document.getElementById('custom-google-email-input');
-  const emailVal = emailInput ? emailInput.value.trim() : '';
-  if (!emailVal) return;
+  const emailVal = emailInput ? emailInput.value.trim().toLowerCase() : '';
+  if (!emailVal || !emailVal.includes('@')) {
+    showToast('Iltimos, to‘g‘ri Google pochtangizni kiriting', 'error');
+    return;
+  }
 
   const namePart = emailVal.split('@')[0].replace(/[._-]/g, ' ');
-  const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+  const formattedName = namePart.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+  const userAvatar = generateUserAvatar(formattedName, emailVal);
 
   currentUser = {
     id: `usr-google-${Date.now()}`,
     name: formattedName,
+    full_name: formattedName,
     email: emailVal,
-    avatar: '/static/assets/avatar.jpg',
-    phone: '+998 91 593 30 18',
+    avatar: userAvatar,
+    phone: '+998 90 123 45 67',
     car_plate: '01 A 777 AA',
     role: 'GUEST'
   };
@@ -1167,13 +1185,13 @@ function updateHeaderAuthState() {
 
   if (currentUser) {
     const displayName = (currentUser.name || currentUser.full_name || 'Umrzoq').split(' ')[0];
-    const avatarUrl = currentUser.avatar || '/static/assets/avatar.jpg';
+    const avatarUrl = currentUser.avatar || generateUserAvatar(displayName, currentUser.email);
     btn.innerHTML = `<img src="${avatarUrl}" class="nav-avatar-img" alt="${displayName}"><span id="user-btn-text">${displayName}</span><svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
     btn.classList.add('logged-in');
 
     if (menuAvatar) menuAvatar.src = avatarUrl;
     if (menuName) menuName.innerText = currentUser.name || currentUser.full_name || 'Umrzoq Yulchiyev';
-    if (menuEmail) menuEmail.innerText = currentUser.email || 'umrzoq.backend@gmail.com';
+    if (menuEmail) menuEmail.innerText = currentUser.email || 'school21dev@gmail.com';
     if (menuRole) menuRole.innerText = currentUser.role === 'OWNER' ? 'DACHA EGASI' : 'SAYYOH / MEHMON';
     if (adminLink) adminLink.style.display = currentUser.role === 'ADMIN' ? 'flex' : 'none';
   } else {
