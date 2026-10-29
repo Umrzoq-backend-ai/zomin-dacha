@@ -1200,7 +1200,16 @@ function handleLogout() {
 
 // Google Authentication Handlers
 function handleGoogleOneClick() {
-  loginWithGoogleAccount('umurzoq');
+  const emailInput = document.getElementById('custom-google-email-input');
+  if (emailInput && emailInput.value.trim()) {
+    const form = document.getElementById('auth-clean-form');
+    if (form) form.requestSubmit();
+    return;
+  }
+  if (emailInput) {
+    emailInput.focus();
+    showToast('Iltimos, Google elektron pochtangizni kiriting', 'info');
+  }
 }
 
 function loginWithGoogleAccount(key) {

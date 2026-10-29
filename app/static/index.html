@@ -20,7 +20,7 @@
   <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   
-  <link rel="stylesheet" href="/static/css/style.css?v=20261029_1205">
+  <link rel="stylesheet" href="/static/css/style.css?v=20261029_1220">
 </head>
 <body>
 
@@ -608,15 +608,15 @@
     <div class="modal-card modal-auth">
       <div class="modal-header">
         <div>
-          <span class="modal-badge-top" id="lbl-auth-badge">TEZKOR VA XAVFSIZ KIRISH</span>
-          <h3 class="modal-title" id="auth-modal-title">Google orqali kirish</h3>
+          <span class="modal-badge-top" id="lbl-auth-badge">XAVFSIZ VA TEZKOR</span>
+          <h3 class="modal-title" id="auth-modal-title">Tizimga kirish</h3>
         </div>
         <button class="modal-close-btn" onclick="closeAuthModal()">✕</button>
       </div>
       <div class="modal-body">
         
         <div class="google-auth-box">
-          <!-- Big 1-Click Google Button -->
+          <!-- Big Google Button -->
           <button type="button" class="btn-google-main" onclick="handleGoogleOneClick()">
             <svg class="google-icon-svg" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -628,56 +628,36 @@
           </button>
 
           <div class="google-divider">
-            <span id="lbl-google-divider">yoki o'z hisobingizni tanlang</span>
+            <span id="lbl-google-divider">yoki elektron pochta bilan</span>
           </div>
 
-          <!-- Accounts Stack with Real Photos & Active Google Profiles -->
-          <div class="google-accounts-stack">
-            <!-- Account 1: Umurzoq (Active Google Browser Profile) -->
-            <div class="google-account-pill" onclick="loginWithGoogleAccount('umurzoq')">
-              <div class="google-letter-avatar" style="width:38px; height:38px; min-width:38px; border-radius:50%; background:#1a73e8; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:18px;">U</div>
-              <div class="google-account-info">
-                <div class="google-account-name">Umurzoq</div>
-                <div class="google-account-email">umurzoq972@gmail.com</div>
-              </div>
-              <span class="google-badge-tag">Asosiy</span>
+          <!-- Direct User Input Form -->
+          <form onsubmit="handleCustomGoogleSubmit(event)" id="auth-clean-form" class="auth-clean-form">
+            <div class="form-group">
+              <label class="input-label" id="lbl-auth-email">Google elektron pochta manzili:</label>
+              <input type="email" id="custom-google-email-input" class="form-input" placeholder="nomingiz@gmail.com" required autocomplete="email">
             </div>
 
-            <!-- Account 2: Umrzoq Yulchiyev -->
-            <div class="google-account-pill" onclick="loginWithGoogleAccount('school21')">
-              <img src="/static/assets/avatar.jpg" alt="Umrzoq Yulchiyev" class="google-account-avatar">
-              <div class="google-account-info">
-                <div class="google-account-name">Umrzoq Yulchiyev</div>
-                <div class="google-account-email">school21dev@gmail.com</div>
-              </div>
-              <span class="google-badge-tag">Sayyoh</span>
+            <div class="form-group mt-2">
+              <label class="input-label" id="lbl-auth-name">Ism-familiyangiz (ixtiyoriy):</label>
+              <input type="text" id="custom-google-name-input" class="form-input" placeholder="Ismingizni kiriting" autocomplete="name">
             </div>
 
-            <!-- Account 3: Alisher Zokirov -->
-            <div class="google-account-pill" onclick="loginWithGoogleAccount('alisher')">
-              <img src="/static/assets/avatar2.jpg" alt="Alisher Zokirov" class="google-account-avatar">
-              <div class="google-account-info">
-                <div class="google-account-name">Alisher Zokirov</div>
-                <div class="google-account-email">alisher.zomin@gmail.com</div>
-              </div>
-              <span class="google-badge-tag">Dacha Egasi</span>
-            </div>
-          </div>
+            <button type="submit" class="btn-auth-submit mt-3" id="lbl-btn-google-login">
+              <span>Davom etish</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </form>
 
-          <!-- Custom Google Email Input -->
-          <div class="custom-google-box mt-3" style="border-top: 1px solid var(--color-border); padding-top: 14px;">
-            <form onsubmit="handleCustomGoogleSubmit(event)" style="display:flex; flex-direction:column; gap:8px;">
-              <label class="input-label" id="lbl-custom-google-email">Boshqa Google elektron pochtangiz bilan kirish:</label>
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                <input type="text" id="custom-google-name-input" class="form-input" placeholder="Ism-familiyangiz" style="font-size:13px;">
-                <input type="email" id="custom-google-email-input" class="form-input" placeholder="ismingiz@gmail.com" required style="font-size:13px;">
-              </div>
-              <button type="submit" class="btn-primary-pill" style="align-self:flex-start; padding: 8px 22px; font-size: 13px;" id="lbl-btn-google-login">Hisob bilan kirish</button>
-            </form>
-          </div>
-
-          <div class="google-trust-badge">
+          <div class="google-trust-badge mt-3">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span id="lbl-google-trust">Google OAuth 2.0 xavfsiz tizimi</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
             <span id="lbl-google-trust">Google OAuth 2.0 bilan himoyalangan</span>
           </div>
         </div>
@@ -1335,6 +1315,6 @@
   </div>
 
   <!-- JavaScript -->
-  <script src="/static/js/app.js?v=20261029_1205"></script>
+  <script src="/static/js/app.js?v=20261029_1220"></script>
 </body>
 </html>
