@@ -1703,6 +1703,15 @@ async function loadProperties() {
   }
 }
 
+let currentCategoryFilter = 'ALL';
+
+function filterByPropertyCategory(cat, btn) {
+  currentCategoryFilter = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderProperties();
+}
+
 function renderProperties() {
   const grid = document.getElementById('properties-grid');
   if (!grid) return;
@@ -1710,14 +1719,34 @@ function renderProperties() {
   const t = I18N[currentLang] || I18N.uz;
 
   let filtered = propertiesCache.filter(p => {
+    // 1. District filter
     if (searchSelectedDistrict !== 'ALL' && p.micro_district !== searchSelectedDistrict) {
       return false;
+    }
+    // 2. Category filter
+    if (currentCategoryFilter !== 'ALL') {
+      if (currentCategoryFilter === 'ASPHALT') {
+        if (p.road_condition !== 'ASPHALT_SEDAN') return false;
+      } else if (p.property_type !== currentCategoryFilter) {
+        return false;
+      }
     }
     return true;
   });
 
   if (filtered.length === 0) {
-    filtered = propertiesCache;
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #64748b;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" style="margin-bottom: 12px;">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <h4 style="font-size: 18px; color: #1e293b; margin-bottom: 6px;">Ushbu parametrlar bo'yicha dacha topilmadi</h4>
+        <p style="font-size: 14px; margin-bottom: 16px;">Iltimos, boshqa toifa yoki barcha filtrlarni tozalab ko'ring.</p>
+        <button class="btn-primary-pill" onclick="clearAllFilters()">Barchasini ko'rsatish</button>
+      </div>
+    `;
+    return;
   }
 
   // Display ALL cards without truncation
@@ -1810,8 +1839,14 @@ function toggleWishlist(slug, btn) {
 
 function clearAllFilters() {
   searchSelectedDistrict = 'ALL';
+  currentCategoryFilter = 'ALL';
+  document.querySelectorAll('.cat-pill').forEach((p, idx) => {
+    if (idx === 0) p.classList.add('active');
+    else p.classList.remove('active');
+  });
   const t = I18N[currentLang] || I18N.uz;
-  document.getElementById('search-val-district').innerText = t.searchLocationDefault;
+  const distEl = document.getElementById('search-val-district');
+  if (distEl) distEl.innerText = t.searchLocationDefault;
   renderProperties();
 }
 

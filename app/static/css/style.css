@@ -3224,3 +3224,61 @@ img {
 .admin-pwd-modal-card {
   max-width: 420px !important;
 }
+
+/* Quick Category Filter Bar */
+.category-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 6px 0 24px 0;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.category-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.cat-pill svg {
+  color: #64748b;
+  transition: color 0.2s ease;
+}
+
+.cat-pill:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.cat-pill:hover svg {
+  color: #0f172a;
+}
+
+.cat-pill.active {
+  background: #0f3529;
+  color: #ffffff;
+  border-color: #0f3529;
+  box-shadow: 0 4px 14px rgba(15, 53, 41, 0.25);
+}
+
+.cat-pill.active svg {
+  color: #34d399;
+}
