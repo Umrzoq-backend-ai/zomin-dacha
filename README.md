@@ -1,4 +1,11 @@
-# ZominStay — Zomin Tog' Turizmi, Dacha va Dam Olish Ekotizimi
+# 🏔️ ZominStay — Zomin Tog' Turizmi, Dacha va Dam Olish Ekotizimi
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Umrzoq-backend-ai/zomin-dacha)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Platform-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://zomin-dacha.vercel.app)
+[![Tests Passing](https://img.shields.io/badge/pytest-39%20passed-success?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/Umrzoq-backend-ai/zomin-dacha)
+
+🌐 **Live Havola:** [https://zomin-dacha.vercel.app](https://zomin-dacha.vercel.app)  
+📱 **Telegram Bot & Mini App:** [@ZominStayBot](https://t.me/ZominStayBot)
 
 ZominStay — Jizzax viloyati Zomin tumanidagi barcha turar joylar (dala hovlilar / dachalar, tog‘ kottejlari, mehmon uylari), dam olish maskanlari (soy bo‘yidagi tapchanlar, choyxonalar) va mashhur Zomin archa tandiri gastronomik xizmatlarini yagona raqamli platformaga birlashtiruvchi zamonaviy ekotizimdir.
 
