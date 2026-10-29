@@ -16,6 +16,7 @@ let leafletMap = null;
 let mapMarkers = [];
 
 let searchSelectedDistrict = 'ALL';
+let searchQueryText = '';
 let searchCheckInDate = '';
 let searchCheckOutDate = '';
 let guestsAdults = 2;
@@ -32,7 +33,7 @@ const I18N = {
     navLogin: "Kirish",
     heroTitle: "Zominni o‘zingizga<br>xos kashf eting.",
     heroSubtitle: "Tog‘lar, dam olish maskanlari va unutilmas sayohatlar — barchasi bir joyda.",
-    searchWhere: "Qayerga?",
+    searchWhere: "Qayerga / Dacha nomi?",
     searchLocationDefault: "Zomin",
     searchCheckIn: "Kelish",
     searchCheckOut: "Ketish",
@@ -185,7 +186,7 @@ const I18N = {
     navLogin: "Войти",
     heroTitle: "Откройте Заамин<br>по-своему.",
     heroSubtitle: "Горы, зоны отдыха и незабываемые путешествия — все в одном месте.",
-    searchWhere: "Куда?",
+    searchWhere: "Куда / Название дачи?",
     searchLocationDefault: "Заамин",
     searchCheckIn: "Заезд",
     searchCheckOut: "Выезд",
@@ -338,7 +339,7 @@ const I18N = {
     navLogin: "Sign In",
     heroTitle: "Discover Zaamin<br>in your own way.",
     heroSubtitle: "Mountains, retreats, and unforgettable journeys — all in one place.",
-    searchWhere: "Where to?",
+    searchWhere: "Where / Dacha name?",
     searchLocationDefault: "Zaamin",
     searchCheckIn: "Check-in",
     searchCheckOut: "Check-out",
@@ -724,15 +725,17 @@ function renderLocationDropdown(lang) {
   const t = I18N[lang] || I18N.uz;
 
   const locs = [
-    { code: 'ALL', name: t.locAll, desc: t.locAllDesc },
-    { code: 'DUOBA', name: t.locDuoba, desc: t.locDuobaDesc },
-    { code: 'SUFFA', name: t.locSuffa, desc: t.locSuffaDesc },
-    { code: 'ORIKLISOY', name: t.locOriklisoy, desc: t.locOriklisoyDesc },
-    { code: 'SANATORIY', name: t.locSanatoriy, desc: t.locSanatoriyDesc }
+    { code: 'ALL', name: t.locAll || "Zomin (Barchasi)", desc: t.locAllDesc || "Barcha 100 ta tog' kottejlari va choyxonalar" },
+    { code: 'DUOBA', name: t.locDuoba || "Duoba", desc: t.locDuobaDesc || "Soy bo'yidagi basseynli dachalar (Asfalt)" },
+    { code: 'SUFFA', name: t.locSuffa || "Suffa Platosi", desc: t.locSuffaDesc || "Bartholet dor yo'li va osma ko'prik" },
+    { code: 'ORIKLISOY', name: t.locOriklisoy || "O'riklisoy", desc: t.locOriklisoyDesc || "Buloq suvi ustidagi soy tapchanlari" },
+    { code: 'SANATORIY', name: t.locSanatoriy || "Sanatoriy", desc: t.locSanatoriyDesc || "Shifobaxsh qarag'ay va archazorlar" },
+    { code: 'ARCHAZOR', name: "Archazor", desc: "Baland archa o'rmonlari va A-Frame kottejlar" },
+    { code: 'PESHAGOR', name: "Peshag'or", desc: "Tarixiy g'or va soylar bo'yidagi maskanlar" }
   ];
 
   dropdown.innerHTML = locs.map(l => `
-    <div class="popup-option ${searchSelectedDistrict === l.code ? 'active' : ''}" onclick="selectSearchLocation('${l.code}')">
+    <div class="popup-option ${searchSelectedDistrict === l.code ? 'active' : ''}" onclick="selectSearchLocation('${l.code}', '${l.name.replace(/'/g, "\\'")}')">
       <div class="opt-name">${l.name}</div>
       <div class="opt-desc">${l.desc}</div>
     </div>
@@ -989,7 +992,18 @@ function applyLanguage(lang) {
     'ORIKLISOY': t.distOriklisoy,
     'SANATORIY': t.distSanatoriy
   };
-  document.getElementById('search-val-district').innerText = nameMap[searchSelectedDistrict] || t.searchLocationDefault;
+  const distEl = document.getElementById('search-val-district');
+  if (distEl) {
+    distEl.innerText = nameMap[searchSelectedDistrict] || t.searchLocationDefault;
+  }
+  const heroInput = document.getElementById('hero-search-input');
+  if (heroInput && !searchQueryText) {
+    heroInput.placeholder = (lang === 'ru') ? 'Название дачи или локация...' : (lang === 'en' ? 'Dacha name or location...' : 'Dacha nomi yoki hudud...');
+  }
+  const catInput = document.getElementById('catalog-search-input');
+  if (catInput && !searchQueryText) {
+    catInput.placeholder = (lang === 'ru') ? 'Быстрый поиск дачи по названию (напр: Shox_dacha, Duoba, Chashma)...' : (lang === 'en' ? 'Quick search by dacha name (e.g. Shox_dacha, Duoba, Chashma)...' : 'Dacha nomi bo\'yicha tezkor qidirish (masalan: Shox_dacha, Duoba, Chashma, Panorama)...');
+  }
 
   document.getElementById('lbl-search-checkin').innerText = t.searchCheckIn;
   document.getElementById('lbl-search-checkout').innerText = t.searchCheckOut;
@@ -1501,57 +1515,223 @@ function toggleLocationDropdown(e) {
   }
 }
 
+// Transliterate Russian/Uzbek Cyrillic to Latin for dual-alphabet search matching
+function cyrillicToLatin(str) {
+  if (!str) return '';
+  const map = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'j', 'з': 'z',
+    'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r',
+    'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'x', 'ҳ': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh',
+    'щ': 'sh', 'ъ': '', 'ы': 'i', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya', 'ў': "o'", 'ғ': "g'", 'қ': 'q'
+  };
+  return str.toLowerCase().split('').map(char => map[char] !== undefined ? map[char] : char).join('');
+}
+
+function handleLocationSegmentClick(e) {
+  const input = document.getElementById('hero-search-input');
+  if (input) input.focus();
+  toggleLocationDropdown(e);
+}
+
+function handleHeroSearchInput(event) {
+  const val = event.target.value;
+  searchQueryText = val.trim();
+  const clearBtn = document.getElementById('btn-hero-clear');
+  if (clearBtn) {
+    if (val) clearBtn.classList.remove('hidden');
+    else clearBtn.classList.add('hidden');
+  }
+
+  // Sync to catalog search input
+  const catalogInput = document.getElementById('catalog-search-input');
+  if (catalogInput && catalogInput.value !== val) {
+    catalogInput.value = val;
+    const catClear = document.getElementById('btn-catalog-clear');
+    if (catClear) {
+      if (val) catClear.classList.remove('hidden');
+      else catClear.classList.add('hidden');
+    }
+  }
+
+  updateHeroSearchSuggestions(val.trim());
+  renderProperties();
+}
+
+function handleHeroSearchKeyDown(event) {
+  if (event.key === 'Enter') {
+    executeHeroSearch();
+  }
+}
+
+function clearHeroSearch(event) {
+  if (event) event.stopPropagation();
+  const input = document.getElementById('hero-search-input');
+  if (input) input.value = '';
+  const clearBtn = document.getElementById('btn-hero-clear');
+  if (clearBtn) clearBtn.classList.add('hidden');
+
+  const catInput = document.getElementById('catalog-search-input');
+  if (catInput) catInput.value = '';
+  const catClear = document.getElementById('btn-catalog-clear');
+  if (catClear) catClear.classList.add('hidden');
+
+  searchQueryText = '';
+  updateHeroSearchSuggestions('');
+  renderProperties();
+}
+
+function handleCatalogSearchInput(val) {
+  closeAllSearchDropdowns();
+  searchQueryText = val.trim();
+  const catClear = document.getElementById('btn-catalog-clear');
+  if (catClear) {
+    if (searchQueryText) catClear.classList.remove('hidden');
+    else catClear.classList.add('hidden');
+  }
+
+  // Sync to hero input
+  const heroInput = document.getElementById('hero-search-input');
+  if (heroInput && heroInput.value !== val) {
+    heroInput.value = val;
+    const heroClear = document.getElementById('btn-hero-clear');
+    if (heroClear) {
+      if (val) heroClear.classList.remove('hidden');
+      else heroClear.classList.add('hidden');
+    }
+  }
+
+  renderProperties();
+}
+
+function clearCatalogSearch() {
+  clearHeroSearch();
+}
+
 function selectSearchLocation(districtCode, displayName) {
   searchSelectedDistrict = districtCode;
-  document.getElementById('search-val-district').innerText = displayName;
+  const heroInput = document.getElementById('hero-search-input');
+  if (districtCode === 'ALL') {
+    if (heroInput) heroInput.value = '';
+    searchQueryText = '';
+  } else {
+    if (heroInput) heroInput.value = displayName || districtCode;
+  }
   const dropdown = document.getElementById('dropdown-locations');
   if (dropdown) dropdown.classList.add('hidden');
   renderProperties();
 }
 
-function handleDateSelect(type, val) {
-  if (!val) return;
-  const parts = val.split('-');
-  const dateFormatted = `${parts[2]}/${parts[1]}`;
-  if (type === 'checkin') {
-    searchCheckInDate = val;
-    const el = document.getElementById('search-val-checkin');
-    if (el) el.innerText = dateFormatted;
-  } else {
-    searchCheckOutDate = val;
-    const el = document.getElementById('search-val-checkout');
-    if (el) el.innerText = dateFormatted;
-  }
+function selectSuggestionProperty(propId) {
   closeAllSearchDropdowns();
+  openBookingModal(propId);
 }
 
-function toggleGuestsDropdown(e) {
-  e.stopPropagation();
-  const dropdown = document.getElementById('dropdown-guests');
-  const isCurrentlyOpen = dropdown && !dropdown.classList.contains('hidden');
-  closeAllSearchDropdowns();
-  if (dropdown && !isCurrentlyOpen) {
-    dropdown.classList.remove('hidden');
-  }
-}
+function updateHeroSearchSuggestions(query) {
+  const dropdown = document.getElementById('dropdown-locations');
+  if (!dropdown) return;
 
-function adjustGuests(type, delta) {
-  if (type === 'adults') {
-    guestsAdults = Math.max(1, guestsAdults + delta);
-    document.getElementById('stepper-adults').innerText = guestsAdults;
-  } else {
-    guestsChildren = Math.max(0, guestsChildren + delta);
-    document.getElementById('stepper-children').innerText = guestsChildren;
+  if (!query) {
+    dropdown.innerHTML = `
+      <div class="popup-option ${searchSelectedDistrict === 'ALL' ? 'active' : ''}" onclick="selectSearchLocation('ALL', 'Zomin')">
+        <div class="opt-name">Zomin (Barchasi)</div>
+        <div class="opt-desc">Barcha 100 ta tog' kottejlari va choyxonalar</div>
+      </div>
+      <div class="popup-option ${searchSelectedDistrict === 'DUOBA' ? 'active' : ''}" onclick="selectSearchLocation('DUOBA', 'Duoba')">
+        <div class="opt-name">Duoba (26 ta dacha)</div>
+        <div class="opt-desc">Soy bo'yidagi basseynli dachalar (Asfalt)</div>
+      </div>
+      <div class="popup-option ${searchSelectedDistrict === 'SUFFA' ? 'active' : ''}" onclick="selectSearchLocation('SUFFA', 'Suffa Platosi')">
+        <div class="opt-name">Suffa Platosi (24 ta dacha)</div>
+        <div class="opt-desc">Bartholet dor yo'li va osma ko'prik</div>
+      </div>
+      <div class="popup-option ${searchSelectedDistrict === 'ORIKLISOY' ? 'active' : ''}" onclick="selectSearchLocation('ORIKLISOY', 'O\\'riklisoy')">
+        <div class="opt-name">O'riklisoy (22 ta dacha)</div>
+        <div class="opt-desc">Buloq suvi ustidagi soy tapchanlari</div>
+      </div>
+      <div class="popup-option ${searchSelectedDistrict === 'SANATORIY' ? 'active' : ''}" onclick="selectSearchLocation('SANATORIY', 'Sanatoriy')">
+        <div class="opt-name">Sanatoriy (14 ta dacha)</div>
+        <div class="opt-desc">Shifobaxsh qarag'ay va archazorlar</div>
+      </div>
+      <div class="popup-option ${searchSelectedDistrict === 'ARCHAZOR' ? 'active' : ''}" onclick="selectSearchLocation('ARCHAZOR', 'Archazor')">
+        <div class="opt-name">Archazor (8 ta dacha)</div>
+        <div class="opt-desc">Baland archa o'rmonlari va A-Frame kottejlar</div>
+      </div>
+      <div class="popup-option ${searchSelectedDistrict === 'PESHAGOR' ? 'active' : ''}" onclick="selectSearchLocation('PESHAGOR', 'Peshag\\'or')">
+        <div class="opt-name">Peshag'or (6 ta dacha)</div>
+        <div class="opt-desc">Tarixiy g'or va soylar bo'yidagi maskanlar</div>
+      </div>
+    `;
+    return;
   }
-  const total = guestsAdults + guestsChildren;
-  const t = I18N[currentLang] || I18N.uz;
-  document.getElementById('search-val-guests').innerText = t.searchGuestsFormat(total);
+
+  const q = query.toLowerCase();
+  const qTr = cyrillicToLatin(query);
+  const matches = propertiesCache.filter(p => {
+    const loc = getLocalizedProperty(p, currentLang);
+    const testMatch = (str) => {
+      if (!str) return false;
+      const s = str.toLowerCase();
+      return s.includes(q) || (qTr && s.includes(qTr));
+    };
+    return testMatch(p.title) ||
+           testMatch(p.slug) ||
+           testMatch(p.micro_district) ||
+           testMatch(p.description) ||
+           (loc && (testMatch(loc.title) || testMatch(loc.districtText)));
+  }).slice(0, 5);
+
+  let html = '';
+  if (matches.length > 0) {
+    const headerTitle = (currentLang === 'ru') ? 'Найденные дачи:' : (currentLang === 'en' ? 'Matched dachas:' : 'Topilgan dachalar:');
+    html += `<div style="padding: 6px 12px; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">${headerTitle}</div>`;
+    html += matches.map(m => {
+      const loc = getLocalizedProperty(m, currentLang);
+      const mTitle = loc ? loc.title : m.title;
+      const mDist = loc ? loc.districtText : m.micro_district;
+      const cover = (m.photos && m.photos.length > 0) ? m.photos[0] : '/static/assets/villa.jpg';
+      return `
+        <div class="suggestion-prop-item" onclick="selectSuggestionProperty('${m.id}')">
+          <img src="${cover}" class="suggestion-thumb" alt="${mTitle}" onerror="this.src='/static/assets/villa.jpg'">
+          <div class="suggestion-info">
+            <div class="suggestion-title">${mTitle}</div>
+            <div class="suggestion-meta">${mDist} • ${m.property_type}</div>
+          </div>
+          <div class="suggestion-price">${formatSum(m.min_price || 1200000)} so'm</div>
+        </div>
+      `;
+    }).join('');
+    const viewAllText = (currentLang === 'ru') ? `Посмотреть все результаты ("${query}") ➔` : (currentLang === 'en' ? `View all results ("${query}") ➔` : `Barcha natijalarni ko'rish ("${query}") ➔`);
+    html += `
+      <div class="popup-option" style="margin-top: 4px; border-top: 1px solid #e2e8f0; text-align: center;" onclick="executeHeroSearch()">
+        <div class="opt-name" style="color: #047857;">${viewAllText}</div>
+      </div>
+    `;
+  } else {
+    html = `
+      <div style="padding: 16px; text-align: center; color: #64748b; font-size: 13px;">
+        ${currentLang === 'ru' ? `По запросу "${query}" дач не найдено.<br><small style="color: #94a3b8;">Попробуйте другое название или район</small>` : (currentLang === 'en' ? `No properties found for "${query}".<br><small style="color: #94a3b8;">Try another name or area</small>` : `"${query}" bo'yicha dacha topilmadi.<br><small style="color: #94a3b8;">Boshqa so'z bilan qidirib ko'ring</small>`)}
+      </div>
+    `;
+  }
+
+  dropdown.innerHTML = html;
+  dropdown.classList.remove('hidden');
 }
 
 function executeHeroSearch() {
+  const heroInput = document.getElementById('hero-search-input');
+  if (heroInput) {
+    searchQueryText = heroInput.value.trim();
+  }
+  closeAllSearchDropdowns();
   renderProperties();
   scrollToSection('stays-section');
-  showToast(currentLang === 'uz' ? 'Qidiruv yangilandi' : (currentLang === 'ru' ? 'Поиск обновлен' : 'Search updated'), 'success');
+
+  const count = document.querySelectorAll('#properties-grid .property-card').length;
+  const msg = searchQueryText 
+    ? `"${searchQueryText}": ${count} ta dacha topildi` 
+    : (currentLang === 'uz' ? 'Qidiruv yangilandi' : (currentLang === 'ru' ? 'Поиск обновлен' : 'Search updated'));
+  showToast(msg, 'success');
 }
 
 function initDefaultDates() {
@@ -1719,11 +1899,38 @@ function renderProperties() {
   const t = I18N[currentLang] || I18N.uz;
 
   let filtered = propertiesCache.filter(p => {
-    // 1. District filter
+    // 1. Text Search Filter (name, slug, description, micro_district, address_text, owner_name, amenities, translations, transliteration)
+    if (searchQueryText) {
+      const q = searchQueryText.toLowerCase();
+      const qTr = cyrillicToLatin(searchQueryText);
+      const testMatch = (str) => {
+        if (!str) return false;
+        const s = str.toLowerCase();
+        return s.includes(q) || (qTr && s.includes(qTr));
+      };
+
+      const loc = getLocalizedProperty(p, currentLang);
+      const locTitleMatch = loc && testMatch(loc.title);
+      const locDescMatch = loc && testMatch(loc.description);
+      const locDistMatch = loc && testMatch(loc.districtText);
+
+      const titleMatch = testMatch(p.title);
+      const slugMatch = testMatch(p.slug);
+      const descMatch = testMatch(p.description);
+      const addrMatch = testMatch(p.address_text);
+      const ownerMatch = testMatch(p.owner_name);
+      const distMatch = testMatch(p.micro_district);
+      const amMatch = (p.amenities || []).some(a => testMatch(a));
+
+      if (!titleMatch && !slugMatch && !descMatch && !addrMatch && !ownerMatch && !distMatch && !amMatch && !locTitleMatch && !locDescMatch && !locDistMatch) {
+        return false;
+      }
+    }
+    // 2. District filter
     if (searchSelectedDistrict !== 'ALL' && p.micro_district !== searchSelectedDistrict) {
       return false;
     }
-    // 2. Category filter
+    // 3. Category filter
     if (currentCategoryFilter !== 'ALL') {
       if (currentCategoryFilter === 'ASPHALT') {
         if (p.road_condition !== 'ASPHALT_SEDAN') return false;
@@ -1734,6 +1941,20 @@ function renderProperties() {
     return true;
   });
 
+  // Update in-catalog live results counter
+  const countEl = document.getElementById('catalog-results-count');
+  if (countEl) {
+    if (searchQueryText) {
+      countEl.innerText = (currentLang === 'ru') 
+        ? `Найдено: ${filtered.length} дач(и) ("${searchQueryText}")` 
+        : (currentLang === 'en' ? `Found: ${filtered.length} dachas ("${searchQueryText}")` : `${filtered.length} ta dacha topildi ("${searchQueryText}")`);
+    } else {
+      countEl.innerText = (currentLang === 'ru')
+        ? `Доступно: ${filtered.length} дач`
+        : (currentLang === 'en' ? `Available: ${filtered.length} dachas` : `${filtered.length} ta dacha mavjud`);
+    }
+  }
+
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #64748b;">
@@ -1741,9 +1962,9 @@ function renderProperties() {
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <h4 style="font-size: 18px; color: #1e293b; margin-bottom: 6px;">Ushbu parametrlar bo'yicha dacha topilmadi</h4>
-        <p style="font-size: 14px; margin-bottom: 16px;">Iltimos, boshqa toifa yoki barcha filtrlarni tozalab ko'ring.</p>
-        <button class="btn-primary-pill" onclick="clearAllFilters()">Barchasini ko'rsatish</button>
+        <h4 style="font-size: 18px; color: #1e293b; margin-bottom: 6px;">${currentLang === 'ru' ? 'Дачи не найдены' : (currentLang === 'en' ? 'No properties found' : 'Ushbu parametrlar bo\'yicha dacha topilmadi')}</h4>
+        <p style="font-size: 14px; margin-bottom: 16px;">${searchQueryText ? `"${searchQueryText}" ` : ''}${currentLang === 'ru' ? 'Попробуйте изменить поисковый запрос или сбросить фильтры.' : (currentLang === 'en' ? 'Try changing your search query or reset filters.' : 'Iltimos, boshqa so\'z bilan qidiring yoki barcha filtrlarni tozalab ko\'ring.')}</p>
+        <button class="btn-primary-pill" onclick="clearAllFilters()">${currentLang === 'ru' ? 'Показать все дачи' : (currentLang === 'en' ? 'Show all properties' : 'Barchasini ko\'rsatish')}</button>
       </div>
     `;
     return;
@@ -1840,6 +2061,18 @@ function toggleWishlist(slug, btn) {
 function clearAllFilters() {
   searchSelectedDistrict = 'ALL';
   currentCategoryFilter = 'ALL';
+  searchQueryText = '';
+
+  const heroInput = document.getElementById('hero-search-input');
+  if (heroInput) heroInput.value = '';
+  const heroClear = document.getElementById('btn-hero-clear');
+  if (heroClear) heroClear.classList.add('hidden');
+
+  const catInput = document.getElementById('catalog-search-input');
+  if (catInput) catInput.value = '';
+  const catClear = document.getElementById('btn-catalog-clear');
+  if (catClear) catClear.classList.add('hidden');
+
   document.querySelectorAll('.cat-pill').forEach((p, idx) => {
     if (idx === 0) p.classList.add('active');
     else p.classList.remove('active');
@@ -1847,6 +2080,7 @@ function clearAllFilters() {
   const t = I18N[currentLang] || I18N.uz;
   const distEl = document.getElementById('search-val-district');
   if (distEl) distEl.innerText = t.searchLocationDefault;
+  updateHeroSearchSuggestions('');
   renderProperties();
 }
 
