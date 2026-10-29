@@ -315,12 +315,16 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (savedUser) {
     try {
       currentUser = JSON.parse(savedUser);
-      if (currentUser && (!currentUser.avatar || currentUser.name === 'Jasur Mamadaliyev' || currentUser.name === 'Foydalanuvchi' || !currentUser.email || currentUser.email === 'umrzoq.backend@gmail.com')) {
-        currentUser = Object.assign({}, GOOGLE_PROFILES.umrzoq, {
-          name: (currentUser.name && currentUser.name !== 'Jasur Mamadaliyev' && currentUser.name !== 'Foydalanuvchi') ? currentUser.name : 'Umrzoq Yulchiyev',
-          email: (currentUser.email && currentUser.email.includes('@') && !currentUser.email.includes('jasur') && currentUser.email !== 'umrzoq.backend@gmail.com') ? currentUser.email : 'school21dev@gmail.com',
-          avatar: '/static/assets/avatar.jpg'
-        });
+      if (currentUser) {
+        if (currentUser.name === 'School21dev' || currentUser.name === 'school21dev' || currentUser.name === 'Jasur Mamadaliyev' || currentUser.name === 'Foydalanuvchi') {
+          currentUser.name = 'Umrzoq Yulchiyev';
+        }
+        if (currentUser.email === 'umrzoq.backend@gmail.com') {
+          currentUser.email = 'school21dev@gmail.com';
+        }
+        if (!currentUser.avatar) {
+          currentUser.avatar = '/static/assets/avatar.jpg';
+        }
         localStorage.setItem('zomin_user', JSON.stringify(currentUser));
       }
     } catch (e) {}
@@ -1133,21 +1137,31 @@ function loginWithGoogleAccount(key) {
 
 function handleCustomGoogleSubmit(e) {
   e.preventDefault();
+  const nameInput = document.getElementById('custom-google-name-input');
   const emailInput = document.getElementById('custom-google-email-input');
+
   const emailVal = emailInput ? emailInput.value.trim().toLowerCase() : '';
+  let nameVal = nameInput ? nameInput.value.trim() : '';
+
   if (!emailVal || !emailVal.includes('@')) {
     showToast('Iltimos, to‘g‘ri Google pochtangizni kiriting', 'error');
     return;
   }
 
-  const namePart = emailVal.split('@')[0].replace(/[._-]/g, ' ');
-  const formattedName = namePart.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-  const userAvatar = generateUserAvatar(formattedName, emailVal);
+  // If this is the main user email, guarantee correct name
+  if (emailVal === 'school21dev@gmail.com') {
+    nameVal = 'Umrzoq Yulchiyev';
+  } else if (!nameVal) {
+    const namePart = emailVal.split('@')[0].replace(/[._-]/g, ' ');
+    nameVal = namePart.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+  }
+
+  const userAvatar = generateUserAvatar(nameVal, emailVal);
 
   currentUser = {
     id: `usr-google-${Date.now()}`,
-    name: formattedName,
-    full_name: formattedName,
+    name: nameVal,
+    full_name: nameVal,
     email: emailVal,
     avatar: userAvatar,
     phone: '+998 90 123 45 67',
@@ -1158,7 +1172,34 @@ function handleCustomGoogleSubmit(e) {
   localStorage.setItem('zomin_user', JSON.stringify(currentUser));
   updateHeaderAuthState();
   closeAuthModal();
-  showToast(`${currentUser.name} (${currentUser.email}) sifatida Google orqali kirdingiz!`, 'success');
+  showToast(`${currentUser.name} (${currentUser.email}) sifatida muvaffaqiyatli kirdingiz!`, 'success');
+}
+
+function handleUserAvatarUpload(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('Rasm hajmi 5MB dan oshmasligi kerak', 'error');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const base64Data = evt.target.result;
+    if (!currentUser) {
+      currentUser = Object.assign({}, GOOGLE_PROFILES.umrzoq);
+    }
+    currentUser.avatar = base64Data;
+    localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+
+    const profImg = document.getElementById('prof-avatar-img');
+    if (profImg) profImg.src = base64Data;
+
+    updateHeaderAuthState();
+    showToast('Profil rasmi muvaffaqiyatli yangilandi!', 'success');
+  };
+  reader.readAsDataURL(file);
 }
 
 function selectUserProfile(roleKey) {
@@ -1181,19 +1222,28 @@ function updateHeaderAuthState() {
   const menuEmail = document.getElementById('menu-user-email');
   const menuRole = document.getElementById('menu-user-role');
   const adminLink = document.getElementById('admin-menu-link');
+  const adminDivider = document.getElementById('admin-menu-divider');
   const t = I18N[currentLang] || I18N.uz;
 
   if (currentUser) {
-    const displayName = (currentUser.name || currentUser.full_name || 'Umrzoq').split(' ')[0];
+    let displayName = currentUser.name || currentUser.full_name || 'Umrzoq';
+    if (displayName.toLowerCase() === 'school21dev') {
+      displayName = 'Umrzoq';
+      currentUser.name = 'Umrzoq Yulchiyev';
+      localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+    }
+    const firstName = displayName.split(' ')[0];
     const avatarUrl = currentUser.avatar || generateUserAvatar(displayName, currentUser.email);
-    btn.innerHTML = `<img src="${avatarUrl}" class="nav-avatar-img" alt="${displayName}"><span id="user-btn-text">${displayName}</span><svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+
+    btn.innerHTML = `<img src="${avatarUrl}" class="nav-avatar-img" alt="${firstName}"><span id="user-btn-text">${firstName}</span><svg class="dropdown-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
     btn.classList.add('logged-in');
 
     if (menuAvatar) menuAvatar.src = avatarUrl;
-    if (menuName) menuName.innerText = currentUser.name || currentUser.full_name || 'Umrzoq Yulchiyev';
+    if (menuName) menuName.innerText = currentUser.name || 'Umrzoq Yulchiyev';
     if (menuEmail) menuEmail.innerText = currentUser.email || 'school21dev@gmail.com';
     if (menuRole) menuRole.innerText = currentUser.role === 'OWNER' ? 'DACHA EGASI' : 'SAYYOH / MEHMON';
     if (adminLink) adminLink.style.display = currentUser.role === 'ADMIN' ? 'flex' : 'none';
+    if (adminDivider) adminDivider.style.display = currentUser.role === 'ADMIN' ? 'block' : 'none';
   } else {
     btn.innerHTML = `<span id="user-btn-text">${t.navLogin}</span>`;
     btn.classList.remove('logged-in');

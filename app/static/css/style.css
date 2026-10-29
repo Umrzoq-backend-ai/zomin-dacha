@@ -394,8 +394,8 @@ img {
    =================================================================== */
 .zomin-hero {
   position: relative;
-  min-height: 620px;
-  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.24) 0%, rgba(0, 0, 0, 0.08) 42%, rgba(0, 0, 0, 0.0) 72%), url('/static/assets/hero.jpg?v=4');
+  min-height: 600px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.06) 42%, rgba(0, 0, 0, 0.0) 72%), url('/static/assets/zomin-hero-panorama-v5.jpg?v=20261029_1130');
   background-size: cover;
   background-position: center center;
   display: flex;
@@ -2048,14 +2048,35 @@ img {
 .badge-google-verified {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   font-size: 11px;
   font-weight: 600;
-  color: #1a73e8;
-  background: #e8f0fe;
+  color: var(--color-primary);
+  background: rgba(13, 56, 44, 0.08);
   padding: 2px 8px;
   border-radius: var(--radius-pill);
-  margin-top: 2px;
+  margin-top: 3px;
+}
+
+.avatar-change-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: all 0.2s ease;
+}
+
+.avatar-change-btn:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
 }
 
 .dropdown-user-email {
