@@ -579,3 +579,10 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
                 INSERT INTO property_caretakers (id, property_id, caretaker_id, can_confirm_arrival, notes, created_at)
                 VALUES (?, ?, ?, 1, 'Duoba qarovchisi Rustam tog''a. Darvoza kaliti unda.', ?)
             """, (str(uuid.uuid4()), prop1_id, caretaker1_id, now_iso))
+
+        # Seed 100 properties catalog (93 additional verified properties)
+        try:
+            from app.seed_catalog import seed_catalog_100
+            seed_catalog_100(conn, now_iso)
+        except Exception as e:
+            print(f"Warning seeding 100 catalog: {e}")

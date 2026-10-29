@@ -164,7 +164,7 @@ def get_property_detail(id_or_slug: str):
         cursor.execute("""
             SELECT p.*, u.full_name as owner_name, u.phone_number as owner_phone
             FROM properties p
-            JOIN users u ON p.owner_id = u.id
+            LEFT JOIN users u ON p.owner_id = u.id
             WHERE p.id = ? OR p.slug = ?
         """, (id_or_slug, id_or_slug))
         p = cursor.fetchone()
@@ -249,7 +249,7 @@ def get_property_detail(id_or_slug: str):
             amenities=json.loads(p["amenities_json"] or "[]"),
             min_price=min_price,
             rental_units=units,
-            owner_name=p["owner_name"],
-            owner_phone=p["owner_phone"],
+            owner_name=p["owner_name"] or "Umrzoq (Superadmin)",
+            owner_phone=p["owner_phone"] or "+998 90 123 45 67",
             caretakers_count=caretakers_count
         )
