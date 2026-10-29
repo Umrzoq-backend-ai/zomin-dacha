@@ -296,10 +296,6 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
     with get_db(db_path) as conn:
         cursor = conn.cursor()
         
-        cursor.execute("SELECT COUNT(*) FROM users")
-        if cursor.fetchone()[0] > 0:
-            return  # Already seeded
-            
         # Demo Users
         admin_id = str(uuid.uuid4())
         owner1_id = str(uuid.uuid4())
@@ -307,25 +303,61 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
         caretaker1_id = str(uuid.uuid4())
         guest1_id = str(uuid.uuid4())
         
-        users_data = [
-            (admin_id, "+998900000001", "ZominStay Platform Admin", 10001, "ADMIN", 1, now_iso, now_iso),
-            (owner1_id, "+998901112233", "Alisher Zokirov (Duoba Dacha Egasi)", 20002, "OWNER", 1, now_iso, now_iso),
-            (owner2_id, "+998904445566", "Muzaffar Raimov (Suffa & O'riklisoy Egasi)", 20003, "OWNER", 1, now_iso, now_iso),
-            (caretaker1_id, "+998917778899", "Rustam Tog'a (Duoba Qarovchisi)", 30001, "CARETAKER", 1, now_iso, now_iso),
-            (guest1_id, "+998935551122", "Jasur Mamadaliyev (Sayyoh)", 40001, "GUEST", 1, now_iso, now_iso),
-        ]
-        cursor.executemany("""
-            INSERT INTO users (id, phone_number, full_name, telegram_id, role, is_active, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, users_data)
+        cursor.execute("SELECT COUNT(*) FROM users")
+        if cursor.fetchone()[0] == 0:
+            users_data = [
+                (admin_id, "+998900000001", "ZominStay Platform Admin", 10001, "ADMIN", 1, now_iso, now_iso),
+                (owner1_id, "+998901112233", "Alisher Zokirov (Duoba Dacha Egasi)", 20002, "OWNER", 1, now_iso, now_iso),
+                (owner2_id, "+998904445566", "Muzaffar Raimov (Suffa & O'riklisoy Egasi)", 20003, "OWNER", 1, now_iso, now_iso),
+                (caretaker1_id, "+998917778899", "Rustam Tog'a (Duoba Qarovchisi)", 30001, "CARETAKER", 1, now_iso, now_iso),
+                (guest1_id, "+998935551122", "Jasur Mamadaliyev (Sayyoh)", 40001, "GUEST", 1, now_iso, now_iso),
+            ]
+            cursor.executemany("""
+                INSERT INTO users (id, phone_number, full_name, telegram_id, role, is_active, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, users_data)
+        else:
+            cursor.execute("SELECT id FROM users WHERE role = 'OWNER' LIMIT 2")
+            existing_owners = cursor.fetchall()
+            if existing_owners:
+                owner1_id = existing_owners[0]["id"]
+                owner2_id = existing_owners[1]["id"] if len(existing_owners) > 1 else owner1_id
+
+        # Helper to insert property idempotently
+        def insert_prop_if_missing(p_tuple, unit_tuples, slot_tuples=None):
+            slug = p_tuple[3]
+            cursor.execute("SELECT id FROM properties WHERE slug = ?", (slug,))
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+            cursor.execute("""
+                INSERT INTO properties (
+                    id, owner_id, title, slug, description, property_type, region, micro_district,
+                    address_text, latitude, longitude, location_precision, road_condition,
+                    has_generator, water_source, heating_type, mobile_coverage,
+                    verification_status, is_published, photos_json, amenities_json, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, p_tuple)
+            for u in unit_tuples:
+                cursor.execute("""
+                    INSERT INTO rental_units (
+                        id, property_id, name, unit_category, standard_capacity, max_capacity,
+                        base_price_weekday, base_price_weekend, is_active, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, u)
+            if slot_tuples:
+                for s in slot_tuples:
+                    cursor.execute("""
+                        INSERT INTO day_use_slots (
+                            id, rental_unit_id, slot_name, start_time, end_time, price_weekday, price_weekend
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, s)
+            return p_tuple[0]
         
-        # Properties
-        prop1_id = str(uuid.uuid4()) # Duoba Villa
-        prop2_id = str(uuid.uuid4()) # Suffa Chalet
-        prop3_id = str(uuid.uuid4()) # O'riklisoy Choyxona & Tapchanlar
-        prop4_id = str(uuid.uuid4()) # Sanatoriy Family Guest House
-        
-        properties_data = [
+        # 1. Mountain Chalet Zomin
+        prop1_id = str(uuid.uuid4())
+        u1_id = str(uuid.uuid4())
+        insert_prop_if_missing(
             (
                 prop1_id, owner1_id,
                 "Mountain Chalet Zomin",
@@ -338,11 +370,20 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
                 "VERIFIED", 1,
                 json.dumps([
                     "/static/assets/chalet.jpg",
-                    "https://images.unsplash.com/photo-1542718610-a1d656d1884c?auto=format&fit=crop&w=1200&q=80"
+                    "/static/assets/dacha_panorama.jpg"
                 ]),
-                json.dumps(["Tog' manzarasi", "Kamin", "Balkon/Ayvon", "Wi-Fi", "Oila uchun shinam", "Mangal"]),
+                json.dumps(["Tog' manzarasi", "Kamin", "Balkon/Ayvon", "Wi-Fi 5G", "Oila uchun shinam", "Mangal"]),
                 now_iso, now_iso
             ),
+            [
+                (u1_id, prop1_id, "Butun Tog' Chaleti", "OVERNIGHT_STAY", 6, 8, 1200000.0, 1600000.0, 1, now_iso)
+            ]
+        )
+
+        # 2. Zomin Villa
+        prop2_id = str(uuid.uuid4())
+        u2_id = str(uuid.uuid4())
+        insert_prop_if_missing(
             (
                 prop2_id, owner2_id,
                 "Zomin Villa",
@@ -355,11 +396,20 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
                 "VERIFIED", 1,
                 json.dumps([
                     "/static/assets/villa.jpg",
-                    "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80"
+                    "/static/assets/dacha_chashma.jpg"
                 ]),
                 json.dumps(["Shaxsiy hovuz (Basseyn)", "Sauna", "Bilyard", "Smart TV", "Tandir & Mangal", "Wi-Fi 4G"]),
                 now_iso, now_iso
             ),
+            [
+                (u2_id, prop2_id, "Hashamatli Basseynli Villa", "OVERNIGHT_STAY", 8, 14, 2500000.0, 3200000.0, 1, now_iso)
+            ]
+        )
+
+        # 3. Forest Lodge
+        prop3_id = str(uuid.uuid4())
+        u3_id = str(uuid.uuid4())
+        insert_prop_if_missing(
             (
                 prop3_id, owner1_id,
                 "Forest Lodge",
@@ -372,11 +422,21 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
                 "VERIFIED", 1,
                 json.dumps([
                     "/static/assets/lodge.jpg",
-                    "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80"
+                    "/static/assets/hiking.jpg"
                 ]),
                 json.dumps(["Qarag'ayzor", "Oshxona barcha jihozlar bilan", "Wi-Fi", "Buloq suvi", "Tinch hordiq"]),
                 now_iso, now_iso
             ),
+            [
+                (u3_id, prop3_id, "Shinam Yog'och Lodge", "OVERNIGHT_STAY", 4, 6, 900000.0, 1200000.0, 1, now_iso)
+            ]
+        )
+
+        # 4. O'riklisoy Choyxona & Tapchanlar
+        prop4_id = str(uuid.uuid4())
+        u4_id = str(uuid.uuid4())
+        u5_id = str(uuid.uuid4())
+        insert_prop_if_missing(
             (
                 prop4_id, owner2_id,
                 "O'riklisoy Buloq Bo'yi Choyxonasi & Tapchanlari",
@@ -389,63 +449,133 @@ def seed_initial_data(db_path: Optional[str] = None) -> None:
                 "VERIFIED", 1,
                 json.dumps([
                     "/static/assets/hiking.jpg",
-                    "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80"
+                    "/static/assets/shox_pool.jpg"
                 ]),
                 json.dumps(["Suv ustidagi tapchan", "Zomin archa tandiri (buyurtmaga)", "Samovar choy", "Buloq suvi", "Soyda suzish"]),
                 now_iso, now_iso
-            )
-        ]
-        
-        cursor.executemany("""
-            INSERT INTO properties (
-                id, owner_id, title, slug, description, property_type, region, micro_district,
-                address_text, latitude, longitude, location_precision, road_condition,
-                has_generator, water_source, heating_type, mobile_coverage,
-                verification_status, is_published, photos_json, amenities_json, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, properties_data)
-        
+            ),
+            [
+                (u4_id, prop4_id, "Soy Ustidagi 1-Katta Tapchan", "DAY_USE_TAPCHAN", 8, 12, 150000.0, 250000.0, 1, now_iso),
+                (u5_id, prop4_id, "Sharshara Yonidagi 2-Tapchan", "DAY_USE_TAPCHAN", 6, 10, 150000.0, 200000.0, 1, now_iso)
+            ],
+            [
+                (str(uuid.uuid4()), u4_id, "FULL_DAY", "10:00:00", "22:00:00", 300000.0, 450000.0),
+                (str(uuid.uuid4()), u4_id, "LUNCH", "10:00:00", "16:00:00", 180000.0, 250000.0),
+                (str(uuid.uuid4()), u4_id, "DINNER", "17:00:00", "23:00:00", 200000.0, 280000.0),
+                (str(uuid.uuid4()), u5_id, "FULL_DAY", "10:00:00", "22:00:00", 250000.0, 350000.0),
+                (str(uuid.uuid4()), u5_id, "LUNCH", "10:00:00", "16:00:00", 150000.0, 200000.0),
+                (str(uuid.uuid4()), u5_id, "DINNER", "17:00:00", "23:00:00", 160000.0, 220000.0)
+            ]
+        )
+
+        # 5. Shox_dacha (Bronla.uz real dacha)
+        prop5_id = str(uuid.uuid4())
+        u6_id = str(uuid.uuid4())
+        insert_prop_if_missing(
+            (
+                prop5_id, owner2_id,
+                "Shox_dacha",
+                "shox-dacha-zomin",
+                "O'riklisoyning betakror manzarasi qo'ynida, Tog' Terak qishlog'ida joylashgan premium darajadagi dacha. Shaxsiy filtrli basseyn (3.5x7.5m), Playstation 3, karaoke, bilyard, stol tennisi, yozgi va qishki oshxona hamda xushbo'y Zomin tandiri.",
+                "VILLA", "ZOMIN", "ORIKLISOY",
+                "Uriklisoy, Zomin tumani, Jizzax viloyati · Tog' Terak qishlog'i 31",
+                39.9180, 68.4105, "EXACT",
+                "ASPHALT_SEDAN", 1, "SPRING_WATER", "GAS_CENTRAL", "4G_EXCELLENT",
+                "VERIFIED", 1,
+                json.dumps([
+                    "/static/assets/shox_pool.jpg",
+                    "/static/assets/shox_kitchen.jpg",
+                    "/static/assets/shox_bath.jpg",
+                    "/static/assets/shox_bedroom1.jpg",
+                    "/static/assets/shox_bedroom2.jpg"
+                ]),
+                json.dumps([
+                    "Filtrli Hovuz (3.5x7.5m)",
+                    "Playstation 3 & Karaoke",
+                    "Bilyard & Stol tennisi",
+                    "Wi-Fi 5G",
+                    "Ochiq oshxona & Mangal",
+                    "Archa tandiri",
+                    "Konditsioner",
+                    "Muzlatgich & Mikroto'lqinli pech"
+                ]),
+                now_iso, now_iso
+            ),
+            [
+                (u6_id, prop5_id, "Shox Dacha To'liq Majmua", "OVERNIGHT_STAY", 10, 12, 1400000.0, 1800000.0, 1, now_iso)
+            ]
+        )
+
+        # 6. Chashma Eco Dacha
+        prop6_id = str(uuid.uuid4())
+        u7_id = str(uuid.uuid4())
+        insert_prop_if_missing(
+            (
+                prop6_id, owner1_id,
+                "Chashma Eco Dacha",
+                "chashma-eco-dacha",
+                "Tog' daryosi va musaffo chashma suvi yoqasida joylashgan zamonaviy eko-dacha. Keng ayvon, hovuz, barbekyu hududi va archazor havosi.",
+                "COTTAGE", "ZOMIN", "ORIKLISOY",
+                "Chashma qishlog'i, Buloqboshi, Zomin",
+                39.9245, 68.4020, "EXACT",
+                "ASPHALT_SEDAN", 1, "SPRING_WATER", "ELECTRIC_FLOOR", "4G_EXCELLENT",
+                "VERIFIED", 1,
+                json.dumps([
+                    "/static/assets/dacha_chashma.jpg",
+                    "/static/assets/chalet.jpg"
+                ]),
+                json.dumps([
+                    "Chashma bo'yida shiypon",
+                    "Basseyn",
+                    "Karaoke & Smart TV",
+                    "Wi-Fi 5G",
+                    "Barbekyu hududi",
+                    "Qozon-o'choq"
+                ]),
+                now_iso, now_iso
+            ),
+            [
+                (u7_id, prop6_id, "Chashma Butun Kottej", "OVERNIGHT_STAY", 8, 10, 1600000.0, 2000000.0, 1, now_iso)
+            ]
+        )
+
+        # 7. Suffa Panorama Kottej
+        prop7_id = str(uuid.uuid4())
+        u8_id = str(uuid.uuid4())
+        insert_prop_if_missing(
+            (
+                prop7_id, owner2_id,
+                "Suffa Panorama Kottej",
+                "suffa-panorama-kottej",
+                "Suffa platosining 2400 metr balandlikdagi panoramali manzarasi. Panoramik derazalar, yulduzli tunlar, kamin va to'liq avtonom isitish.",
+                "COTTAGE", "ZOMIN", "SUFFA",
+                "Suffa platosi, Radioastronomiya observatoriyasi yo'li, Zomin",
+                39.8650, 68.4610, "EXACT",
+                "HIGH_CLEARANCE", 1, "SPRING_WATER", "WOOD_STOVE", "4G_EXCELLENT",
+                "VERIFIED", 1,
+                json.dumps([
+                    "/static/assets/dacha_panorama.jpg",
+                    "/static/assets/villa.jpg"
+                ]),
+                json.dumps([
+                    "360° Panorama",
+                    "Issiq pol & Kamin",
+                    "Yulduzlar kuzatuvi terassasi",
+                    "Wi-Fi 5G",
+                    "Avtomat generator",
+                    "Tandir go'shti"
+                ]),
+                now_iso, now_iso
+            ),
+            [
+                (u8_id, prop7_id, "Suffa Panorama Kottej", "OVERNIGHT_STAY", 6, 8, 1800000.0, 2200000.0, 1, now_iso)
+            ]
+        )
+
         # Caretaker link for Property 1
-        cursor.execute("""
-            INSERT INTO property_caretakers (id, property_id, caretaker_id, can_confirm_arrival, notes, created_at)
-            VALUES (?, ?, ?, 1, 'Duoba qarovchisi Rustam tog''a. Darvoza kaliti unda.', ?)
-        """, (str(uuid.uuid4()), prop1_id, caretaker1_id, now_iso))
-        
-        # Rental Units
-        unit1_id = str(uuid.uuid4()) # Duoba Full Villa
-        unit2_id = str(uuid.uuid4()) # Suffa Chalet
-        unit3_id = str(uuid.uuid4()) # O'riklisoy Tapchan 1
-        unit4_id = str(uuid.uuid4()) # O'riklisoy Tapchan 2
-        unit5_id = str(uuid.uuid4()) # Sanatoriy Guest House
-        
-        rental_units_data = [
-            (unit1_id, prop1_id, "Butun Tog' Chaleti", "OVERNIGHT_STAY", 6, 8, 1200000.0, 1600000.0, 1, now_iso),
-            (unit2_id, prop2_id, "Hashamatli Basseynli Villa", "OVERNIGHT_STAY", 8, 14, 2500000.0, 3200000.0, 1, now_iso),
-            (unit3_id, prop3_id, "Shinam Yog'och Lodge", "OVERNIGHT_STAY", 4, 6, 900000.0, 1200000.0, 1, now_iso),
-            (unit4_id, prop4_id, "Soy Ustidagi 1-Katta Tapchan", "DAY_USE_TAPCHAN", 8, 12, 150000.0, 250000.0, 1, now_iso),
-            (unit5_id, prop4_id, "Sharshara Yonidagi 2-Tapchan", "DAY_USE_TAPCHAN", 6, 10, 150000.0, 200000.0, 1, now_iso),
-        ]
-        
-        cursor.executemany("""
-            INSERT INTO rental_units (
-                id, property_id, name, unit_category, standard_capacity, max_capacity,
-                base_price_weekday, base_price_weekend, is_active, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, rental_units_data)
-        
-        # Day Use Slots for Tapchans
-        slots_data = [
-            (str(uuid.uuid4()), unit4_id, "FULL_DAY", "10:00:00", "22:00:00", 300000.0, 450000.0),
-            (str(uuid.uuid4()), unit4_id, "LUNCH", "10:00:00", "16:00:00", 180000.0, 250000.0),
-            (str(uuid.uuid4()), unit4_id, "DINNER", "17:00:00", "23:00:00", 200000.0, 280000.0),
-            
-            (str(uuid.uuid4()), unit5_id, "FULL_DAY", "10:00:00", "22:00:00", 250000.0, 350000.0),
-            (str(uuid.uuid4()), unit5_id, "LUNCH", "10:00:00", "16:00:00", 150000.0, 200000.0),
-            (str(uuid.uuid4()), unit5_id, "DINNER", "17:00:00", "23:00:00", 160000.0, 220000.0),
-        ]
-        
-        cursor.executemany("""
-            INSERT INTO day_use_slots (
-                id, rental_unit_id, slot_name, start_time, end_time, price_weekday, price_weekend
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, slots_data)
+        cursor.execute("SELECT id FROM property_caretakers LIMIT 1")
+        if not cursor.fetchone():
+            cursor.execute("""
+                INSERT INTO property_caretakers (id, property_id, caretaker_id, can_confirm_arrival, notes, created_at)
+                VALUES (?, ?, ?, 1, 'Duoba qarovchisi Rustam tog''a. Darvoza kaliti unda.', ?)
+            """, (str(uuid.uuid4()), prop1_id, caretaker1_id, now_iso))

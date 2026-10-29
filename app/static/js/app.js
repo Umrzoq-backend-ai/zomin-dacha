@@ -244,8 +244,17 @@ const I18N = {
 
 // Google Auth User Profiles
 const GOOGLE_PROFILES = {
-  umrzoq: {
-    id: "usr-google-umrzoq",
+  umurzoq: {
+    id: "usr-google-umurzoq",
+    name: "Umurzoq",
+    email: "umurzoq972@gmail.com",
+    avatar: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'><circle cx='64' cy='64' r='64' fill='%231a73e8'/><text x='50%' y='55%' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif' font-weight='600' font-size='56' fill='%23ffffff' text-anchor='middle' dominant-baseline='middle'>U</text></svg>",
+    phone: "+998 91 593 30 18",
+    car_plate: "01 A 777 AA",
+    role: "GUEST"
+  },
+  school21: {
+    id: "usr-google-school21",
     name: "Umrzoq Yulchiyev",
     email: "school21dev@gmail.com",
     avatar: "/static/assets/avatar.jpg",
@@ -272,14 +281,19 @@ function generateUserAvatar(name, email) {
   if (email === 'alisher.zomin@gmail.com') {
     return '/static/assets/avatar2.jpg';
   }
-  const initial = (name || 'U').charAt(0).toUpperCase();
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0d382c"/><stop offset="100%" stop-color="#165b47"/></linearGradient></defs><circle cx="64" cy="64" r="64" fill="url(#g)"/><text x="50%" y="54%" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-weight="700" font-size="52" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">${initial}</text></svg>`;
+  if (email === 'umurzoq972@gmail.com') {
+    return "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'><circle cx='64' cy='64' r='64' fill='%231a73e8'/><text x='50%' y='55%' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif' font-weight='600' font-size='56' fill='%23ffffff' text-anchor='middle' dominant-baseline='middle'>U</text></svg>";
+  }
+  const initial = (name || email || 'U').charAt(0).toUpperCase();
+  const colors = ['#1a73e8', '#0d9488', '#e11d48', '#7c3aed', '#d97706', '#2563eb', '#059669'];
+  const color = colors[initial.charCodeAt(0) % colors.length];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><circle cx='64' cy='64' r='64' fill='${color}'/><text x='50%' y='55%' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif' font-weight='600' font-size='56' fill='%23ffffff' text-anchor='middle' dominant-baseline='middle'>${initial}</text></svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
 // Demo User Profiles
 const DEMO_PROFILES = {
-  guest: GOOGLE_PROFILES.umrzoq,
+  guest: GOOGLE_PROFILES.umurzoq,
   owner1: GOOGLE_PROFILES.alisher,
   caretaker: { id: "usr-caretaker-rustam", phone: '+998917778899', name: 'Rustam Tog\'a', role: 'CARETAKER', avatar: '/static/assets/avatar2.jpg' },
   admin: { id: "usr-admin-sanjar", phone: '+998900000001', name: 'Sanjar Karimov', role: 'ADMIN', avatar: '/static/assets/avatar.jpg' }
@@ -315,22 +329,14 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (savedUser) {
     try {
       currentUser = JSON.parse(savedUser);
-      if (currentUser) {
-        if (currentUser.name === 'School21dev' || currentUser.name === 'school21dev' || currentUser.name === 'Jasur Mamadaliyev' || currentUser.name === 'Foydalanuvchi') {
-          currentUser.name = 'Umrzoq Yulchiyev';
-        }
-        if (currentUser.email === 'umrzoq.backend@gmail.com') {
-          currentUser.email = 'school21dev@gmail.com';
-        }
-        if (!currentUser.avatar) {
-          currentUser.avatar = '/static/assets/avatar.jpg';
-        }
-        localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+      if (currentUser && !currentUser.avatar) {
+        currentUser.avatar = generateUserAvatar(currentUser.name, currentUser.email);
       }
-    } catch (e) {}
+    } catch (e) {
+      currentUser = null;
+    }
   } else {
-    currentUser = Object.assign({}, GOOGLE_PROFILES.umrzoq);
-    localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+    currentUser = null; // Clean unauthenticated state by default!
   }
 
   // Apply saved language
@@ -843,7 +849,7 @@ function initDefaultDates() {
 }
 
 // ===================================================================
-// PROPERTIES RENDERING (Matches Image 1 Master Reference)
+// PROPERTIES RENDERING (Matches Image 1 Master Reference & Bronla)
 // ===================================================================
 async function loadProperties() {
   try {
@@ -856,13 +862,65 @@ async function loadProperties() {
     // Use high-fidelity local defaults if server reload happens
     propertiesCache = [
       {
+        id: "prop-shox",
+        title: "Shox_dacha",
+        slug: "shox-dacha-zomin",
+        description: "O'riklisoyning betakror manzarasi qo'ynida, Tog' Terak qishlog'ida joylashgan premium darajadagi dacha. Shaxsiy filtrli basseyn (3.5x7.5m), Playstation 3, karaoke, bilyard, stol tennisi, yozgi va qishki oshxona.",
+        micro_district: "ORIKLISOY",
+        address_text: "Uriklisoy, Zomin tumani · Tog' Terak qishlog'i 31",
+        photos: [
+          "/static/assets/shox_pool.jpg",
+          "/static/assets/shox_kitchen.jpg",
+          "/static/assets/shox_bath.jpg",
+          "/static/assets/shox_bedroom1.jpg",
+          "/static/assets/shox_bedroom2.jpg"
+        ],
+        amenities: [
+          "Filtrli Hovuz (3.5x7.5m)", "Playstation 3 & Karaoke", "Bilyard & Stol tennisi", 
+          "Wi-Fi 5G", "Ochiq oshxona & Mangal", "Archa tandiri", "Konditsioner", "Muzlatgich & Mikroto'lqinli pech"
+        ],
+        min_price: 1400000,
+        rating: 4.95,
+        reviews_count: 54,
+        guests: 12
+      },
+      {
+        id: "prop-chashma",
+        title: "Chashma Eco Dacha",
+        slug: "chashma-eco-dacha",
+        description: "Tog' daryosi va musaffo chashma suvi yoqasida joylashgan zamonaviy eko-dacha. Keng ayvon, hovuz, barbekyu hududi va archazor havosi.",
+        micro_district: "ORIKLISOY",
+        address_text: "Chashma qishlog'i, Buloqboshi, Zomin",
+        photos: ["/static/assets/dacha_chashma.jpg", "/static/assets/chalet.jpg"],
+        amenities: ["Chashma bo'yida shiypon", "Basseyn", "Karaoke & Smart TV", "Wi-Fi 5G", "Barbekyu hududi", "Qozon-o'choq"],
+        min_price: 1600000,
+        rating: 4.88,
+        reviews_count: 42,
+        guests: 10
+      },
+      {
+        id: "prop-panorama",
+        title: "Suffa Panorama Kottej",
+        slug: "suffa-panorama-kottej",
+        description: "Suffa platosining 2400 metr balandlikdagi panoramali manzarasi. Panoramik derazalar, yulduzli tunlar, kamin va to'liq avtonom isitish.",
+        micro_district: "SUFFA",
+        address_text: "Suffa platosi, Radioastronomiya observatoriyasi yo'li, Zomin",
+        photos: ["/static/assets/dacha_panorama.jpg", "/static/assets/villa.jpg"],
+        amenities: ["360° Panorama", "Issiq pol & Kamin", "Yulduzlar kuzatuvi terassasi", "Wi-Fi 5G", "Avtomat generator", "Tandir go'shti"],
+        min_price: 1800000,
+        rating: 4.92,
+        reviews_count: 65,
+        guests: 8
+      },
+      {
         id: "prop-1",
         title: "Mountain Chalet Zomin",
         slug: "mountain-chalet-zomin",
         description: "Tog‘ manzarali, yog‘och uy. Oila va do‘stlar uchun ideal.",
         micro_district: "SUFFA",
-        address_text: "Zomin, Jizzax",
-        photos: ["/static/assets/chalet.jpg"],
+        address_text: "Suffa platosi, Dor yo'li yaqinida, Zomin",
+        photos: ["/static/assets/chalet.jpg", "/static/assets/dacha_panorama.jpg"],
+        amenities: ["Tog' manzarasi", "Kamin", "Balkon/Ayvon", "Wi-Fi 5G", "Oila uchun shinam", "Mangal"],
         min_price: 1200000,
         rating: 4.8,
         reviews_count: 124,
@@ -874,12 +932,13 @@ async function loadProperties() {
         slug: "zomin-villa",
         description: "Shaxsiy hovuz, zamonaviy qulayliklar va betakror manzara.",
         micro_district: "DUOBA",
-        address_text: "Zomin, Jizzax",
-        photos: ["/static/assets/villa.jpg"],
+        address_text: "Duoba MFY, Soy bo'yi ko'chasi 14-uy, Zomin",
+        photos: ["/static/assets/villa.jpg", "/static/assets/dacha_chashma.jpg"],
+        amenities: ["Shaxsiy hovuz (Basseyn)", "Sauna", "Bilyard", "Smart TV", "Tandir & Mangal", "Wi-Fi 4G"],
         min_price: 2500000,
         rating: 4.9,
         reviews_count: 98,
-        guests: 8
+        guests: 10
       },
       {
         id: "prop-3",
@@ -887,12 +946,27 @@ async function loadProperties() {
         slug: "forest-lodge",
         description: "Tabiat bag‘rida, sokin va qulay dam olish maskani.",
         micro_district: "SANATORIY",
-        address_text: "Zomin, Jizzax",
-        photos: ["/static/assets/lodge.jpg"],
+        address_text: "Sanatoriy ko'chasi 8-uy, Zomin",
+        photos: ["/static/assets/lodge.jpg", "/static/assets/hiking.jpg"],
+        amenities: ["Qarag'ayzor", "Oshxona barcha jihozlar bilan", "Wi-Fi", "Buloq suvi", "Tinch hordiq"],
         min_price: 900000,
         rating: 4.7,
         reviews_count: 76,
         guests: 4
+      },
+      {
+        id: "prop-4",
+        title: "O'riklisoy Buloq Bo'yi Choyxonasi & Tapchanlari",
+        slug: "oriklisoy-buloq-boyi-tapchanlar",
+        description: "O'riklisoyning salqin tog' suvlari ustida qurilgan milliy tapchanlar majmuasi. Kunduzgi hordiq, oilaviy dam olish, archa tandiri.",
+        micro_district: "ORIKLISOY",
+        address_text: "O'riklisoy dam olish hududi, Buloqboshi, Zomin",
+        photos: ["/static/assets/hiking.jpg", "/static/assets/shox_pool.jpg"],
+        amenities: ["Suv ustidagi tapchan", "Zomin archa tandiri", "Samovar choy", "Buloq suvi", "Soyda suzish"],
+        min_price: 150000,
+        rating: 4.85,
+        reviews_count: 112,
+        guests: 12
       }
     ];
     renderProperties();
@@ -916,14 +990,20 @@ function renderProperties() {
     filtered = propertiesCache;
   }
 
-  // Display top 3 cards matching Image 1
-  const displayItems = filtered.slice(0, 3);
+  // Display ALL cards without truncation
+  const displayItems = filtered;
 
   grid.innerHTML = displayItems.map(p => {
-    // Photo
+    // Photo selection
     let photoUrl = '/static/assets/chalet.jpg';
     if (p.photos && p.photos.length > 0) {
       photoUrl = p.photos[0];
+    } else if (p.slug.includes('shox')) {
+      photoUrl = '/static/assets/shox_pool.jpg';
+    } else if (p.slug.includes('chashma')) {
+      photoUrl = '/static/assets/dacha_chashma.jpg';
+    } else if (p.slug.includes('panorama')) {
+      photoUrl = '/static/assets/dacha_panorama.jpg';
     } else if (p.slug.includes('villa')) {
       photoUrl = '/static/assets/villa.jpg';
     } else if (p.slug.includes('lodge')) {
@@ -937,24 +1017,19 @@ function renderProperties() {
       : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
 
     // Capacity & Price
-    const guests = p.guests || (p.rental_units && p.rental_units[0] ? p.rental_units[0].standard_capacity : 6);
+    const guests = p.guests || (p.rental_units && p.rental_units[0] ? p.rental_units[0].standard_capacity : 8);
     const price = p.min_price || 1200000;
-    const rating = p.rating || (p.slug.includes('villa') ? 4.9 : (p.slug.includes('lodge') ? 4.7 : 4.8));
-    const reviews = p.reviews_count || (p.slug.includes('villa') ? 98 : (p.slug.includes('lodge') ? 76 : 124));
+    const rating = p.rating || (p.slug.includes('shox') ? 4.95 : (p.slug.includes('villa') ? 4.9 : (p.slug.includes('panorama') ? 4.92 : 4.8)));
+    const reviews = p.reviews_count || (p.slug.includes('shox') ? 54 : (p.slug.includes('villa') ? 98 : (p.slug.includes('panorama') ? 65 : 124)));
 
-    // Dynamic Title & Description based on language
     let cardTitle = p.title;
     let cardDesc = p.description;
-    if (p.slug.includes('chalet') || p.id === 'prop-1') {
-      cardTitle = t.cardChaletTitle || p.title;
-      cardDesc = t.cardChaletDesc || p.description;
-    } else if (p.slug.includes('villa') || p.id === 'prop-2') {
-      cardTitle = t.cardVillaTitle || p.title;
-      cardDesc = t.cardVillaDesc || p.description;
-    } else if (p.slug.includes('lodge') || p.id === 'prop-3') {
-      cardTitle = t.cardLodgeTitle || p.title;
-      cardDesc = t.cardLodgeDesc || p.description;
-    }
+
+    let districtText = "Zomin, Jizzax";
+    if (p.micro_district === 'ORIKLISOY') districtText = "O'riklisoy, Zomin";
+    else if (p.micro_district === 'SUFFA') districtText = "Suffa platosi, Zomin";
+    else if (p.micro_district === 'DUOBA') districtText = "Duoba, Zomin";
+    else if (p.micro_district === 'SANATORIY') districtText = "Sanatoriy, Zomin";
 
     return `
       <div class="property-card" onclick="openBookingModal('${p.id}')">
@@ -968,7 +1043,7 @@ function renderProperties() {
         <div class="property-card-body">
           <div class="property-location-line">
             <svg class="location-pin-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            <span>${t.locationZaamin}</span>
+            <span>${districtText}</span>
           </div>
 
           <h3 class="property-card-title">${cardTitle}</h3>
@@ -986,7 +1061,7 @@ function renderProperties() {
             </div>
             <div class="footer-price-block">
               <span class="price-main">${formatSum(price)} ${t.currency}</span>
-              <span class="price-period">${t.perNight}</span>
+              <span class="price-period">${p.property_type === 'CHOYXONA_TAPCHAN' ? t.perDay : t.perNight}</span>
             </div>
           </div>
         </div>
@@ -1037,11 +1112,15 @@ function closeAuthModal() {
 }
 
 function openProfileModal() {
-  const p = currentUser || GOOGLE_PROFILES.umrzoq;
+  if (!currentUser) {
+    openAuthModal();
+    return;
+  }
+  const p = currentUser;
 
-  const nameVal = p.name || p.full_name || 'Umrzoq Yulchiyev';
+  const nameVal = p.name || p.full_name || 'Umurzoq';
   const phoneVal = p.phone || p.phone_number || '+998 91 593 30 18';
-  const emailVal = p.email || 'school21dev@gmail.com';
+  const emailVal = p.email || 'umurzoq972@gmail.com';
   const carVal = p.car_plate || '01 A 777 AA';
   const roleVal = p.role || 'GUEST';
   const avatarVal = p.avatar || generateUserAvatar(nameVal, emailVal);
@@ -1087,13 +1166,11 @@ function closeProfileModal() {
 
 function handleSaveProfile(e) {
   e.preventDefault();
+  if (!currentUser) return;
+
   const nameVal = document.getElementById('prof-input-name').value.trim();
   const phoneVal = document.getElementById('prof-input-phone').value.trim();
   const carVal = document.getElementById('prof-input-car').value.trim();
-
-  if (!currentUser) {
-    currentUser = Object.assign({}, GOOGLE_PROFILES.umrzoq);
-  }
 
   currentUser.name = nameVal;
   currentUser.full_name = nameVal;
@@ -1123,11 +1200,11 @@ function handleLogout() {
 
 // Google Authentication Handlers
 function handleGoogleOneClick() {
-  loginWithGoogleAccount('umrzoq');
+  loginWithGoogleAccount('umurzoq');
 }
 
 function loginWithGoogleAccount(key) {
-  const profile = GOOGLE_PROFILES[key] || GOOGLE_PROFILES.umrzoq;
+  const profile = GOOGLE_PROFILES[key] || GOOGLE_PROFILES.umurzoq;
   currentUser = Object.assign({}, profile);
   localStorage.setItem('zomin_user', JSON.stringify(currentUser));
   updateHeaderAuthState();
@@ -1148,9 +1225,11 @@ function handleCustomGoogleSubmit(e) {
     return;
   }
 
-  // If this is the main user email, guarantee correct name
+  // Pre-seed known names for familiar emails
   if (emailVal === 'school21dev@gmail.com') {
     nameVal = 'Umrzoq Yulchiyev';
+  } else if (emailVal === 'umurzoq972@gmail.com') {
+    nameVal = 'Umurzoq';
   } else if (!nameVal) {
     const namePart = emailVal.split('@')[0].replace(/[._-]/g, ' ');
     nameVal = namePart.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
@@ -1188,7 +1267,7 @@ function handleUserAvatarUpload(e) {
   reader.onload = function(evt) {
     const base64Data = evt.target.result;
     if (!currentUser) {
-      currentUser = Object.assign({}, GOOGLE_PROFILES.umrzoq);
+      currentUser = Object.assign({}, GOOGLE_PROFILES.umurzoq);
     }
     currentUser.avatar = base64Data;
     localStorage.setItem('zomin_user', JSON.stringify(currentUser));
@@ -1203,7 +1282,7 @@ function handleUserAvatarUpload(e) {
 }
 
 function selectUserProfile(roleKey) {
-  const profile = DEMO_PROFILES[roleKey] || GOOGLE_PROFILES.umrzoq;
+  const profile = DEMO_PROFILES[roleKey] || GOOGLE_PROFILES.umurzoq;
   currentUser = Object.assign({}, profile);
   localStorage.setItem('zomin_user', JSON.stringify(currentUser));
   updateHeaderAuthState();
@@ -1226,9 +1305,9 @@ function updateHeaderAuthState() {
   const t = I18N[currentLang] || I18N.uz;
 
   if (currentUser) {
-    let displayName = currentUser.name || currentUser.full_name || 'Umrzoq';
+    let displayName = currentUser.name || currentUser.full_name || 'Umurzoq';
     if (displayName.toLowerCase() === 'school21dev') {
-      displayName = 'Umrzoq';
+      displayName = 'Umrzoq Yulchiyev';
       currentUser.name = 'Umrzoq Yulchiyev';
       localStorage.setItem('zomin_user', JSON.stringify(currentUser));
     }
@@ -1239,13 +1318,13 @@ function updateHeaderAuthState() {
     btn.classList.add('logged-in');
 
     if (menuAvatar) menuAvatar.src = avatarUrl;
-    if (menuName) menuName.innerText = currentUser.name || 'Umrzoq Yulchiyev';
-    if (menuEmail) menuEmail.innerText = currentUser.email || 'school21dev@gmail.com';
+    if (menuName) menuName.innerText = currentUser.name || displayName;
+    if (menuEmail) menuEmail.innerText = currentUser.email || 'umurzoq972@gmail.com';
     if (menuRole) menuRole.innerText = currentUser.role === 'OWNER' ? 'DACHA EGASI' : 'SAYYOH / MEHMON';
     if (adminLink) adminLink.style.display = currentUser.role === 'ADMIN' ? 'flex' : 'none';
     if (adminDivider) adminDivider.style.display = currentUser.role === 'ADMIN' ? 'block' : 'none';
   } else {
-    btn.innerHTML = `<span id="user-btn-text">${t.navLogin}</span>`;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span id="user-btn-text">${t.navLogin || 'Kirish'}</span>`;
     btn.classList.remove('logged-in');
   }
 }
@@ -1264,21 +1343,28 @@ function initLeafletMap() {
   }).addTo(leafletMap);
 
   const locs = [
-    { type: "DACHA", title: "Mountain Chalet Zomin", price: "1 200 000 so'm", lat: 39.8715, lng: 68.4520, img: "/static/assets/chalet.jpg" },
-    { type: "DACHA", title: "Zomin Villa", price: "2 500 000 so'm", lat: 39.9612, lng: 68.4231, img: "/static/assets/villa.jpg" },
-    { type: "DACHA", title: "Forest Lodge", price: "900 000 so'm", lat: 39.9450, lng: 68.4110, img: "/static/assets/lodge.jpg" },
+    { type: "DACHA", title: "Shox_dacha", price: "1 400 000 so'm", lat: 39.9180, lng: 68.4105, img: "/static/assets/shox_pool.jpg", id: "prop-shox" },
+    { type: "DACHA", title: "Chashma Eco Dacha", price: "1 600 000 so'm", lat: 39.9245, lng: 68.4020, img: "/static/assets/dacha_chashma.jpg", id: "prop-chashma" },
+    { type: "DACHA", title: "Suffa Panorama Kottej", price: "1 800 000 so'm", lat: 39.8650, lng: 68.4610, img: "/static/assets/dacha_panorama.jpg", id: "prop-panorama" },
+    { type: "DACHA", title: "Mountain Chalet Zomin", price: "1 200 000 so'm", lat: 39.8715, lng: 68.4520, img: "/static/assets/chalet.jpg", id: "prop-1" },
+    { type: "DACHA", title: "Zomin Villa", price: "2 500 000 so'm", lat: 39.9612, lng: 68.4231, img: "/static/assets/villa.jpg", id: "prop-2" },
+    { type: "DACHA", title: "Forest Lodge", price: "900 000 so'm", lat: 39.9450, lng: 68.4110, img: "/static/assets/lodge.jpg", id: "prop-3" },
+    { type: "DACHA", title: "O'riklisoy Buloq Bo'yi", price: "150 000 so'm", lat: 39.9210, lng: 68.3980, img: "/static/assets/hiking.jpg", id: "prop-4" },
     { type: "ATTRACTION", title: "Zomin osma ko‘prigi (305m)", price: "Diqqatga sazovor", lat: 39.8900, lng: 68.4400, img: "/static/assets/bridge.jpg" },
     { type: "ATTRACTION", title: "Kabel yo‘li (Suffa 2400m)", price: "Dor yo'li", lat: 39.8750, lng: 68.4550, img: "/static/assets/cablecar.jpg" }
   ];
 
   locs.forEach(l => {
     const marker = L.marker([l.lat, l.lng]).addTo(leafletMap);
+    const clickAction = l.type === 'DACHA' 
+      ? `onclick="openBookingModal('${l.id || propertiesCache[0]?.id}')"`
+      : `onclick="openAttractionModal('${l.title.includes('ko‘prigi') ? 'bridge' : 'cablecar'}')"`;
     marker.bindPopup(`
       <div class="map-popup-card">
         <img src="${l.img}" class="map-popup-img">
         <div class="map-popup-title">${l.title}</div>
         <div class="map-popup-price">${l.price}</div>
-        <button class="btn-popup-action" onclick="openBookingModal('${propertiesCache[0]?.id}')">Batafsil / Bron</button>
+        <button class="btn-popup-action" ${clickAction}>Batafsil / Ko'rish</button>
       </div>
     `);
     mapMarkers.push({ marker, type: l.type });
@@ -1323,7 +1409,7 @@ function showAdminPortal() {
 }
 
 // ===================================================================
-// BOOKING FLOW, QUOTES & MODALS
+// BOOKING FLOW, QUOTES & MODALS (Bronla.uz Layout)
 // ===================================================================
 async function openBookingModal(propId) {
   selectedProperty = propertiesCache.find(p => p.id === propId) || propertiesCache[0];
@@ -1332,26 +1418,131 @@ async function openBookingModal(propId) {
   document.getElementById('booking-modal').classList.remove('hidden');
   document.getElementById('modal-property-title').innerText = selectedProperty.title;
   document.getElementById('modal-property-desc').innerText = selectedProperty.description;
+  document.getElementById('modal-property-address').innerText = `📍 ${selectedProperty.address_text || "Zomin, Jizzax"}`;
 
-  const photo = selectedProperty.photos && selectedProperty.photos.length > 0 ? selectedProperty.photos[0] : '/static/assets/chalet.jpg';
-  document.getElementById('modal-main-photo').src = photo;
+  // "Yangi" badge visibility
+  const isNew = selectedProperty.slug.includes('shox') || selectedProperty.slug.includes('chashma') || selectedProperty.slug.includes('panorama');
+  const badgeEl = document.getElementById('modal-property-new-badge');
+  if (badgeEl) badgeEl.style.display = isNew ? 'inline-block' : 'none';
 
+  // Photo Gallery
+  let photos = selectedProperty.photos || [];
+  if (selectedProperty.slug.includes('shox')) {
+    photos = [
+      '/static/assets/shox_pool.jpg',
+      '/static/assets/shox_kitchen.jpg',
+      '/static/assets/shox_bath.jpg',
+      '/static/assets/shox_bedroom1.jpg',
+      '/static/assets/shox_bedroom2.jpg'
+    ];
+  } else if (photos.length === 0) {
+    photos = ['/static/assets/chalet.jpg', '/static/assets/villa.jpg'];
+  }
+
+  const mainPhotoEl = document.getElementById('modal-main-photo');
+  if (mainPhotoEl) mainPhotoEl.src = photos[0];
+
+  const thumbsEl = document.getElementById('modal-gallery-thumbs');
+  if (thumbsEl) {
+    thumbsEl.innerHTML = photos.map((pUrl, idx) => `
+      <div class="gallery-thumb-item ${idx === 0 ? 'active' : ''}" onclick="selectModalGalleryPhoto('${pUrl}', this)">
+        <img src="${pUrl}" alt="Photo ${idx + 1}">
+      </div>
+    `).join('');
+  }
+
+  // Unit Selector
   const unitSel = document.getElementById('modal-unit-select');
-  unitSel.innerHTML = `
-    <option value="unit-standard">Standart Joylashuv (${formatSum(selectedProperty.min_price)} so'm/kecha)</option>
-    <option value="unit-deluxe">Deluxe Kottej (${formatSum(selectedProperty.min_price * 1.3)} so'm/kecha)</option>
-  `;
+  if (selectedProperty.rental_units && selectedProperty.rental_units.length > 0) {
+    unitSel.innerHTML = selectedProperty.rental_units.map(u => `
+      <option value="${u.id}">${u.name} (${formatSum(u.base_price_weekday)} so'm)</option>
+    `).join('');
+  } else {
+    unitSel.innerHTML = `
+      <option value="unit-standard">Standart Joylashuv (${formatSum(selectedProperty.min_price || 1400000)} so'm/kecha)</option>
+      <option value="unit-deluxe">Deluxe Kottej (${formatSum((selectedProperty.min_price || 1400000) * 1.3)} so'm/kecha)</option>
+    `;
+  }
 
-  document.getElementById('modal-amenities-tags').innerHTML = `
-    <span class="amenity-chip">✓ Tog' manzarasi</span>
-    <span class="amenity-chip">✓ Wi-Fi</span>
-    <span class="amenity-chip">✓ Toza buloq suvi</span>
-    <span class="amenity-chip">✓ Avtomat generator</span>
-  `;
+  // Amenities
+  const amenities = selectedProperty.amenities || [
+    "Filtrli Hovuz (3.5x7.5m)", "Playstation 3 & Karaoke", "Bilyard & Stol tennisi", 
+    "Wi-Fi 5G", "Ochiq oshxona & Mangal", "Archa tandiri", "Konditsioner", "Muzlatgich & Mikroto'lqinli pech"
+  ];
+  const amEl = document.getElementById('modal-amenities-tags');
+  if (amEl) {
+    amEl.innerHTML = amenities.map(a => `<span class="amenity-chip">✓ ${a}</span>`).join('');
+  }
+
+  // Autofill user phone & car plate if logged in
+  if (currentUser) {
+    const phoneInput = document.getElementById('modal-guest-phone');
+    if (phoneInput && currentUser.phone) phoneInput.value = currentUser.phone;
+    const carInput = document.getElementById('modal-car-plate');
+    if (carInput && currentUser.car_plate) carInput.value = currentUser.car_plate;
+  }
+
+  // Update save/wishlist button state in modal
+  updateModalSaveButtonState();
 
   currentTandirKg = 0;
   updateTandirDisplay();
   await recalculateQuote();
+}
+
+function selectModalGalleryPhoto(src, thumbEl) {
+  const mainPhoto = document.getElementById('modal-main-photo');
+  if (mainPhoto) {
+    mainPhoto.style.opacity = '0.5';
+    setTimeout(() => {
+      mainPhoto.src = src;
+      mainPhoto.style.opacity = '1';
+    }, 120);
+  }
+  document.querySelectorAll('.gallery-thumb-item').forEach(el => el.classList.remove('active'));
+  if (thumbEl) thumbEl.classList.add('active');
+}
+
+function shareCurrentProperty() {
+  if (!selectedProperty) return;
+  const shareUrl = window.location.origin + '/#stays';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast(`${selectedProperty.title} havolasi nusxalandi!`, 'success');
+    }).catch(() => {
+      showToast(`${selectedProperty.title}: ${shareUrl}`, 'info');
+    });
+  } else {
+    showToast(`${selectedProperty.title}: ${shareUrl}`, 'info');
+  }
+}
+
+function toggleModalSaveProperty() {
+  if (!selectedProperty) return;
+  const slug = selectedProperty.slug;
+  if (wishlistItems.has(slug)) {
+    wishlistItems.delete(slug);
+    showToast(`${selectedProperty.title} saqlanganlardan olib tashlandi`, 'info');
+  } else {
+    wishlistItems.add(slug);
+    showToast(`${selectedProperty.title} saqlanganlarga qo'shildi!`, 'success');
+  }
+  updateModalSaveButtonState();
+  renderProperties();
+}
+
+function updateModalSaveButtonState() {
+  if (!selectedProperty) return;
+  const isFav = wishlistItems.has(selectedProperty.slug);
+  const btn = document.getElementById('modal-save-btn');
+  const txt = document.getElementById('modal-save-text');
+  if (btn) {
+    btn.style.color = isFav ? '#ef4444' : 'var(--color-text-main)';
+    btn.style.borderColor = isFav ? '#fca5a5' : 'var(--color-border)';
+  }
+  if (txt) {
+    txt.innerText = isFav ? "Saqlandi" : "Saqlash";
+  }
 }
 
 function closeBookingModal() {
@@ -1390,13 +1581,14 @@ function updateTandirDisplay() {
 }
 
 async function recalculateQuote() {
-  const basePrice = selectedProperty ? selectedProperty.min_price : 1200000;
-  const nights = currentBookingMode === 'DAY_USE' ? 1 : 2;
+  const basePrice = selectedProperty ? (selectedProperty.min_price || 1400000) : 1400000;
+  const nights = currentBookingMode === 'DAY_USE' ? 1 : 1;
   const stayAmount = basePrice * nights;
   const tandirAmount = currentTandirKg * 150000;
   const total = stayAmount + tandirAmount;
-  const deposit = total * 0.10;
-  const remaining = total * 0.90;
+  // Bronla 15% deposit breakdown
+  const deposit = Math.round(total * 0.15);
+  const remaining = total - deposit;
 
   currentQuote = {
     base_stay_amount: stayAmount,
@@ -1406,15 +1598,33 @@ async function recalculateQuote() {
     remaining_owner_amount: remaining
   };
 
-  document.getElementById('quote-stay-amount').innerText = `${formatSum(stayAmount)} so'm`;
-  document.getElementById('quote-tandir-amount').innerText = `${formatSum(tandirAmount)} so'm`;
-  document.getElementById('quote-total-amount').innerText = `${formatSum(total)} so'm`;
-  document.getElementById('quote-deposit-amount').innerText = `${formatSum(deposit)} so'm`;
-  document.getElementById('quote-remaining-amount').innerText = `${formatSum(remaining)} so'm`;
+  const elStay = document.getElementById('quote-stay-amount');
+  if (elStay) elStay.innerText = `${formatSum(stayAmount)} so'm`;
+  const elTandir = document.getElementById('quote-tandir-amount');
+  if (elTandir) elTandir.innerText = `${formatSum(tandirAmount)} so'm`;
+
+  const elTotal = document.getElementById('quote-total-amount');
+  if (elTotal) elTotal.innerText = `${formatSum(total)} so'm`;
+
+  const elRemaining = document.getElementById('quote-remaining-amount');
+  if (elRemaining) elRemaining.innerText = `${formatSum(remaining)} so'm`;
+
+  const elDeposit = document.getElementById('quote-deposit-amount');
+  if (elDeposit) elDeposit.innerText = `${formatSum(deposit)} so'm`;
 }
 
 async function submitBookingReservation() {
   if (!currentQuote) return;
+
+  const phoneInput = document.getElementById('modal-guest-phone');
+  const guestPhone = phoneInput ? phoneInput.value.trim() : '';
+
+  if (!currentUser && (!guestPhone || guestPhone.length < 9)) {
+    showToast('Iltimos, telefon raqamingizni kiriting yoki Google orqali kiring', 'error');
+    if (phoneInput) phoneInput.focus();
+    return;
+  }
+
   closeBookingModal();
   currentBooking = {
     id: `bk_${Date.now()}`,

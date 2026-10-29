@@ -20,7 +20,7 @@
   <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   
-  <link rel="stylesheet" href="/static/css/style.css?v=20261029_1145">
+  <link rel="stylesheet" href="/static/css/style.css?v=20261029_1205">
 </head>
 <body>
 
@@ -628,14 +628,24 @@
           </button>
 
           <div class="google-divider">
-            <span id="lbl-google-divider">yoki tezkor hisobni tanlang</span>
+            <span id="lbl-google-divider">yoki o'z hisobingizni tanlang</span>
           </div>
 
-          <!-- Accounts Stack with Real Photos -->
+          <!-- Accounts Stack with Real Photos & Active Google Profiles -->
           <div class="google-accounts-stack">
-            <!-- Account 1: Umrzoq Yulchiyev -->
-            <div class="google-account-pill" onclick="loginWithGoogleAccount('umrzoq')">
-              <img src="/static/assets/avatar.jpg" alt="Umrzoq" class="google-account-avatar">
+            <!-- Account 1: Umurzoq (Active Google Browser Profile) -->
+            <div class="google-account-pill" onclick="loginWithGoogleAccount('umurzoq')">
+              <div class="google-letter-avatar" style="width:38px; height:38px; min-width:38px; border-radius:50%; background:#1a73e8; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:18px;">U</div>
+              <div class="google-account-info">
+                <div class="google-account-name">Umurzoq</div>
+                <div class="google-account-email">umurzoq972@gmail.com</div>
+              </div>
+              <span class="google-badge-tag">Asosiy</span>
+            </div>
+
+            <!-- Account 2: Umrzoq Yulchiyev -->
+            <div class="google-account-pill" onclick="loginWithGoogleAccount('school21')">
+              <img src="/static/assets/avatar.jpg" alt="Umrzoq Yulchiyev" class="google-account-avatar">
               <div class="google-account-info">
                 <div class="google-account-name">Umrzoq Yulchiyev</div>
                 <div class="google-account-email">school21dev@gmail.com</div>
@@ -643,9 +653,9 @@
               <span class="google-badge-tag">Sayyoh</span>
             </div>
 
-            <!-- Account 2: Alisher Zokirov -->
+            <!-- Account 3: Alisher Zokirov -->
             <div class="google-account-pill" onclick="loginWithGoogleAccount('alisher')">
-              <img src="/static/assets/avatar2.jpg" alt="Alisher" class="google-account-avatar">
+              <img src="/static/assets/avatar2.jpg" alt="Alisher Zokirov" class="google-account-avatar">
               <div class="google-account-info">
                 <div class="google-account-name">Alisher Zokirov</div>
                 <div class="google-account-email">alisher.zomin@gmail.com</div>
@@ -676,37 +686,124 @@
     </div>
   </div>
 
-  <!-- ================= 5. INTERACTIVE BOOKING MODAL ================= -->
+  <!-- ================= 6. INTERACTIVE BRONLA-STYLE BOOKING MODAL ================= -->
   <div id="booking-modal" class="modal-overlay hidden">
     <div class="modal-card modal-lg">
       <div class="modal-header">
         <div class="modal-header-titles">
-          <span class="modal-badge-top" id="modal-property-badge">ZOMIN</span>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <span class="modal-badge-top" id="modal-property-badge">ZOMIN</span>
+            <span class="badge-new-pill" id="modal-property-new-badge">Yangi</span>
+          </div>
           <h2 class="modal-title" id="modal-property-title">Dacha</h2>
-          <span class="modal-address" id="modal-property-address">📍 Zomin, Jizzax</span>
+          <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:4px;">
+            <span class="modal-address" id="modal-property-address">📍 Zomin, Jizzax</span>
+            <button type="button" class="btn-link-map" onclick="closeBookingModal(); scrollToSection('map-section');">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <span>Xaritada ko'rsatish</span>
+            </button>
+          </div>
         </div>
-        <button class="modal-close-btn" onclick="closeBookingModal()">✕</button>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button type="button" class="btn-modal-action-pill" onclick="shareCurrentProperty()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            <span>Ulashish</span>
+          </button>
+          <button type="button" class="btn-modal-action-pill" id="modal-save-btn" onclick="toggleModalSaveProperty()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <span id="modal-save-text">Saqlash</span>
+          </button>
+          <button class="modal-close-btn" onclick="closeBookingModal()">✕</button>
+        </div>
       </div>
 
       <div class="modal-body">
         
-        <!-- Photo Gallery Carousel -->
+        <!-- Photo Gallery Carousel with Thumbnails (Bronla.uz style) -->
         <div class="property-gallery-slider">
-          <img id="modal-main-photo" src="" alt="Dacha" class="modal-gallery-main">
+          <div class="gallery-main-wrap">
+            <img id="modal-main-photo" src="" alt="Dacha" class="modal-gallery-main">
+            <span class="gallery-photo-badge">📷 RASM VA VIDEOLAR</span>
+          </div>
           <div class="gallery-thumbs" id="modal-gallery-thumbs"></div>
         </div>
 
         <div class="modal-grid-2col">
           
-          <!-- Left Column: Details & Amenities -->
+          <!-- Left Column: Rules, Schedule, Details & Amenities -->
           <div class="modal-details-col">
-            <h3 class="subsection-title" id="lbl-modal-about">Obyekt haqida</h3>
-            <p id="modal-property-desc" class="modal-property-description"></p>
+            
+            <!-- 1. Joylashish tartibi (Bronla.uz rules) -->
+            <div class="booking-section-card">
+              <h3 class="subsection-title">Joylashish tartibi</h3>
+              <div class="bronla-rules-grid">
+                <div class="rule-row">
+                  <div class="rule-icon-label">
+                    <span class="rule-icon">🏢</span>
+                    <span class="rule-name">Korporativ</span>
+                  </div>
+                  <div class="rule-status status-no" id="rule-val-corp">Mumkin emas</div>
+                </div>
+                <div class="rule-row">
+                  <div class="rule-icon-label">
+                    <span class="rule-icon">🍷</span>
+                    <span class="rule-name">Alkogol</span>
+                  </div>
+                  <div class="rule-status status-yes" id="rule-val-alcohol">Mumkin</div>
+                </div>
+                <div class="rule-row">
+                  <div class="rule-icon-label">
+                    <span class="rule-icon">🐾</span>
+                    <span class="rule-name">Uy hayvonlari</span>
+                  </div>
+                  <div class="rule-status status-no" id="rule-val-pets">Mumkin emas</div>
+                </div>
+                <div class="rule-row full-width">
+                  <div class="rule-icon-label">
+                    <span class="rule-icon">📜</span>
+                    <span class="rule-name">Nikoh guvohnoma</span>
+                  </div>
+                  <div class="rule-desc-text" id="rule-val-marriage">Oilaviy mehmonlar farzandlarsiz kelsa, nikoh guvohnomasini ko'rsatish so'raladi.</div>
+                </div>
+              </div>
+            </div>
 
-            <h3 class="subsection-title mt-4" id="lbl-modal-amenities">Qulayliklar va Sharoitlar</h3>
-            <div id="modal-amenities-tags" class="amenities-tags-grid"></div>
+            <!-- 2. Tartib va qoidalar (Schedule) -->
+            <div class="booking-section-card mt-3">
+              <h3 class="subsection-title">Tartib va qoidalar</h3>
+              <div class="schedule-rules-row">
+                <div class="schedule-rule-box">
+                  <span class="sched-icon">🕒</span>
+                  <span class="sched-label">Kirish</span>
+                  <strong class="sched-val" id="sched-val-checkin">14:00</strong>
+                </div>
+                <div class="schedule-rule-box">
+                  <span class="sched-icon">🕛</span>
+                  <span class="sched-label">Chiqish</span>
+                  <strong class="sched-val" id="sched-val-checkout">12:00</strong>
+                </div>
+                <div class="schedule-rule-box">
+                  <span class="sched-icon">🌙</span>
+                  <span class="sched-label">Tungi sukunat</span>
+                  <strong class="sched-val" id="sched-val-quiet">22:00 - 07:00</strong>
+                </div>
+              </div>
+            </div>
 
-            <div class="road-trust-box mt-4">
+            <!-- 3. Obyekt haqida -->
+            <div class="booking-section-card mt-3">
+              <h3 class="subsection-title" id="lbl-modal-about">Obyekt haqida</h3>
+              <p id="modal-property-desc" class="modal-property-description"></p>
+            </div>
+
+            <!-- 4. Qulayliklar va Sharoitlar -->
+            <div class="booking-section-card mt-3">
+              <h3 class="subsection-title" id="lbl-modal-amenities">Qulayliklar va Sharoitlar</h3>
+              <div id="modal-amenities-tags" class="amenities-tags-grid"></div>
+            </div>
+
+            <!-- 5. Tog' infratuzilmasi ishonch bloki -->
+            <div class="road-trust-box mt-3">
               <div class="road-trust-item" id="modal-road-info">🚗 Asfalt yo'l (Spark/Cobalt bemalol chiqadi)</div>
               <div class="road-trust-item" id="modal-generator-info">⚡ Avtomat generator mavjud (Elektr kafolat)</div>
               <div class="road-trust-item" id="modal-water-info">💧 Muzdek toza buloq suvi</div>
@@ -782,41 +879,50 @@
                 </div>
               </div>
 
-              <!-- Car Plate Number for Caretaker (AC-14) -->
+              <!-- Guest Phone & Car Plate Number -->
               <div class="form-group mt-3">
+                <label class="input-label">Telefon raqamingiz:</label>
+                <input type="tel" id="modal-guest-phone" class="form-input" placeholder="+998 90 123 45 67">
+              </div>
+
+              <div class="form-group mt-2">
                 <label class="input-label">Avtomobil raqami (Darvozadagi bog'bon tekshiruvi uchun):</label>
                 <input type="text" id="modal-car-plate" class="form-input text-uppercase" placeholder="Masalan: 01 A 777 AA">
               </div>
 
-              <!-- Quote Price Breakdown -->
+              <!-- Quote Price Breakdown (Bronla.uz style calculation) -->
               <div class="quote-summary-box" id="quote-summary-box">
-                <div class="quote-row">
-                  <span id="quote-stay-label">Ijara to'lovi:</span>
-                  <span id="quote-stay-amount">0 so'm</span>
-                </div>
-                <div class="quote-row" id="quote-tandir-row">
-                  <span>Archa tandiri:</span>
-                  <span id="quote-tandir-amount">0 so'm</span>
-                </div>
                 <div class="quote-row highlight">
-                  <span>Jami qiymat:</span>
-                  <span id="quote-total-amount" class="bold">0 so'm</span>
+                  <span>Umumiy summa:</span>
+                  <span id="quote-total-amount" class="bold">1 400 000 so'm</span>
+                </div>
+                <div class="quote-row">
+                  <span>Kirishda to'lov (85%):</span>
+                  <span id="quote-remaining-amount">1 190 000 so'm</span>
                 </div>
                 <div class="quote-divider"></div>
                 <div class="quote-row deposit-row">
-                  <span class="deposit-label">⚡ 10% Onlayn Kafolat To'lovi (Click/Payme):</span>
-                  <span id="quote-deposit-amount" class="deposit-val">0 so'm</span>
-                </div>
-                <div class="quote-row remaining-row">
-                  <span>Joyida to'lanadigan qoldiq:</span>
-                  <span id="quote-remaining-amount">0 so'm</span>
+                  <span class="deposit-label">⚡ Avans to'lov (15% kafolatli onlayn):</span>
+                  <span id="quote-deposit-amount" class="deposit-val">210 000 so'm</span>
                 </div>
               </div>
 
               <!-- Booking Submit Button -->
               <button type="button" class="btn-book-action" id="btn-proceed-booking" onclick="submitBookingReservation()">
-                <span>Joyni Band Qilish (15 daqiqa qulf)</span>
+                <span>Band Qilish (15 daqiqa kafolatli qulf)</span>
               </button>
+
+              <!-- Payment System Logos (Bronla.uz match) -->
+              <div class="payment-trust-footer">
+                <span class="payment-trust-title">Kafolatlangan xavfsiz to'lov:</span>
+                <div class="payment-badges-row">
+                  <span class="pay-logo-badge payme">PAYME</span>
+                  <span class="pay-logo-badge click">CLICK</span>
+                  <span class="pay-logo-badge uzcard">UZCARD</span>
+                  <span class="pay-logo-badge humo">HUMO</span>
+                  <span class="pay-logo-badge paynet">PAYNET</span>
+                </div>
+              </div>
 
             </div>
           </div>
@@ -1229,6 +1335,6 @@
   </div>
 
   <!-- JavaScript -->
-  <script src="/static/js/app.js?v=20261029_1150"></script>
+  <script src="/static/js/app.js?v=20261029_1205"></script>
 </body>
 </html>
