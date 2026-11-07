@@ -152,6 +152,17 @@ def seed_catalog_100(conn, now_iso: str = None) -> int:
 
     # 2. Seed 93 properties
     inserted_count = 0
+    import random
+    rng = random.Random(42)
+    DISTRICT_COORDS = {
+        'DUOBA': ((39.835, 39.868), (68.395, 68.432)),
+        'ORIKLISOY': ((39.735, 39.778), (68.415, 68.455)),
+        'SANATORIY': ((39.682, 39.718), (68.432, 68.468)),
+        'ARCHAZOR': ((39.652, 39.685), (68.448, 68.485)),
+        'SUFFA': ((39.622, 39.652), (68.425, 68.468)),
+        'PESHAGOR': ((39.915, 39.955), (68.342, 68.385)),
+    }
+
     for p in NEW_93_PROPERTIES:
         slug = p["slug"]
         cursor.execute("SELECT id FROM properties WHERE slug = ?", (slug,))
@@ -162,6 +173,10 @@ def seed_catalog_100(conn, now_iso: str = None) -> int:
         prop_id = str(uuid.uuid4())
         owner_id = owner_id_map.get(p["owner_idx"], list(owner_id_map.values())[0])
 
+        d_cfg = DISTRICT_COORDS.get(p["micro_district"], DISTRICT_COORDS['DUOBA'])
+        p_lat = round(rng.uniform(*d_cfg[0]), 4)
+        p_lng = round(rng.uniform(*d_cfg[1]), 4)
+
         cursor.execute("""
             INSERT INTO properties (
                 id, owner_id, title, slug, description, property_type, region, micro_district,
@@ -171,7 +186,7 @@ def seed_catalog_100(conn, now_iso: str = None) -> int:
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             prop_id, owner_id, p["title"], p["slug"], p["description"], p["property_type"],
-            p["region"], p["micro_district"], p["address_text"], p["latitude"], p["longitude"],
+            p["region"], p["micro_district"], p["address_text"], p_lat, p_lng,
             p["location_precision"], p["road_condition"], p["has_generator"], p["water_source"],
             p["heating_type"], p["mobile_coverage"], p["verification_status"], p["is_published"],
             json.dumps(p["photos"]), json.dumps(p["amenities"]), now_iso, now_iso

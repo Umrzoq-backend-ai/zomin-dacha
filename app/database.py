@@ -290,6 +290,37 @@ def init_db(db_path: Optional[str] = None) -> None:
         END;
         """)
 
+        # 13. Wishlists Table
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_wishlists (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            property_id TEXT,
+            property_slug TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE(user_id, property_slug)
+        );
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_wishlist_user ON user_wishlists(user_id);")
+
+        # Dynamic migration for users table columns
+        cursor.execute("PRAGMA table_info(users)")
+        existing_cols = {row["name"] for row in cursor.fetchall()}
+        cols_to_add = [
+            ("email", "TEXT"),
+            ("password_hash", "TEXT"),
+            ("avatar_url", "TEXT"),
+            ("car_number", "TEXT"),
+            ("reset_code", "TEXT"),
+            ("reset_code_expires_at", "TEXT"),
+            ("auth_provider", "TEXT DEFAULT 'LOCAL'")
+        ]
+        for col_name, col_type in cols_to_add:
+            if col_name not in existing_cols:
+                cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type};")
+
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
+
 def seed_initial_data(db_path: Optional[str] = None) -> None:
     now_iso = datetime.now(timezone.utc).isoformat()
     

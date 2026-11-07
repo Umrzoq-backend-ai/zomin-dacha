@@ -21,7 +21,7 @@ let searchCheckInDate = '';
 let searchCheckOutDate = '';
 let guestsAdults = 2;
 let guestsChildren = 0;
-let wishlistItems = new Set(['mountain-chalet-zomin', 'zomin-villa']);
+let wishlistItems = new Set();
 
 // Multilingual Localization Dictionaries (UZ, RU, EN)
 const I18N = {
@@ -824,6 +824,9 @@ function formatSum(num) {
 
 // Initialize on DOM load
 window.addEventListener('DOMContentLoaded', async () => {
+  // Initialize Dark / Light Theme
+  initTheme();
+
   // Telegram Mini App (TMA) Native SDK Integration
   const tg = window.Telegram?.WebApp;
   if (tg) {
@@ -855,6 +858,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             };
             localStorage.setItem('zomin_user', JSON.stringify(currentUser));
             updateHeaderAuthState();
+            loadUserWishlist(currentUser);
             showToast(`Telegram orqali kirdingiz: ${userData.full_name}`, 'success');
           }
         })
@@ -888,6 +892,14 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Load properties
   await loadProperties();
+
+  // Load user wishlist if logged in
+  if (currentUser) {
+    await loadUserWishlist(currentUser);
+  } else {
+    wishlistItems = new Set();
+    updateSavedCounters();
+  }
 
   // Initialize Map
   initLeafletMap();
@@ -1734,6 +1746,45 @@ function executeHeroSearch() {
   showToast(msg, 'success');
 }
 
+function toggleGuestsDropdown(e) {
+  if (e) e.stopPropagation();
+  const dropdown = document.getElementById('dropdown-guests');
+  const isCurrentlyOpen = dropdown && !dropdown.classList.contains('hidden');
+  closeAllSearchDropdowns();
+  if (dropdown && !isCurrentlyOpen) {
+    dropdown.classList.remove('hidden');
+    const seg = document.getElementById('segment-guests');
+    if (seg) {
+      const parentCard = seg.closest('.floating-search-card');
+      if (parentCard) {
+        const parentRect = parentCard.getBoundingClientRect();
+        const segRect = seg.getBoundingClientRect();
+        const offsetLeft = segRect.left - parentRect.left;
+        const maxLeft = parentRect.width - 290;
+        dropdown.style.left = `${Math.max(10, Math.min(offsetLeft - 20, maxLeft))}px`;
+      }
+    }
+  }
+}
+
+function adjustGuests(type, delta) {
+  if (type === 'adults') {
+    guestsAdults = Math.max(1, Math.min(20, guestsAdults + delta));
+    const cntEl = document.getElementById('stepper-adults') || document.getElementById('counter-adults');
+    if (cntEl) cntEl.innerText = guestsAdults;
+  } else if (type === 'children') {
+    guestsChildren = Math.max(0, Math.min(15, guestsChildren + delta));
+    const cntEl = document.getElementById('stepper-children') || document.getElementById('counter-children');
+    if (cntEl) cntEl.innerText = guestsChildren;
+  }
+  const total = guestsAdults + guestsChildren;
+  const t = I18N[currentLang] || I18N.uz;
+  const valEl = document.getElementById('search-val-guests');
+  if (valEl) valEl.innerText = t.searchGuestsFormat(total);
+
+  renderProperties();
+}
+
 function initDefaultDates() {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1767,6 +1818,7 @@ async function loadProperties() {
     if (!res.ok) throw new Error('Failed to fetch');
     propertiesCache = await res.json();
     renderProperties();
+    if (typeof renderMapMarkers === 'function') renderMapMarkers('ALL');
   } catch (err) {
     console.error('Error loading properties:', err);
     // Use high-fidelity local defaults if server reload happens
@@ -2046,16 +2098,146 @@ function renderProperties() {
   }).join('');
 }
 
-function toggleWishlist(slug, btn) {
-  if (wishlistItems.has(slug)) {
-    wishlistItems.delete(slug);
-    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
-    btn.classList.remove('active');
-  } else {
-    wishlistItems.add(slug);
-    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
-    btn.classList.add('active');
+async function toggleWishlist(slug, btn) {
+  if (!currentUser) {
+    const t = I18N[currentLang] || I18N.uz;
+    showToast(currentLang === 'uz' ? "Dachalarni saqlash uchun avval hisobingizga kiring" : (currentLang === 'ru' ? "Войдите в систему, чтобы сохранять дачи" : "Please sign in to save properties"), 'info');
+    window.pendingWishlistSlug = slug;
+    openAuthModal('login');
+    return;
   }
+
+  try {
+    const res = await fetch('/api/v1/auth/wishlist/toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: currentUser.id, property_slug: slug })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Saqlashda xatolik yuz berdi');
+    }
+    const data = await res.json();
+    wishlistItems = new Set(data.wishlist || []);
+    const isSaved = wishlistItems.has(slug);
+
+    if (btn) {
+      if (isSaved) {
+        btn.classList.add('active');
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+      } else {
+        btn.classList.remove('active');
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+      }
+    }
+
+    updateSavedCounters();
+    updateModalSaveButtonState();
+
+    const t = I18N[currentLang] || I18N.uz;
+    showToast(isSaved ? (t.toastSaved || "Saqlanganlarga qo'shildi!") : (t.toastRemoved || "Saqlanganlardan olib tashlandi"), isSaved ? 'success' : 'info');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function loadUserWishlist(user) {
+  if (!user || !user.id) {
+    wishlistItems = new Set();
+    updateSavedCounters();
+    return;
+  }
+  try {
+    const res = await fetch(`/api/v1/auth/wishlist/${user.id}`);
+    if (res.ok) {
+      const data = await res.json();
+      wishlistItems = new Set(data.wishlist || []);
+    }
+  } catch (err) {
+    console.warn('Wishlist load error:', err);
+  }
+  updateSavedCounters();
+  renderProperties();
+  updateModalSaveButtonState();
+}
+
+function updateSavedCounters() {
+  const statSaved = document.getElementById('prof-stat-saved');
+  if (statSaved) statSaved.innerText = wishlistItems.size;
+  const countBadge = document.getElementById('wishlist-count-badge');
+  if (countBadge) countBadge.innerText = wishlistItems.size;
+}
+
+function openWishlistModal() {
+  if (!currentUser) {
+    showToast(currentLang === 'uz' ? "Saqlanganlarni ko'rish uchun avval hisobingizga kiring" : (currentLang === 'ru' ? "Войдите в систему, чтобы просмотреть избранное" : "Please log in to view your saved places"), 'info');
+    openAuthModal('login');
+    return;
+  }
+  const modal = document.getElementById('wishlist-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    renderWishlistModalCards();
+  }
+  const pMenu = document.getElementById('profile-dropdown-menu');
+  if (pMenu) pMenu.classList.add('hidden');
+}
+
+function closeWishlistModal() {
+  const modal = document.getElementById('wishlist-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function renderWishlistModalCards() {
+  const grid = document.getElementById('wishlist-cards-grid');
+  const countBadge = document.getElementById('wishlist-count-badge');
+  if (!grid) return;
+
+  if (countBadge) countBadge.innerText = wishlistItems.size;
+
+  if (wishlistItems.size === 0) {
+    grid.innerHTML = `
+      <div class="wishlist-empty-state" style="grid-column: 1 / -1; text-align: center; padding: 48px 16px;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" style="margin: 0 auto 16px;">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <h4 style="font-size: 16px; font-weight: 700; color: var(--color-text-main); margin-bottom: 6px;">Hozircha saqlangan dachalar yo'q</h4>
+        <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px;">O'zingizga yoqqan dachalarni yurakcha belgisini bosib saqlab qo'ying</p>
+        <button class="btn-primary-auth" style="display: inline-block; width: auto; padding: 10px 24px; margin: 0 auto;" onclick="closeWishlistModal(); scrollToSection('stays-section');">Dachalarni ko'rish</button>
+      </div>
+    `;
+    return;
+  }
+
+  const savedProps = propertiesCache.filter(p => wishlistItems.has(p.slug));
+  grid.innerHTML = savedProps.map(p => {
+    const loc = getLocalizedProperty(p, currentLang);
+    const title = loc ? loc.title : p.title;
+    const dist = loc ? loc.districtText : p.micro_district;
+    const img = (p.photos && p.photos.length > 0) ? p.photos[0] : '/static/assets/villa.jpg';
+    const price = formatSum(p.min_price || 1200000);
+
+    return `
+      <div class="wishlist-item-card" style="display: flex; gap: 14px; background: var(--color-bg-card, #fff); border: 1px solid var(--color-border); border-radius: 12px; padding: 12px; align-items: center;">
+        <img src="${img}" style="width: 88px; height: 72px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" alt="${title}" onerror="this.src='/static/assets/villa.jpg'">
+        <div style="flex: 1; min-width: 0;">
+          <h4 style="font-size: 14px; font-weight: 700; color: var(--color-text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</h4>
+          <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 6px;">📍 ${dist}</div>
+          <div style="font-size: 13px; font-weight: 700; color: #047857;">${price} so'm <small style="font-weight: 400; color: var(--color-text-muted);">/ kun</small></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+          <button class="btn-popup-action" style="padding: 6px 14px; font-size: 12px;" onclick="closeWishlistModal(); openBookingModal('${p.id}');">Ko'rish</button>
+          <button class="btn-remove-wishlist" style="background: none; border: none; color: #ef4444; font-size: 11px; cursor: pointer; padding: 4px;" onclick="removeWishlistItem('${p.slug}')">✕ Olib tashlash</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function removeWishlistItem(slug) {
+  if (!currentUser) return;
+  await toggleWishlist(slug);
+  renderWishlistModalCards();
 }
 
 function clearAllFilters() {
@@ -2087,28 +2269,283 @@ function clearAllFilters() {
 // ===================================================================
 // AUTH & PROFILE LOGIC
 // ===================================================================
+// ===================================================================
+// THEME SWITCHER (DARK / LIGHT LUXURY MOUNTAIN PALETTE)
+// ===================================================================
+function initTheme() {
+  const saved = localStorage.getItem('zomin_theme') || 'light';
+  applyTheme(saved);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const sunIcon = document.querySelector('.theme-sun-icon');
+  const moonIcon = document.querySelector('.theme-moon-icon');
+  if (theme === 'dark') {
+    if (sunIcon) sunIcon.classList.add('hidden');
+    if (moonIcon) moonIcon.classList.remove('hidden');
+  } else {
+    if (sunIcon) sunIcon.classList.remove('hidden');
+    if (moonIcon) moonIcon.classList.add('hidden');
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('zomin_theme', next);
+  applyTheme(next);
+  showToast(next === 'dark' ? "Tungi rejim yoqildi (Dark)" : "Kunduzgi rejim yoqildi (Light)", 'info');
+}
+
+// ===================================================================
+// AUTH & TOPHAND-STYLE LOGIN / REGISTER / FORGOT PASSWORD
+// ===================================================================
 function handleAuthButtonClick() {
   if (!currentUser) {
-    openAuthModal();
+    openAuthModal('login');
   } else {
     const menu = document.getElementById('profile-dropdown-menu');
     menu.classList.toggle('hidden');
   }
 }
 
-function openAuthModal() {
-  document.getElementById('auth-modal').classList.remove('hidden');
+function openAuthModal(view = 'login') {
+  const modal = document.getElementById('auth-modal');
+  if (modal) modal.classList.remove('hidden');
+  showAuthView(view);
   const pMenu = document.getElementById('profile-dropdown-menu');
   if (pMenu) pMenu.classList.add('hidden');
 }
 
 function closeAuthModal() {
-  document.getElementById('auth-modal').classList.add('hidden');
+  const modal = document.getElementById('auth-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function showAuthView(view) {
+  const vLogin = document.getElementById('auth-view-login');
+  const vReg = document.getElementById('auth-view-register');
+  const vForgot = document.getElementById('auth-view-forgot');
+
+  if (vLogin) vLogin.classList.toggle('hidden', view !== 'login');
+  if (vReg) vReg.classList.toggle('hidden', view !== 'register');
+  if (vForgot) vForgot.classList.toggle('hidden', view !== 'forgot');
+
+  if (view === 'forgot') {
+    const s1 = document.getElementById('forgot-step-1');
+    const s2 = document.getElementById('forgot-step-2');
+    if (s1) s1.classList.remove('hidden');
+    if (s2) s2.classList.add('hidden');
+  }
+}
+
+function togglePasswordVisibility(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPwd = input.type === 'password';
+  input.type = isPwd ? 'text' : 'password';
+  if (btnEl) {
+    btnEl.innerHTML = isPwd
+      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+  }
+}
+
+async function handleEmailLoginSubmit(e) {
+  e.preventDefault();
+  const emailInput = document.getElementById('login-email-input');
+  const pwdInput = document.getElementById('login-password-input');
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+  const password = pwdInput ? pwdInput.value : '';
+
+  if (!email || !password) {
+    showToast('Email va parolni kiriting', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/v1/auth/login-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Email yoki parol noto‘g‘ri');
+    }
+    const user = await res.json();
+    onAuthSuccess(user);
+    showToast(`${user.full_name}, platformaga xush kelibsiz!`, 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function handleEmailRegisterSubmit(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('reg-fullname-input');
+  const emailInput = document.getElementById('reg-email-input');
+  const phoneInput = document.getElementById('reg-phone-input');
+  const pwdInput = document.getElementById('reg-password-input');
+
+  const full_name = nameInput ? nameInput.value.trim() : '';
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+  const phone_number = phoneInput ? phoneInput.value.trim() : '';
+  const password = pwdInput ? pwdInput.value : '';
+
+  if (!full_name || !email || !password) {
+    showToast('Barcha maydonlarni to‘ldiring', 'error');
+    return;
+  }
+  if (password.length < 6) {
+    showToast('Parol kamida 6 ta belgidan iborat bo‘lsin', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/v1/auth/register-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ full_name, email, password, phone_number })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Ro‘yxatdan o‘tishda xatolik yuz berdi');
+    }
+    const user = await res.json();
+    onAuthSuccess(user);
+    showToast(`Tabriklaymiz, ${user.full_name}! Hisobingiz yaratildi.`, 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function handleGoogleLogin(email = null, name = null) {
+  let chosenEmail = email;
+  let chosenName = name;
+  if (!chosenEmail) {
+    chosenEmail = 'umurzoq972@gmail.com';
+    chosenName = 'Umurzoq';
+  }
+
+  try {
+    const res = await fetch('/api/v1/auth/google-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: chosenEmail,
+        full_name: chosenName,
+        avatar_url: generateUserAvatar(chosenName, chosenEmail)
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Google orqali kirishda xatolik');
+    }
+    const user = await res.json();
+    onAuthSuccess(user);
+    showToast(`Google orqali kirdingiz: ${user.full_name}`, 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function handleSendResetCode() {
+  const emailInput = document.getElementById('forgot-email-input');
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+  if (!email || !email.includes('@')) {
+    showToast('Iltimos, to‘g‘ri email manzilini kiriting', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/v1/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Kodni yuborishda xatolik');
+    }
+    const data = await res.json();
+    document.getElementById('forgot-step-1')?.classList.add('hidden');
+    document.getElementById('forgot-step-2')?.classList.remove('hidden');
+
+    if (data.code_hint) {
+      const codeInput = document.getElementById('forgot-code-input');
+      if (codeInput) codeInput.value = data.code_hint;
+    }
+    showToast('Tasdiqlash kodi emailingizga yuborildi!', 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function handleConfirmResetPassword() {
+  const emailInput = document.getElementById('forgot-email-input');
+  const codeInput = document.getElementById('forgot-code-input');
+  const newPwdInput = document.getElementById('forgot-new-pwd-input');
+
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+  const code = codeInput ? codeInput.value.trim() : '';
+  const new_password = newPwdInput ? newPwdInput.value : '';
+
+  if (!code || code.length < 4) {
+    showToast('Tasdiqlash kodini kiriting', 'error');
+    return;
+  }
+  if (!new_password || new_password.length < 6) {
+    showToast('Yangi parol kamida 6 ta belgidan iborat bo‘lsin', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/v1/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code, new_password })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Parolni yangilashda xatolik');
+    }
+    const user = await res.json();
+    onAuthSuccess(user);
+    showToast('Parolingiz yangilandi va tizimga kirdingiz!', 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+function onAuthSuccess(user) {
+  currentUser = {
+    id: user.id,
+    name: user.full_name,
+    full_name: user.full_name,
+    email: user.email,
+    phone: user.phone_number,
+    phone_number: user.phone_number,
+    role: user.role || 'GUEST',
+    car_plate: user.car_number || '01 A 777 AA',
+    avatar: user.avatar_url || generateUserAvatar(user.full_name, user.email)
+  };
+  localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+  updateHeaderAuthState();
+  closeAuthModal();
+  loadUserWishlist(currentUser);
+
+  if (window.pendingWishlistSlug) {
+    const pending = window.pendingWishlistSlug;
+    window.pendingWishlistSlug = null;
+    toggleWishlist(pending);
+  }
 }
 
 function openProfileModal() {
   if (!currentUser) {
-    openAuthModal();
+    openAuthModal('login');
     return;
   }
   const p = currentUser;
@@ -2173,6 +2610,20 @@ function handleSaveProfile(e) {
   currentUser.phone_number = phoneVal;
   currentUser.car_plate = carVal;
 
+  // Persist to backend if ID is available
+  if (currentUser.id) {
+    fetch('/api/v1/auth/update-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: currentUser.id,
+        full_name: nameVal,
+        phone_number: phoneVal,
+        car_number: carVal
+      })
+    }).catch(err => console.warn('Profile sync warning:', err));
+  }
+
   localStorage.setItem('zomin_user', JSON.stringify(currentUser));
   updateHeaderAuthState();
   closeProfileModal();
@@ -2183,79 +2634,17 @@ function handleSaveProfile(e) {
 
 function handleLogout() {
   currentUser = null;
+  wishlistItems.clear();
   localStorage.removeItem('zomin_user');
   updateHeaderAuthState();
+  updateSavedCounters();
+  renderProperties();
   closeProfileModal();
   const menu = document.getElementById('profile-dropdown-menu');
   if (menu) menu.classList.add('hidden');
 
   const t = I18N[currentLang] || I18N.uz;
   showToast(t.profLogoutToast || 'Hisobdan chiqildi', 'info');
-}
-
-// Google Authentication Handlers
-function handleGoogleOneClick() {
-  const emailInput = document.getElementById('custom-google-email-input');
-  if (emailInput && emailInput.value.trim()) {
-    const form = document.getElementById('auth-clean-form');
-    if (form) form.requestSubmit();
-    return;
-  }
-  if (emailInput) {
-    emailInput.focus();
-    showToast('Iltimos, Google elektron pochtangizni kiriting', 'info');
-  }
-}
-
-function loginWithGoogleAccount(key) {
-  const profile = GOOGLE_PROFILES[key] || GOOGLE_PROFILES.umurzoq;
-  currentUser = Object.assign({}, profile);
-  localStorage.setItem('zomin_user', JSON.stringify(currentUser));
-  updateHeaderAuthState();
-  closeAuthModal();
-  showToast(`${currentUser.name} (${currentUser.email}) Google hisobi orqali kirdingiz!`, 'success');
-}
-
-function handleCustomGoogleSubmit(e) {
-  e.preventDefault();
-  const nameInput = document.getElementById('custom-google-name-input');
-  const emailInput = document.getElementById('custom-google-email-input');
-
-  const emailVal = emailInput ? emailInput.value.trim().toLowerCase() : '';
-  let nameVal = nameInput ? nameInput.value.trim() : '';
-
-  if (!emailVal || !emailVal.includes('@')) {
-    showToast('Iltimos, to‘g‘ri Google pochtangizni kiriting', 'error');
-    return;
-  }
-
-  // Pre-seed known names for familiar emails
-  if (emailVal === 'school21dev@gmail.com') {
-    nameVal = 'Umrzoq Yulchiyev';
-  } else if (emailVal === 'umurzoq972@gmail.com') {
-    nameVal = 'Umurzoq';
-  } else if (!nameVal) {
-    const namePart = emailVal.split('@')[0].replace(/[._-]/g, ' ');
-    nameVal = namePart.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-  }
-
-  const userAvatar = generateUserAvatar(nameVal, emailVal);
-
-  currentUser = {
-    id: `usr-google-${Date.now()}`,
-    name: nameVal,
-    full_name: nameVal,
-    email: emailVal,
-    avatar: userAvatar,
-    phone: '+998 90 123 45 67',
-    car_plate: '01 A 777 AA',
-    role: 'GUEST'
-  };
-
-  localStorage.setItem('zomin_user', JSON.stringify(currentUser));
-  updateHeaderAuthState();
-  closeAuthModal();
-  showToast(`${currentUser.name} (${currentUser.email}) sifatida muvaffaqiyatli kirdingiz!`, 'success');
 }
 
 function handleUserAvatarUpload(e) {
@@ -2290,6 +2679,7 @@ function selectUserProfile(roleKey) {
   currentUser = Object.assign({}, profile);
   localStorage.setItem('zomin_user', JSON.stringify(currentUser));
   updateHeaderAuthState();
+  loadUserWishlist(currentUser);
   closeAuthModal();
   showToast(`${currentUser.name} (${currentUser.role}) sifatida tizimga kirdingiz`, 'success');
 
@@ -2334,58 +2724,179 @@ function updateHeaderAuthState() {
 }
 
 // ===================================================================
-// LEAFLET MAP
+// DYNAMIC LEAFLET MAP & TOURIST MARKERS
 // ===================================================================
 function initLeafletMap() {
   const el = document.getElementById('zomin-leaflet-map');
   if (!el || typeof L === 'undefined') return;
 
-  leafletMap = L.map('zomin-leaflet-map', { scrollWheelZoom: false }).setView([39.90, 68.43], 12);
+  if (leafletMap) {
+    leafletMap.remove();
+    leafletMap = null;
+  }
+
+  leafletMap = L.map('zomin-leaflet-map', { scrollWheelZoom: false }).setView([39.78, 68.43], 11);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors | Zomin'
+    attribution: '© OpenStreetMap contributors | Zomin Milliy Bog‘i'
   }).addTo(leafletMap);
 
-  const locs = [
-    { type: "DACHA", title: "Shox_dacha", price: "1 400 000 so'm", lat: 39.9180, lng: 68.4105, img: "/static/assets/shox_pool.jpg", id: "prop-shox" },
-    { type: "DACHA", title: "Chashma Eco Dacha", price: "1 600 000 so'm", lat: 39.9245, lng: 68.4020, img: "/static/assets/dacha_chashma.jpg", id: "prop-chashma" },
-    { type: "DACHA", title: "Suffa Panorama Kottej", price: "1 800 000 so'm", lat: 39.8650, lng: 68.4610, img: "/static/assets/dacha_panorama.jpg", id: "prop-panorama" },
-    { type: "DACHA", title: "Mountain Chalet Zomin", price: "1 200 000 so'm", lat: 39.8715, lng: 68.4520, img: "/static/assets/chalet.jpg", id: "prop-1" },
-    { type: "DACHA", title: "Zomin Villa", price: "2 500 000 so'm", lat: 39.9612, lng: 68.4231, img: "/static/assets/villa.jpg", id: "prop-2" },
-    { type: "DACHA", title: "Forest Lodge", price: "900 000 so'm", lat: 39.9450, lng: 68.4110, img: "/static/assets/lodge.jpg", id: "prop-3" },
-    { type: "DACHA", title: "O'riklisoy Buloq Bo'yi", price: "150 000 so'm", lat: 39.9210, lng: 68.3980, img: "/static/assets/hiking.jpg", id: "prop-4" },
-    { type: "ATTRACTION", title: "Zomin osma ko‘prigi (305m)", price: "Diqqatga sazovor", lat: 39.8900, lng: 68.4400, img: "/static/assets/bridge.jpg" },
-    { type: "ATTRACTION", title: "Kabel yo‘li (Suffa 2400m)", price: "Dor yo'li", lat: 39.8750, lng: 68.4550, img: "/static/assets/cablecar.jpg" }
+  renderMapMarkers('ALL');
+}
+
+function renderMapMarkers(filterType = 'ALL') {
+  if (!leafletMap || typeof L === 'undefined') return;
+
+  // Clear existing markers
+  mapMarkers.forEach(m => leafletMap.removeLayer(m.marker));
+  mapMarkers = [];
+
+  // 1. Signature Zomin Attractions
+  const attractions = [
+    {
+      id: "attr-bridge",
+      type: "ATTRACTION",
+      title: "Zomin Osma Shisha Ko‘prigi (305m)",
+      district: "Suffa yo'li, Zomin",
+      price: "Attraksion & Sayr",
+      lat: 39.670,
+      lng: 68.460,
+      img: "/static/assets/bridge.jpg",
+      action: "openAttractionModal('bridge')"
+    },
+    {
+      id: "attr-cablecar",
+      type: "ATTRACTION",
+      title: "Suffa Bartholet Kanat Yo‘li (2400m)",
+      district: "Suffa platosi, Zomin",
+      price: "Dor yo'li (Panorama)",
+      lat: 39.635,
+      lng: 68.445,
+      img: "/static/assets/cablecar.jpg",
+      action: "openAttractionModal('cablecar')"
+    },
+    {
+      id: "attr-waterfall",
+      type: "ATTRACTION",
+      title: "Sharshara & Muzbuloq Chashmasi",
+      district: "O'riklisoy, Zomin",
+      price: "Tabiat durdonasi",
+      lat: 39.750,
+      lng: 68.430,
+      img: "/static/assets/hiking.jpg",
+      action: "scrollToSection('stays-section')"
+    },
+    {
+      id: "attr-peshagor",
+      type: "ATTRACTION",
+      title: "Peshag‘or Qadimiy G‘ori",
+      district: "Peshag'or, Zomin",
+      price: "Tarixiy obida",
+      lat: 39.935,
+      lng: 68.365,
+      img: "/static/assets/chalet.jpg",
+      action: "scrollToSection('stays-section')"
+    },
+    {
+      id: "attr-walnut",
+      type: "ATTRACTION",
+      title: "Boboong‘oq (1000 yillik yong‘oq)",
+      district: "Sanatoriy hududi, Zomin",
+      price: "Asriy tabiat yodgorligi",
+      lat: 39.715,
+      lng: 68.445,
+      img: "/static/assets/lodge.jpg",
+      action: "scrollToSection('stays-section')"
+    }
   ];
 
-  locs.forEach(l => {
-    const marker = L.marker([l.lat, l.lng]).addTo(leafletMap);
-    const clickAction = l.type === 'DACHA' 
-      ? `onclick="openBookingModal('${l.id || propertiesCache[0]?.id}')"`
-      : `onclick="openAttractionModal('${l.title.includes('ko‘prigi') ? 'bridge' : 'cablecar'}')"`;
-    marker.bindPopup(`
-      <div class="map-popup-card">
-        <img src="${l.img}" class="map-popup-img">
-        <div class="map-popup-title">${l.title}</div>
-        <div class="map-popup-price">${l.price}</div>
-        <button class="btn-popup-action" ${clickAction}>Batafsil / Ko'rish</button>
+  // 2. Combine properties from propertiesCache + attractions
+  const allMapItems = [];
+
+  propertiesCache.forEach(p => {
+    if (!p.latitude || !p.longitude) return;
+    const isTapchan = p.property_type === 'CHOYXONA_TAPCHAN';
+    const itemType = isTapchan ? 'TAPCHAN' : 'DACHA';
+    const loc = getLocalizedProperty(p, currentLang);
+    const title = loc ? loc.title : p.title;
+    const dist = loc ? loc.districtText : p.micro_district;
+    const img = (p.photos && p.photos.length > 0) ? p.photos[0] : '/static/assets/villa.jpg';
+    const priceText = `${formatSum(p.min_price || 1200000)} so'm / kun`;
+
+    allMapItems.push({
+      id: p.id,
+      type: itemType,
+      title: title,
+      district: dist,
+      price: priceText,
+      lat: p.latitude,
+      lng: p.longitude,
+      img: img,
+      action: `openBookingModal('${p.id}')`
+    });
+  });
+
+  attractions.forEach(a => allMapItems.push(a));
+
+  // 3. Render markers according to filterType
+  allMapItems.forEach(item => {
+    if (filterType !== 'ALL' && item.type !== filterType) return;
+
+    let pinColor = '#047857'; // Green for Dachas
+    let iconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>';
+
+    if (item.type === 'TAPCHAN') {
+      pinColor = '#d97706'; // Amber for Tapchans
+      iconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>';
+    } else if (item.type === 'ATTRACTION') {
+      pinColor = '#2563eb'; // Blue for Sights / Attractions
+      iconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+    }
+
+    const pinHtml = `
+      <div style="background:${pinColor}; width:32px; height:32px; border-radius:50%; border:2px solid #ffffff; box-shadow:0 3px 10px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; cursor:pointer;">
+        ${iconSvg}
       </div>
-    `);
-    mapMarkers.push({ marker, type: l.type });
+    `;
+
+    const customIcon = L.divIcon({
+      html: pinHtml,
+      className: 'custom-map-pin',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      popupAnchor: [0, -18]
+    });
+
+    const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(leafletMap);
+
+    const popupHtml = `
+      <div class="map-popup-card">
+        <img src="${item.img}" class="map-popup-img" alt="${item.title}" onerror="this.src='/static/assets/villa.jpg'">
+        <div class="map-popup-title">${item.title}</div>
+        <div style="font-size:11px; color:#64748b; margin-bottom:4px;">📍 ${item.district}</div>
+        <div class="map-popup-price">${item.price}</div>
+        <button class="btn-popup-action" onclick="${item.action}">Ko'rish / Batafsil</button>
+      </div>
+    `;
+
+    marker.bindPopup(popupHtml, { maxWidth: 240, closeButton: true });
+    mapMarkers.push({ marker, type: item.type });
   });
 }
 
-function filterMapMarkers(type) {
+function filterMapMarkers(type, evt) {
   document.querySelectorAll('.map-ctrl-chip').forEach(c => c.classList.remove('active'));
-  event.target.classList.add('active');
+  if (evt && evt.target) {
+    evt.target.classList.add('active');
+  } else if (window.event && window.event.target) {
+    window.event.target.classList.add('active');
+  } else {
+    const idMap = { 'ALL': 'chip-map-all', 'DACHA': 'chip-map-dachas', 'TAPCHAN': 'chip-map-tapchans', 'ATTRACTION': 'chip-map-sights' };
+    const btn = document.getElementById(idMap[type]);
+    if (btn) btn.classList.add('active');
+  }
 
-  mapMarkers.forEach(item => {
-    if (type === 'ALL' || item.type === type) {
-      leafletMap.addLayer(item.marker);
-    } else {
-      leafletMap.removeLayer(item.marker);
-    }
-  });
+  renderMapMarkers(type);
 }
 
 // Navigation helpers
@@ -2548,19 +3059,17 @@ function shareCurrentProperty() {
   }
 }
 
-function toggleModalSaveProperty() {
+async function toggleModalSaveProperty() {
   if (!selectedProperty) return;
-  const t = I18N[currentLang] || I18N.uz;
-  const slug = selectedProperty.slug;
-  if (wishlistItems.has(slug)) {
-    wishlistItems.delete(slug);
-    showToast(`${selectedProperty.title}: ${t.toastRemoved || 'Saqlanganlardan olib tashlandi'}`, 'info');
-  } else {
-    wishlistItems.add(slug);
-    showToast(`${selectedProperty.title}: ${t.toastSaved || "Saqlanganlarga qo'shildi!"}`, 'success');
+  if (!currentUser) {
+    const t = I18N[currentLang] || I18N.uz;
+    showToast(currentLang === 'uz' ? "Dachalarni saqlash uchun avval hisobingizga kiring" : (currentLang === 'ru' ? "Войдите в систему, чтобы сохранять дачи" : "Please sign in to save properties"), 'info');
+    window.pendingWishlistSlug = selectedProperty.slug;
+    openAuthModal('login');
+    return;
   }
+  await toggleWishlist(selectedProperty.slug);
   updateModalSaveButtonState();
-  renderProperties();
 }
 
 function updateModalSaveButtonState() {

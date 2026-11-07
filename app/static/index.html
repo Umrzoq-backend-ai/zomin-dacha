@@ -62,8 +62,26 @@
         <a href="#partner" class="nav-link" id="nav-link-partner" onclick="openPartnerModal()">Hamkor bo'lish</a>
       </nav>
 
-      <!-- Right Controls: Multilingual Selector (UZ/RU/EN) & Kirish / Profile -->
+      <!-- Right Controls: Theme Toggle, Multilingual Selector (UZ/RU/EN) & Kirish / Profile -->
       <div class="header-actions">
+        <!-- Theme Switcher (Dark / Light) -->
+        <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Mavzuni o'zgartirish (Dark / Light)">
+          <svg class="theme-sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="theme-moon-icon hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
         <!-- Language Selector -->
         <div class="lang-dropdown-wrapper">
           <button class="lang-btn" id="lang-btn" onclick="toggleLangMenu(event)">
@@ -131,7 +149,7 @@
               </svg>
               <span id="lbl-menu-trips">Mening safarlarim</span>
             </a>
-            <a href="#saved" class="profile-menu-item" onclick="scrollToSection('stays-section')">
+            <a href="#saved" class="profile-menu-item" onclick="openWishlistModal()">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path
                   d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
@@ -324,7 +342,7 @@
           <div class="search-divider"></div>
 
           <!-- Segment 4: Guests Counter -->
-          <div class="search-segment segment-guests" onclick="toggleGuestsDropdown(event)">
+          <div class="search-segment segment-guests" id="segment-guests" onclick="toggleGuestsDropdown(event)">
             <div class="segment-icon-box">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18221e" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -768,7 +786,7 @@
               <span class="stat-number" id="prof-stat-trips">2</span>
               <span class="stat-title" id="lbl-prof-stat-trips">Bron qilingan safarlar</span>
             </div>
-            <div class="prof-stat-box" onclick="closeProfileModal(); scrollToSection('stays-section');">
+            <div class="prof-stat-box" onclick="closeProfileModal(); openWishlistModal();">
               <span class="stat-number" id="prof-stat-saved">2</span>
               <span class="stat-title" id="lbl-prof-stat-saved">Saqlangan maskanlar</span>
             </div>
@@ -792,69 +810,233 @@
     </div>
   </div>
 
-  <!-- ================= 5. GOOGLE AUTH MODAL ================= -->
+  <!-- ================= 5. TOPHAND-STYLE SECURE AUTH MODAL ================= -->
   <div id="auth-modal" class="modal-overlay hidden">
-    <div class="modal-card modal-auth">
-      <div class="modal-header">
-        <div>
-          <span class="modal-badge-top" id="lbl-auth-badge">XAVFSIZ VA TEZKOR</span>
-          <h3 class="modal-title" id="auth-modal-title">Tizimga kirish</h3>
-        </div>
-        <button class="modal-close-btn" onclick="closeAuthModal()">✕</button>
-      </div>
-      <div class="modal-body">
+    <div class="modal-card modal-auth tophand-auth-card">
+      <button class="modal-close-btn tophand-close" onclick="closeAuthModal()">✕</button>
 
-        <div class="google-auth-box">
-          <!-- Big Google Button -->
-          <button type="button" class="btn-google-main" onclick="handleGoogleOneClick()">
-            <svg class="google-icon-svg" viewBox="0 0 24 24">
-              <path fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-              <path fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+      <!-- View 1: Tizimga kirish (Login) -->
+      <div id="auth-view-login">
+        <div class="tophand-header">
+          <div class="tophand-brand">
+            <svg class="tophand-brand-icon" viewBox="0 0 38 22" fill="none">
+              <path d="M2 20L13 4L21 15L26 9L36 20H2Z" stroke="#047857" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13 4L18 11" stroke="#047857" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
-            <span id="lbl-google-btn-text">Google hisobi bilan davom etish</span>
-          </button>
+            <span class="tophand-brand-title">ZOMIN</span>
+          </div>
+          <h3 class="tophand-title" id="lbl-auth-welcome">Xush kelibsiz!</h3>
+          <p class="tophand-sub" id="lbl-auth-sub">Zomin dam olish va dacha platformasi</p>
+        </div>
 
-          <div class="google-divider">
-            <span id="lbl-google-divider">yoki elektron pochta bilan</span>
+        <button type="button" class="btn-google-sso" onclick="handleGoogleLogin()">
+          <svg class="google-icon-svg" viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+          </svg>
+          <span id="lbl-google-btn-text">Google orqali kirish</span>
+        </button>
+
+        <div class="tophand-divider">
+          <span id="lbl-tophand-divider">yoki email orqali</span>
+        </div>
+
+        <form onsubmit="handleEmailLoginSubmit(event)" class="tophand-form">
+          <div class="auth-field-box">
+            <svg class="auth-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <input type="email" id="login-email-input" class="auth-input-inner" placeholder="Email manzilingiz" required autocomplete="email">
           </div>
 
-          <!-- Direct User Input Form -->
-          <form onsubmit="handleCustomGoogleSubmit(event)" id="auth-clean-form" class="auth-clean-form">
-            <div class="form-group">
-              <label class="input-label" id="lbl-auth-email">Google elektron pochta manzili:</label>
-              <input type="email" id="custom-google-email-input" class="form-input" placeholder="nomingiz@gmail.com"
-                required autocomplete="email">
-            </div>
-
-            <div class="form-group mt-2">
-              <label class="input-label" id="lbl-auth-name">Ism-familiyangiz (ixtiyoriy):</label>
-              <input type="text" id="custom-google-name-input" class="form-input" placeholder="Ismingizni kiriting"
-                autocomplete="name">
-            </div>
-
-            <button type="submit" class="btn-auth-submit mt-3" id="lbl-btn-google-login">
-              <span>Davom etish</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
+          <div class="auth-field-box mt-3">
+            <svg class="auth-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input type="password" id="login-password-input" class="auth-input-inner" placeholder="Parol" required autocomplete="current-password">
+            <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility('login-password-input', this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
               </svg>
             </button>
-          </form>
-
-          <div class="google-trust-badge mt-3">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-            <span id="lbl-google-trust">Google OAuth 2.0 bilan himoyalangan</span>
           </div>
+
+          <div class="auth-rate-note mt-2" id="lbl-auth-rate-note">
+            15 daqiqa ichida 30 kirish urinishi. Parol 10 marta xato bo'lsa hisob 15 daqiqa qulflanadi.
+          </div>
+
+          <div class="auth-forgot-row mt-2">
+            <a href="javascript:void(0)" class="auth-forgot-link" onclick="showAuthView('forgot')" id="lbl-auth-forgot">Parolni unutdingizmi?</a>
+          </div>
+
+          <button type="submit" class="btn-primary-auth mt-3" id="lbl-auth-submit-btn">
+            Tizimga kirish
+          </button>
+        </form>
+
+        <div class="auth-switch-footer">
+          <span id="lbl-auth-no-account">Hisobingiz yo'qmi?</span>
+          <a href="javascript:void(0)" class="auth-switch-link" onclick="showAuthView('register')" id="lbl-auth-to-reg">Ro'yxatdan o'tish</a>
+        </div>
+      </div>
+
+      <!-- View 2: Ro'yxatdan o'tish (Register) -->
+      <div id="auth-view-register" class="hidden">
+        <div class="tophand-header">
+          <div class="tophand-brand">
+            <svg class="tophand-brand-icon" viewBox="0 0 38 22" fill="none">
+              <path d="M2 20L13 4L21 15L26 9L36 20H2Z" stroke="#047857" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13 4L18 11" stroke="#047857" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span class="tophand-brand-title">ZOMIN</span>
+          </div>
+          <h3 class="tophand-title" id="lbl-reg-title">Ro'yxatdan o'tish</h3>
+          <p class="tophand-sub" id="lbl-reg-sub">Zomin platformasida o'z hisobingizni oching</p>
         </div>
 
+        <button type="button" class="btn-google-sso" onclick="handleGoogleLogin()">
+          <svg class="google-icon-svg" viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+          </svg>
+          <span id="lbl-google-reg-text">Google orqali ro'yxatdan o'tish</span>
+        </button>
+
+        <div class="tophand-divider">
+          <span id="lbl-tophand-divider-reg">yoki email orqali</span>
+        </div>
+
+        <form onsubmit="handleEmailRegisterSubmit(event)" class="tophand-form">
+          <div class="auth-field-box">
+            <svg class="auth-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <input type="text" id="reg-fullname-input" class="auth-input-inner" placeholder="To'liq ism-familiyangiz" required>
+          </div>
+
+          <div class="auth-field-box mt-2">
+            <svg class="auth-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <input type="email" id="reg-email-input" class="auth-input-inner" placeholder="Email manzilingiz" required autocomplete="email">
+          </div>
+
+          <div class="auth-field-box mt-2">
+            <svg class="auth-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            <input type="tel" id="reg-phone-input" class="auth-input-inner" placeholder="+998 90 123 45 67">
+          </div>
+
+          <div class="auth-field-box mt-2">
+            <svg class="auth-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input type="password" id="reg-password-input" class="auth-input-inner" placeholder="Parol (kamida 6 ta belgi)" required minlength="6">
+            <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility('reg-password-input', this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+
+          <button type="submit" class="btn-primary-auth mt-3" id="lbl-reg-submit-btn">
+            Ro'yxatdan o'tish
+          </button>
+        </form>
+
+        <div class="auth-switch-footer">
+          <span id="lbl-auth-has-account">Hisobingiz bormi?</span>
+          <a href="javascript:void(0)" class="auth-switch-link" onclick="showAuthView('login')" id="lbl-auth-to-login">Tizimga kirish</a>
+        </div>
+      </div>
+
+      <!-- View 3: Parolni tiklash (Forgot Password) -->
+      <div id="auth-view-forgot" class="hidden">
+        <div class="tophand-header">
+          <div class="tophand-brand">
+            <svg class="tophand-brand-icon" viewBox="0 0 38 22" fill="none">
+              <path d="M2 20L13 4L21 15L26 9L36 20H2Z" stroke="#047857" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13 4L18 11" stroke="#047857" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span class="tophand-brand-title">ZOMIN</span>
+          </div>
+          <h3 class="tophand-title" id="lbl-forgot-title">Parolni tiklash</h3>
+          <p class="tophand-sub" id="lbl-forgot-sub">Ro'yxatdan o'tgan email manzilingizni kiriting. Tasdiqlash kodi yuboriladi.</p>
+        </div>
+
+        <div id="forgot-step-1">
+          <div class="auth-field-box">
+            <svg class="auth-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <input type="email" id="forgot-email-input" class="auth-input-inner" placeholder="Email manzilingiz" required>
+          </div>
+
+          <button type="button" class="btn-primary-auth mt-3" onclick="handleSendResetCode()" id="lbl-forgot-send-btn">
+            Tasdiqlash kodini yuborish
+          </button>
+        </div>
+
+        <div id="forgot-step-2" class="hidden mt-3">
+          <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:10px 14px; font-size:13px; color:#065f46; margin-bottom:12px;" id="forgot-code-alert">
+            Tasdiqlash kodi emailingizga yuborildi.
+          </div>
+
+          <div class="auth-field-box">
+            <svg class="auth-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 2l-2 2m-2-2l2 2m7 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
+            </svg>
+            <input type="text" id="forgot-code-input" class="auth-input-inner text-center font-bold" placeholder="6 xonali kod (masalan: 123456)" maxlength="6">
+          </div>
+
+          <div class="auth-field-box mt-2">
+            <svg class="auth-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input type="password" id="forgot-new-pwd-input" class="auth-input-inner" placeholder="Yangi parol (kamida 6 ta belgi)" minlength="6">
+          </div>
+
+          <button type="button" class="btn-primary-auth mt-3" onclick="handleConfirmResetPassword()" id="lbl-forgot-reset-btn">
+            Parolni yangilash va tizimga kirish
+          </button>
+        </div>
+
+        <div class="auth-switch-footer">
+          <a href="javascript:void(0)" class="auth-switch-link" onclick="showAuthView('login')" id="lbl-forgot-back">← Tizimga kirishga qaytish</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 5B. USER WISHLIST MODAL ================= -->
+  <div id="wishlist-modal" class="modal-overlay hidden">
+    <div class="modal-card modal-lg wishlist-modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="modal-badge-top" id="lbl-wishlist-badge">SEVIMLI MASKANLAR</span>
+          <h3 class="modal-title" id="lbl-wishlist-title">Saqlangan dachalar (<span id="wishlist-count-badge">0</span>)</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeWishlistModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="wishlist-cards-grid" class="wishlist-cards-grid">
+          <!-- Rendered dynamically -->
+        </div>
       </div>
     </div>
   </div>
@@ -1994,7 +2176,7 @@
   </div>
 
   <!-- JavaScript -->
-  <script src="/static/js/app.js?v=20261030_0215"></script>
+  <script src="/static/js/app.js?v=20261108_001"></script>
 </body>
 
 </html>

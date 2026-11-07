@@ -5,6 +5,10 @@ from datetime import datetime
 class UserBase(BaseModel):
     phone_number: str
     full_name: Optional[str] = None
+    email: Optional[str] = None
+    avatar_url: Optional[str] = None
+    car_number: Optional[str] = None
+    auth_provider: Optional[str] = "LOCAL"
     telegram_id: Optional[int] = None
     role: str = "GUEST"
 
