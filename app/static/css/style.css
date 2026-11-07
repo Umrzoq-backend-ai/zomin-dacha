@@ -146,19 +146,46 @@ img {
   align-items: center;
   gap: 12px;
   text-decoration: none;
+  cursor: pointer;
 }
 
-.brand-mountain-icon {
-  width: 38px;
-  height: 22px;
+.brand-logo-img {
+  height: 48px;
+  width: auto;
+  max-width: 135px;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.brand-text {
-  font-family: var(--font-serif);
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--color-primary);
+.brand-logo-img.logo-dark {
+  display: none;
+}
+
+.brand-logo:hover .brand-logo-img {
+  transform: scale(1.02);
+}
+
+.footer-logo-img {
+  height: 58px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.auth-brand-logo-img {
+  height: 46px;
+  width: auto;
+  max-width: 130px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 6px;
+}
+
+.auth-brand-logo-img.logo-dark {
+  display: none;
 }
 
 /* Center Nav Links */
@@ -553,6 +580,12 @@ img {
   min-width: 300px;
   z-index: 1005;
   animation: fadeInDown 0.2s ease;
+}
+
+#dropdown-guests {
+  left: auto !important;
+  right: 0 !important;
+  min-width: 290px;
 }
 
 .popup-option {
@@ -3511,6 +3544,78 @@ img {
 [data-theme="dark"] .site-header {
   background-color: rgba(9, 19, 16, 0.95);
   border-bottom: 1px solid #1d332b;
+}
+
+[data-theme="dark"] .brand-logo-img.logo-light,
+[data-theme="dark"] .auth-brand-logo-img.logo-light {
+  display: none !important;
+}
+
+[data-theme="dark"] .brand-logo-img.logo-dark,
+[data-theme="dark"] .auth-brand-logo-img.logo-dark {
+  display: block !important;
+}
+
+.google-active-account-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.google-active-account-hint:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.google-active-account-hint .hint-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.google-active-account-hint .hint-text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.google-active-account-hint .hint-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #14532d;
+  line-height: 1.2;
+}
+
+.google-active-account-hint .hint-email {
+  font-size: 11px;
+  color: #166534;
+  line-height: 1.2;
+}
+
+[data-theme="dark"] .google-active-account-hint {
+  background: #142e23;
+  border-color: #1e4a38;
+}
+
+[data-theme="dark"] .google-active-account-hint:hover {
+  background: #193a2c;
+}
+
+[data-theme="dark"] .google-active-account-hint .hint-name {
+  color: #86efac;
+}
+
+[data-theme="dark"] .google-active-account-hint .hint-email {
+  color: #a7f3d0;
 }
 
 [data-theme="dark"] .floating-search-card {

@@ -90,7 +90,7 @@ const I18N = {
     footerMain: "Asosiy",
     footerInfo: "Foydali ma'lumotlar",
     footerConnect: "Biz bilan bog'laning",
-    footerCopyright: "© 2025 ZOMIN. Barcha huquqlar himoyalangan.",
+    footerCopyright: "© 2026 ZOMIN. Barcha huquqlar himoyalangan.",
     flStays: "Turar joylar",
     flDiscover: "Kashf etish",
     flRoutes: "Marshrutlar",
@@ -243,7 +243,7 @@ const I18N = {
     footerMain: "Главное",
     footerInfo: "Полезная информация",
     footerConnect: "Свяжитесь с нами",
-    footerCopyright: "© 2025 ZOMIN. Все права защищены.",
+    footerCopyright: "© 2026 ZOMIN. Все права защищены.",
     flStays: "Жилье",
     flDiscover: "Исследовать",
     flRoutes: "Маршруты",
@@ -396,7 +396,7 @@ const I18N = {
     footerMain: "Navigation",
     footerInfo: "Helpful Info",
     footerConnect: "Connect With Us",
-    footerCopyright: "© 2025 ZOMIN. All rights reserved.",
+    footerCopyright: "© 2026 ZOMIN. All rights reserved.",
     flStays: "Stays",
     flDiscover: "Discover",
     flRoutes: "Routes",
@@ -744,19 +744,19 @@ function renderLocationDropdown(lang) {
 
 // Google Auth User Profiles
 const GOOGLE_PROFILES = {
-  umurzoq: {
-    id: "usr-google-umurzoq",
-    name: "Umurzoq",
-    email: "umurzoq972@gmail.com",
-    avatar: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'><circle cx='64' cy='64' r='64' fill='%231a73e8'/><text x='50%' y='55%' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif' font-weight='600' font-size='56' fill='%23ffffff' text-anchor='middle' dominant-baseline='middle'>U</text></svg>",
-    phone: "+998 91 593 30 18",
-    car_plate: "01 A 777 AA",
-    role: "GUEST"
-  },
   school21: {
     id: "usr-google-school21",
     name: "Umrzoq Yulchiyev",
     email: "school21dev@gmail.com",
+    avatar: "/static/assets/avatar.jpg",
+    phone: "+998 91 593 30 18",
+    car_plate: "01 A 777 AA",
+    role: "GUEST"
+  },
+  umurzoq: {
+    id: "usr-google-umurzoq",
+    name: "Umurzoq",
+    email: "umurzoq972@gmail.com",
     avatar: "/static/assets/avatar.jpg",
     phone: "+998 91 593 30 18",
     car_plate: "01 A 777 AA",
@@ -775,17 +775,17 @@ const GOOGLE_PROFILES = {
 
 // Generate high-resolution user avatar for any Google user
 function generateUserAvatar(name, email) {
-  if (email === 'school21dev@gmail.com' || email === 'umrzoq.backend@gmail.com') {
+  if (email === 'school21dev@gmail.com' || email === 'umrzoq.backend@gmail.com' || (name && name.toLowerCase().includes('umrzoq'))) {
     return '/static/assets/avatar.jpg';
   }
   if (email === 'alisher.zomin@gmail.com') {
     return '/static/assets/avatar2.jpg';
   }
   if (email === 'umurzoq972@gmail.com') {
-    return "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'><circle cx='64' cy='64' r='64' fill='%231a73e8'/><text x='50%' y='55%' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif' font-weight='600' font-size='56' fill='%23ffffff' text-anchor='middle' dominant-baseline='middle'>U</text></svg>";
+    return '/static/assets/avatar.jpg';
   }
   const initial = (name || email || 'U').charAt(0).toUpperCase();
-  const colors = ['#1a73e8', '#0d9488', '#e11d48', '#7c3aed', '#d97706', '#2563eb', '#059669'];
+  const colors = ['#047857', '#0d9488', '#10b981', '#065f46', '#059669', '#2563eb', '#d97706'];
   const color = colors[initial.charCodeAt(0) % colors.length];
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><circle cx='64' cy='64' r='64' fill='${color}'/><text x='50%' y='55%' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif' font-weight='600' font-size='56' fill='%23ffffff' text-anchor='middle' dominant-baseline='middle'>${initial}</text></svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
@@ -793,7 +793,7 @@ function generateUserAvatar(name, email) {
 
 // Demo User Profiles
 const DEMO_PROFILES = {
-  guest: GOOGLE_PROFILES.umurzoq,
+  guest: GOOGLE_PROFILES.school21,
   owner1: GOOGLE_PROFILES.alisher,
   caretaker: { id: "usr-caretaker-rustam", phone: '+998917778899', name: 'Rustam Tog\'a', role: 'CARETAKER', avatar: '/static/assets/avatar2.jpg' },
   admin: { id: "usr-admin-sanjar", phone: '+998900000001', name: 'Sanjar Karimov', role: 'ADMIN', avatar: '/static/assets/avatar.jpg' }
@@ -874,8 +874,18 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (savedUser) {
     try {
       currentUser = JSON.parse(savedUser);
-      if (currentUser && !currentUser.avatar) {
-        currentUser.avatar = generateUserAvatar(currentUser.name, currentUser.email);
+      // If user had old dummy umurzoq972 account, migrate to actual school21dev account
+      if (currentUser && currentUser.email === 'umurzoq972@gmail.com') {
+        currentUser = Object.assign({}, GOOGLE_PROFILES.school21);
+        localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+      }
+      if (currentUser) {
+        const customAvatar = localStorage.getItem('zomin_user_avatar_' + (currentUser.email || 'school21dev@gmail.com'));
+        if (customAvatar) {
+          currentUser.avatar = customAvatar;
+        } else if (!currentUser.avatar || currentUser.avatar.includes('circle cx=')) {
+          currentUser.avatar = generateUserAvatar(currentUser.name || currentUser.full_name, currentUser.email);
+        }
       }
     } catch (e) {
       currentUser = null;
@@ -1753,17 +1763,8 @@ function toggleGuestsDropdown(e) {
   closeAllSearchDropdowns();
   if (dropdown && !isCurrentlyOpen) {
     dropdown.classList.remove('hidden');
-    const seg = document.getElementById('segment-guests');
-    if (seg) {
-      const parentCard = seg.closest('.floating-search-card');
-      if (parentCard) {
-        const parentRect = parentCard.getBoundingClientRect();
-        const segRect = seg.getBoundingClientRect();
-        const offsetLeft = segRect.left - parentRect.left;
-        const maxLeft = parentRect.width - 290;
-        dropdown.style.left = `${Math.max(10, Math.min(offsetLeft - 20, maxLeft))}px`;
-      }
-    }
+    dropdown.style.left = 'auto';
+    dropdown.style.right = '0';
   }
 }
 
@@ -2375,7 +2376,7 @@ async function handleEmailLoginSubmit(e) {
       throw new Error(err.detail || 'Email yoki parol noto‘g‘ri');
     }
     const user = await res.json();
-    onAuthSuccess(user);
+    await onAuthSuccess(user);
     showToast(`${user.full_name}, platformaga xush kelibsiz!`, 'success');
   } catch (err) {
     showToast(err.message, 'error');
@@ -2414,7 +2415,7 @@ async function handleEmailRegisterSubmit(e) {
       throw new Error(err.detail || 'Ro‘yxatdan o‘tishda xatolik yuz berdi');
     }
     const user = await res.json();
-    onAuthSuccess(user);
+    await onAuthSuccess(user);
     showToast(`Tabriklaymiz, ${user.full_name}! Hisobingiz yaratildi.`, 'success');
   } catch (err) {
     showToast(err.message, 'error');
@@ -2425,9 +2426,18 @@ async function handleGoogleLogin(email = null, name = null) {
   let chosenEmail = email;
   let chosenName = name;
   if (!chosenEmail) {
-    chosenEmail = 'umurzoq972@gmail.com';
-    chosenName = 'Umurzoq';
+    chosenEmail = localStorage.getItem('last_google_email') || 'school21dev@gmail.com';
+    chosenName = localStorage.getItem('last_google_name') || (chosenEmail === 'school21dev@gmail.com' ? 'Umrzoq Yulchiyev' : 'Umrzoq');
   }
+  localStorage.setItem('last_google_email', chosenEmail);
+  localStorage.setItem('last_google_name', chosenName);
+
+  const customAvatar = localStorage.getItem('zomin_user_avatar_' + chosenEmail);
+  const chosenAvatar = customAvatar || (
+    (chosenEmail === 'school21dev@gmail.com' || (chosenName && chosenName.toLowerCase().includes('umrzoq')))
+      ? '/static/assets/avatar.jpg'
+      : generateUserAvatar(chosenName, chosenEmail)
+  );
 
   try {
     const res = await fetch('/api/v1/auth/google-auth', {
@@ -2436,7 +2446,7 @@ async function handleGoogleLogin(email = null, name = null) {
       body: JSON.stringify({
         email: chosenEmail,
         full_name: chosenName,
-        avatar_url: generateUserAvatar(chosenName, chosenEmail)
+        avatar_url: chosenAvatar
       })
     });
     if (!res.ok) {
@@ -2444,10 +2454,21 @@ async function handleGoogleLogin(email = null, name = null) {
       throw new Error(err.detail || 'Google orqali kirishda xatolik');
     }
     const user = await res.json();
-    onAuthSuccess(user);
-    showToast(`Google orqali kirdingiz: ${user.full_name}`, 'success');
+    await onAuthSuccess(user);
+    showToast(`Xush kelibsiz, ${user.full_name || chosenName}!`, 'success');
   } catch (err) {
-    showToast(err.message, 'error');
+    // Offline / static hosting fallback
+    const fallbackProfile = (chosenEmail === 'school21dev@gmail.com')
+      ? Object.assign({}, GOOGLE_PROFILES.school21, { avatar: chosenAvatar })
+      : {
+          id: 'usr-google-' + Date.now(),
+          name: chosenName,
+          email: chosenEmail,
+          avatar: chosenAvatar,
+          role: 'GUEST'
+        };
+    await onAuthSuccess(fallbackProfile);
+    showToast(`Xush kelibsiz, ${fallbackProfile.name || fallbackProfile.full_name}!`, 'success');
   }
 }
 
@@ -2512,14 +2533,14 @@ async function handleConfirmResetPassword() {
       throw new Error(err.detail || 'Parolni yangilashda xatolik');
     }
     const user = await res.json();
-    onAuthSuccess(user);
+    await onAuthSuccess(user);
     showToast('Parolingiz yangilandi va tizimga kirdingiz!', 'success');
   } catch (err) {
     showToast(err.message, 'error');
   }
 }
 
-function onAuthSuccess(user) {
+async function onAuthSuccess(user) {
   currentUser = {
     id: user.id,
     name: user.full_name,
@@ -2534,12 +2555,14 @@ function onAuthSuccess(user) {
   localStorage.setItem('zomin_user', JSON.stringify(currentUser));
   updateHeaderAuthState();
   closeAuthModal();
-  loadUserWishlist(currentUser);
+  await loadUserWishlist(currentUser);
 
   if (window.pendingWishlistSlug) {
     const pending = window.pendingWishlistSlug;
     window.pendingWishlistSlug = null;
-    toggleWishlist(pending);
+    if (!wishlistItems.has(pending)) {
+      await toggleWishlist(pending);
+    }
   }
 }
 
@@ -2550,9 +2573,9 @@ function openProfileModal() {
   }
   const p = currentUser;
 
-  const nameVal = p.name || p.full_name || 'Umurzoq';
+  const nameVal = p.name || p.full_name || 'Umrzoq Yulchiyev';
   const phoneVal = p.phone || p.phone_number || '+998 91 593 30 18';
-  const emailVal = p.email || 'umurzoq972@gmail.com';
+  const emailVal = p.email || 'school21dev@gmail.com';
   const carVal = p.car_plate || '01 A 777 AA';
   const roleVal = p.role || 'GUEST';
   const avatarVal = p.avatar || generateUserAvatar(nameVal, emailVal);
@@ -2636,6 +2659,8 @@ function handleLogout() {
   currentUser = null;
   wishlistItems.clear();
   localStorage.removeItem('zomin_user');
+  localStorage.removeItem('last_google_email');
+  localStorage.removeItem('last_google_name');
   updateHeaderAuthState();
   updateSavedCounters();
   renderProperties();
@@ -2657,25 +2682,42 @@ function handleUserAvatarUpload(e) {
   }
 
   const reader = new FileReader();
-  reader.onload = function(evt) {
+  reader.onload = async function(evt) {
     const base64Data = evt.target.result;
     if (!currentUser) {
-      currentUser = Object.assign({}, GOOGLE_PROFILES.umurzoq);
+      currentUser = Object.assign({}, GOOGLE_PROFILES.school21);
     }
     currentUser.avatar = base64Data;
     localStorage.setItem('zomin_user', JSON.stringify(currentUser));
+    localStorage.setItem('zomin_user_avatar_' + (currentUser.email || 'school21dev@gmail.com'), base64Data);
 
     const profImg = document.getElementById('prof-avatar-img');
     if (profImg) profImg.src = base64Data;
 
     updateHeaderAuthState();
-    showToast('Profil rasmi muvaffaqiyatli yangilandi!', 'success');
+
+    if (currentUser.id) {
+      try {
+        await fetch('/api/v1/auth/update-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: currentUser.id,
+            avatar_url: base64Data
+          })
+        });
+      } catch (err) {
+        console.warn('Could not sync avatar to backend DB:', err);
+      }
+    }
+
+    showToast('Profil rasmi muvaffaqiyatli yangilandi va saqlandi!', 'success');
   };
   reader.readAsDataURL(file);
 }
 
 function selectUserProfile(roleKey) {
-  const profile = DEMO_PROFILES[roleKey] || GOOGLE_PROFILES.umurzoq;
+  const profile = DEMO_PROFILES[roleKey] || GOOGLE_PROFILES.school21;
   currentUser = Object.assign({}, profile);
   localStorage.setItem('zomin_user', JSON.stringify(currentUser));
   updateHeaderAuthState();
@@ -2699,7 +2741,7 @@ function updateHeaderAuthState() {
   const t = I18N[currentLang] || I18N.uz;
 
   if (currentUser) {
-    let displayName = currentUser.name || currentUser.full_name || 'Umurzoq';
+    let displayName = currentUser.name || currentUser.full_name || 'Umrzoq';
     if (displayName.toLowerCase() === 'school21dev') {
       displayName = 'Umrzoq Yulchiyev';
       currentUser.name = 'Umrzoq Yulchiyev';
@@ -2713,7 +2755,7 @@ function updateHeaderAuthState() {
 
     if (menuAvatar) menuAvatar.src = avatarUrl;
     if (menuName) menuName.innerText = currentUser.name || displayName;
-    if (menuEmail) menuEmail.innerText = currentUser.email || 'umurzoq972@gmail.com';
+    if (menuEmail) menuEmail.innerText = currentUser.email || 'school21dev@gmail.com';
     if (menuRole) menuRole.innerText = currentUser.role === 'OWNER' ? 'DACHA EGASI' : 'SAYYOH / MEHMON';
     if (adminLink) adminLink.style.display = currentUser.role === 'ADMIN' ? 'flex' : 'none';
     if (adminDivider) adminDivider.style.display = currentUser.role === 'ADMIN' ? 'block' : 'none';
